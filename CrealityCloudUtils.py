@@ -1,21 +1,45 @@
 import os
 import json
+import hashlib
+import gzip
+import uuid
+import requests
+from oss2 import SizedFileAdapter, determine_part_size, headers
+from oss2.models import PartInfo
+import oss2
 from PyQt5.QtCore import (QSysInfo, pyqtProperty, pyqtSignal, pyqtSlot, QObject, QUrl, QVariant, QFileInfo, QFile, QByteArray, QUuid, QStandardPaths)
 from PyQt5.QtNetwork import (QNetworkAccessManager, QNetworkReply, QNetworkRequest, QNetworkInterface)
-from PyQt5.QtGui import QDesktopServices
 
+from UM.Job import Job
 from UM.Logger import Logger
 
 class CrealityCloudUtils(QObject):
 
     def __init__(self, parent=None):
         super(CrealityCloudUtils, self).__init__(parent)
-
+        self._filePath = ""
+        self._gzipFilePath = ""
+        self._cloudUrl = "http://2-model-admin-dev.crealitygroup.com"
+        self._cloudUrl2 = "http://vip-mall-admin-dev.crealitygroup.com"
+        self._cloudUrl3 = "http://47.114.48.45:22087"
         self._osVersion = QSysInfo.productType() + " " + QSysInfo.productVersion()
+        self._qnam = QNetworkAccessManager()
+        self._qnam.finished.connect
         self._duid = self._generateDUID()
         self._userInfo = {"token": "", "userId": ""}
+        self._bucketInfo = {"endpoint": "", "bucket": "", "prefixPath": "", "accessKeyId": "",
+                            "secretAccessKey": "", "sessionToken": "", "lifeTime": "",
+                            "expiredTime": ""}
+        self._ossKey = ""
         self._appDataFolder = os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "CrealityCloud")
         self._tokenFile = os.path.join(self._appDataFolder, "token")
+        self._defaultFileName = ""
+        self._fileName = ""
+
+    saveGCodeStarted = pyqtSignal(str)
+    updateProgressText = pyqtSignal(str)
+    updateProgress = pyqtSignal(float)
+    updateStatus = pyqtSignal(str)
 
     @pyqtSlot(result=str)
     def getOsVersion(self):
@@ -72,3 +96,222 @@ class CrealityCloudUtils(QObject):
         Logger.log("d", "CrealityCloudUtils: %s", text)
         
 
+    @pyqtSlot(str)
+    def saveUploadFile(self, fileName):
+        self._fileName = fileName + ".gcode"
+        self._filePath = os.path.join(self._appDataFolder, self._fileName)
+        self.saveGCodeStarted.emit(self._filePath)
+
+    @pyqtSlot(result=str)
+    def defaultFileName(self):
+        return self._defaultFileName
+
+    @pyqtSlot(str)
+    def setDefaultFileName(self, filename):
+        self._defaultFileName = filename
+
+    def clearUploadFile(self):
+        os.remove(self._filePath)
+        os.remove(self._gzipFilePath)
+
+    # Compression gcode file
+    def gzipFile(self):
+        if os.path.isfile(self._filePath) is False:
+            return
+        self.updatedProgressTextSlot("2/4 Compressing file...")
+        self._gzipFilePath = self._filePath + ".gz"
+        try:
+            job = CompressFileJob(self._filePath, self._gzipFilePath)
+            job.progress.connect(self._onCompressFileJobProgress)
+            job.finished.connect(self._onCompressFileJobFinished)
+            job.start()
+        except Exception as e:
+            Logger.log(
+                "e", "file compress faild")
+            self.updateStatus.emit("bad")
+
+    def _onCompressFileJobFinished(self, job):
+        self.uploadOss()
+
+    def _onCompressFileJobProgress(self, job, progress):
+        self.updateProgress.emit(progress)
+
+    # Calculate file MD5
+    def getFileMd5(self, fileName):
+        mObj = hashlib.md5()
+        with open(fileName,'rb') as fObj:
+            while True:
+                data = fObj.read(4096)
+                if not data:
+                    break
+                mObj.update(data)
+
+        return mObj.hexdigest()
+
+    def commitFile(self):
+        self.updatedProgressTextSlot("4/4 Committing file...")
+        self.updateProgress.emit(0)
+        url = self._cloudUrl3 + "/api/cxy/v2/gcode/uploadGcode"
+        response = requests.post(
+            url, data=json.dumps({"list": [{"name": self._fileName, "filekey": self._ossKey}]}), 
+            headers=self.getCommonHeaders()).text
+        response = json.loads(response)
+        if (response["code"] == 0):
+            self.updateProgress.emit(1)
+            Logger.log("d", "upload success")
+            self.updateStatus.emit("good")
+            self.clearUploadFile()
+        else:
+            self.updateStatus.emit("bad")
+            Logger.log("e", "oss commit api: %s", json.dumps(response))
+
+
+    def getCommonHeaders(self):
+        headers = {
+            "Content-Type": "application/json; charset=UTF-8",
+            "__CXY_APP_ID_": "creality_model",
+            "__CXY_OS_LANG_": "0",
+            "__CXY_DUID_": self._duid,
+            "__CXY_OS_VER_": self._osVersion,
+            "__CXY_PLATFORM_": "6",
+            "__CXY_REQUESTID_": str(uuid.uuid1()),
+            "__CXY_UID_": self._userInfo["userId"],
+            "__CXY_TOKEN_": self._userInfo["token"]
+        }
+        return headers
+
+    def getOssAuth(self):
+        url = self._cloudUrl + "/api/cxy/common/getOssInfo"
+        url2 = self._cloudUrl2 + "/api/account/getAliyunInfo"
+        response = requests.post(url, data="{}", headers=self.getCommonHeaders()).text
+        response = json.loads(response)
+        if (response["code"] == 0):
+            self._bucketInfo["endpoint"] = response["result"]["info"]["endpoint"]
+            self._bucketInfo["bucket"] = response["result"]["info"]["file"]["bucket"]
+            self._bucketInfo["prefixPath"] = response["result"]["info"]["file"]["prefixPath"]
+        else:
+            raise Exception("oss bucket api error: "+json.dumps(response))
+        response = requests.post(
+            url2, data="{}", headers=self.getCommonHeaders()).text
+        response = json.loads(response)
+        if (response["code"] == 0):
+            self._bucketInfo["accessKeyId"] = response["result"]["aliyunInfo"]["accessKeyId"]
+            self._bucketInfo["secretAccessKey"] = response["result"]["aliyunInfo"]["secretAccessKey"]
+            self._bucketInfo["sessionToken"] = response["result"]["aliyunInfo"]["sessionToken"]
+            self._bucketInfo["lifeTime"] = response["result"]["aliyunInfo"]["lifeTime"]
+            self._bucketInfo["expiredTime"] = response["result"]["aliyunInfo"]["expiredTime"]
+        else:
+            raise Exception("oss auth api error: "+json.dumps(response))
+        
+    def uploadOss(self):
+        self.updatedProgressTextSlot("3/4 Uploading file...")
+        self.getOssAuth()
+        self._ossKey = self._bucketInfo["prefixPath"] + "/" + \
+            self.getFileMd5(self._gzipFilePath) + ".gcode.gz"
+        Logger.log("d", self._ossKey)
+        try:
+            job = UploadFileJob(self._bucketInfo, self._ossKey, self._gzipFilePath)
+            job.progress.connect(self._onCompressFileJobProgress)
+            job.finished.connect(self._onUploadFileJobFinished)
+            job.start()
+        except Exception as e:
+            Logger.log(
+                "e", "oss upload faild")
+            self.updateStatus.emit("bad")
+
+
+    def _onUploadFileJobFinished(self, job):
+        self.commitFile()
+
+    def _onUploadFileJobProgress(self, job, progress):
+        self.updateProgress.emit(progress)
+
+    def updatedProgressTextSlot(self, message):
+        Logger.log("i", "%s" % message)
+        self.updateProgressText.emit(message)
+
+      
+
+class CompressFileJob(Job):
+
+    def __init__(self, inputFilePath: str, outputFilePath: str):
+        super().__init__()
+        self._inputFilePath = inputFilePath
+        self._outputFilePath = outputFilePath
+        self._message = None
+        self.progress.connect(self._onProgress)
+        self.finished.connect(self._onFinished)
+
+    def _onFinished(self, job: Job) -> None:
+        if self == job and self._message is not None:
+            self._message.hide()
+            self._message = None
+
+    def _onProgress(self, job: Job, amount: float) -> None:
+        if self == job and self._message:
+            self._message.setProgress(amount)
+
+    def run(self) -> None:
+        Job.yieldThread()
+        with open(self._inputFilePath, 'rb') as f_in:
+            with gzip.open(self._outputFilePath, 'wb') as f_out:
+                # shutil.copyfileobj(f_in, f_out)
+                copied = 0
+                total = os.path.getsize(self._inputFilePath)
+                while True:
+                    buf = f_in.read(16*1024)
+                    if not buf:
+                        break
+                    f_out.write(buf)
+                    copied += len(buf)
+                    self.progress.emit(Job, copied/total)
+
+
+class UploadFileJob(Job):
+    def __init__(self, bucketInfo: dict, ossKey: str, uploadFilePath: str):
+        super().__init__()
+        self._bucketInfo = bucketInfo
+        self._ossKey = ossKey
+        self._uploadFilePath = uploadFilePath
+        self._message = None
+        self.progress.connect(self._onProgress)
+        self.finished.connect(self._onFinished)
+
+    def _onFinished(self, job: Job) -> None:
+        if self == job and self._message is not None:
+            self._message.hide()
+            self._message = None
+
+    def _onProgress(self, job: Job, amount: float) -> None:
+        if self == job and self._message:
+            self._message.setProgress(amount)
+
+    def run(self) -> None:
+        Job.yieldThread()
+        auth = oss2.StsAuth(
+            self._bucketInfo["accessKeyId"], self._bucketInfo["secretAccessKey"], self._bucketInfo["sessionToken"])
+
+        bucket = oss2.Bucket(
+            auth, self._bucketInfo["endpoint"], self._bucketInfo["bucket"])
+
+        totalSize = os.path.getsize(self._uploadFilePath)
+        partSize = determine_part_size(totalSize, preferred_size=100 * 1024)
+        uploadId = bucket.init_multipart_upload(self._ossKey).upload_id
+        parts = []
+        with open(self._uploadFilePath, 'rb') as fileobj:
+            part_number = 1
+            offset = 0
+            while offset < totalSize:
+                num_to_upload = min(partSize, totalSize - offset)
+                result = bucket.upload_part(self._ossKey, uploadId, part_number,
+                                            SizedFileAdapter(fileobj, num_to_upload))
+                parts.append(PartInfo(part_number, result.etag))
+
+                offset += num_to_upload
+                part_number += 1
+                self.progress.emit(Job, offset/totalSize)
+        bucket.complete_multipart_upload(self._ossKey, uploadId, parts)
+
+        # Check integrity
+        # with open(self._uploadFilePath, 'rb') as fileobj:
+        #     assert bucket.get_object(self._ossKey).read() == fileobj.read()

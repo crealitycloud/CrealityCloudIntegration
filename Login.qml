@@ -104,9 +104,9 @@ Item {
                     if (data["code"] === 0) {
                         if (data["result"]["state"] === 3) {
                             console.log(JSON.stringify(data))
-                            pluginRootWindow.showMessage("login success:" + data["result"]["token"])
                             pluginRootWindow.saveToken(data["result"]["token"], data["result"]["userId"])
                             qrTimer.stop()
+                            bodyLoader.source = "Options.qml"
                         }
                     }else {
                         CloudUtils.qmlLog(JSON.stringify(data))

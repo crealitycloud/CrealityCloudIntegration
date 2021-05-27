@@ -21,10 +21,6 @@ Window {
 
     property string token: ""
     property string userId: ""
-    property bool optionVisible: true
-    property string uploadStatus: "upload" // good bad
-    property string fileId: ""
-    property string printerTypeId: ""
 
     function showBusy() {
         busyLayer.visible = true
@@ -96,7 +92,7 @@ Window {
             CloudAPI.getUserInfo(token, userId, function(data) {
                 hideBusy()
                 if (data["code"] === 0) {
-                    pluginRootWindow.showMessage("token effective")
+                    bodyLoader.source = "Options.qml"
                 }else {
                     bodyLoader.source = "Login.qml"
                 }
