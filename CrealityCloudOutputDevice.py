@@ -1,6 +1,4 @@
 import os
-import os.path
-
 from . CrealityCloudUtils import CrealityCloudUtils
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *

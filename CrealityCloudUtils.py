@@ -1,9 +1,24 @@
-import os
+import os, sys
 import json
 import hashlib
 import gzip
 import uuid
 import requests
+import importlib
+#Import package into sys.modules so that the library can reference itself with absolute imports.
+this_plugin_path = os.path.dirname(__file__)
+def importExtLib(libName):
+    path = os.path.join(this_plugin_path, libName, "__init__.py")
+    spec = importlib.util.spec_from_file_location(libName, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[libName] = module
+    spec.loader.exec_module(module)
+
+importExtLib("crcmod")
+importExtLib("Crypto")
+importExtLib("aliyunsdkcore")
+importExtLib("aliyunsdkkms")
+importExtLib("oss2")
 from oss2 import SizedFileAdapter, determine_part_size, headers
 from oss2.models import PartInfo
 import oss2
@@ -12,6 +27,7 @@ from PyQt5.QtNetwork import (QNetworkAccessManager, QNetworkReply, QNetworkReque
 
 from UM.Job import Job
 from UM.Logger import Logger
+
 
 class CrealityCloudUtils(QObject):
 
