@@ -1,7 +1,7 @@
 .pragma library
 
 var api_url = "http://vip-mall-admin-dev.crealitygroup.com"
-var api_url_2 = "http://47.114.48.45:22087"
+var api_url_2 = "http://2-model-admin-dev.crealitygroup.com"
 var os_version = ""
 var duid = ""
 var identical = ""

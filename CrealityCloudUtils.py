@@ -14,6 +14,7 @@ def importExtLib(libName):
     sys.modules[libName] = module
     spec.loader.exec_module(module)
 
+importExtLib("jmespath")
 importExtLib("crcmod")
 importExtLib("Crypto")
 importExtLib("aliyunsdkcore")
@@ -37,7 +38,6 @@ class CrealityCloudUtils(QObject):
         self._gzipFilePath = ""
         self._cloudUrl = "http://2-model-admin-dev.crealitygroup.com"
         self._cloudUrl2 = "http://vip-mall-admin-dev.crealitygroup.com"
-        self._cloudUrl3 = "http://47.114.48.45:22087"
         self._osVersion = QSysInfo.productType() + " " + QSysInfo.productVersion()
         self._qnam = QNetworkAccessManager()
         self._qnam.finished.connect
@@ -167,7 +167,7 @@ class CrealityCloudUtils(QObject):
     def commitFile(self):
         self.updatedProgressTextSlot("4/4 Committing file...")
         self.updateProgress.emit(0)
-        url = self._cloudUrl3 + "/api/cxy/v2/gcode/uploadGcode"
+        url = self._cloudUrl + "/api/cxy/v2/gcode/uploadGcode"
         response = requests.post(
             url, data=json.dumps({"list": [{"name": self._fileName, "filekey": self._ossKey}]}), 
             headers=self.getCommonHeaders()).text
