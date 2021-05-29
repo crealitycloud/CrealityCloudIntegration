@@ -1,7 +1,6 @@
 .pragma library
 
-var api_url = "http://vip-mall-admin-dev.crealitygroup.com"
-var api_url_2 = "http://2-model-admin-dev.crealitygroup.com"
+var api_url = ""
 var os_version = ""
 var duid = ""
 var identical = ""
@@ -17,7 +16,7 @@ function qrQuery(callback) {
 }
 
 function getUserInfo(token, userId, callback) {
-    var getUrl = api_url_2 + "/api/cxy/v2/user/getInfo"
+    var getUrl = api_url + "/api/cxy/v2/user/getInfo"
     sendForm(getUrl, "{}", callback, function(http) {
         http.setRequestHeader("__CXY_TOKEN_", token)
         http.setRequestHeader("__CXY_UID_", userId)

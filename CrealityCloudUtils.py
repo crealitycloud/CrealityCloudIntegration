@@ -34,10 +34,9 @@ class CrealityCloudUtils(QObject):
 
     def __init__(self, parent=None):
         super(CrealityCloudUtils, self).__init__(parent)
+        self._env = "test" # test, release_local, release_oversea
         self._filePath = ""
         self._gzipFilePath = ""
-        self._cloudUrl = "http://2-model-admin-dev.crealitygroup.com"
-        self._cloudUrl2 = "http://vip-mall-admin-dev.crealitygroup.com"
         self._osVersion = QSysInfo.productType() + " " + QSysInfo.productVersion()
         self._qnam = QNetworkAccessManager()
         self._qnam.finished.connect
@@ -52,6 +51,13 @@ class CrealityCloudUtils(QObject):
         self._defaultFileName = ""
         self._fileName = ""
 
+        if (self._env == "test"):
+            self._cloudUrl = "http://2-model-admin-dev.crealitygroup.com"
+        elif(self._env == "release_local"):
+            self._cloudUrl = "https://model-admin.crealitygroup.com"
+        else:
+            self._cloudUrl = "https://model-admin2.creality.com"
+
     saveGCodeStarted = pyqtSignal(str)
     updateProgressText = pyqtSignal(str)
     updateProgress = pyqtSignal(float)
@@ -63,8 +69,15 @@ class CrealityCloudUtils(QObject):
 
     @pyqtSlot(result=str)
     def getDUID(self):
-
         return self._duid
+
+    @pyqtSlot(result=str)
+    def getCloudUrl(self):
+        return self._cloudUrl
+
+    @pyqtSlot(result=str)
+    def getEnv(self):
+        return self._env
 
     def _generateDUID(self):
         macAddress = ""
@@ -198,7 +211,7 @@ class CrealityCloudUtils(QObject):
 
     def getOssAuth(self):
         url = self._cloudUrl + "/api/cxy/common/getOssInfo"
-        url2 = self._cloudUrl2 + "/api/account/getAliyunInfo"
+        url2 = self._cloudUrl + "/api/account/getAliyunInfo"
         response = requests.post(url, data="{}", headers=self.getCommonHeaders()).text
         response = json.loads(response)
         if (response["code"] == 0):

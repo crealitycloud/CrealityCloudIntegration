@@ -54,6 +54,7 @@ Window {
         id: rootRect
         anchors.fill: parent
 
+
         Rectangle {
             id: busyLayer
             anchors.fill: parent
@@ -72,17 +73,61 @@ Window {
                 anchors.fill: parent
             }
         }
-        
+
+        Rectangle {
+            id: logoBg
+            x: 0
+            y: 0
+            width: 440
+            height: 63
+            color: "#0f2d79"
+            z: 2
+
+            BorderImage {
+                id: logo
+                x: 20
+                y: 17
+                width: 34
+                height: 34
+                transformOrigin: Item.Center
+                source: "res/logo.png"
+            }
+
+            Text {
+                id: logoText
+                x: 68
+                y: 22
+                color: "#ffffff"
+                text: qsTr("Creality Cloud")
+                font.family: "Tahoma"
+                font.pixelSize: 17
+            }
+
+            Text {
+                id: testLabel
+                x: 180
+                y: 22
+                color: "#ffffff"
+                width: 40
+                height: 19
+                visible: CloudUtils.getEnv() === "test"
+                text: qsTr("test")
+                font.family: "Tahoma"
+                font.pixelSize: 12
+            }
+        }
+
         Loader {
             id: bodyLoader
             anchors.fill: parent
-           // source: "Login.qml"
-            
+            // source: "Login.qml"
+
         }
     }
     Component.onCompleted: {
         CloudAPI.os_version = CloudUtils.getOsVersion()
         CloudAPI.duid = CloudUtils.getDUID()
+        CloudAPI.api_url = CloudUtils.getCloudUrl()
         var token = CloudUtils.loadToken()
         var userId = CloudUtils.getUserId()
         if (token === "") {
@@ -98,9 +143,9 @@ Window {
                 }
             })
         }
-        
+
     }
-    onClosing: {
-        bodyLoader.source = ""
-    }
+      onClosing: {
+          bodyLoader.source = ""
+      }
 }

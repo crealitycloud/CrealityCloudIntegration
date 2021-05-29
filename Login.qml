@@ -158,36 +158,6 @@ Item {
         }
     }
 
-    BorderImage {
-        id: logo
-        x: 20
-        y: 17
-        width: 34
-        height: 34
-        transformOrigin: Item.Center
-        source: "res/logo.png"
-    }
-
-    Rectangle {
-        id: logoBg
-        x: 0
-        y: 0
-        width: 440
-        height: 63
-        color: "#0f2d79"
-        z: -3
-    }
-
-    Text {
-        id: logoText
-        x: 68
-        y: 22
-        color: "#ffffff"
-        text: qsTr("Creality Cloud")
-        font.family: "Tahoma"
-        font.pixelSize: 17
-    }
-
 
     Component.onCompleted: {
         requestQrCode()
