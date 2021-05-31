@@ -1,3 +1,5 @@
+from UM.Logger import Logger
+from UM.i18n import i18nCatalog
 import os, sys
 import json
 import hashlib
@@ -27,14 +29,16 @@ from PyQt5.QtCore import (QSysInfo, pyqtProperty, pyqtSignal, pyqtSlot, QObject,
 from PyQt5.QtNetwork import (QNetworkAccessManager, QNetworkReply, QNetworkRequest, QNetworkInterface)
 
 from UM.Job import Job
-from UM.Logger import Logger
+catalog = i18nCatalog("uranium")
 
 
 class CrealityCloudUtils(QObject):
 
     def __init__(self, parent=None):
         super(CrealityCloudUtils, self).__init__(parent)
-        self._env = "test" # test, release_local, release_oversea
+
+        # Modify this parameter to configure the server. test, release_local, release_oversea
+        self._env = "test"
         self._filePath = ""
         self._gzipFilePath = ""
         self._osVersion = QSysInfo.productType() + " " + QSysInfo.productVersion()
@@ -147,7 +151,7 @@ class CrealityCloudUtils(QObject):
     def gzipFile(self):
         if os.path.isfile(self._filePath) is False:
             return
-        self.updatedProgressTextSlot("2/4 Compressing file...")
+        self.updatedProgressTextSlot(catalog.i18nc("@info:status", "2/4 Compressing file..."))
         self._gzipFilePath = self._filePath + ".gz"
         try:
             job = CompressFileJob(self._filePath, self._gzipFilePath)
@@ -178,7 +182,7 @@ class CrealityCloudUtils(QObject):
         return mObj.hexdigest()
 
     def commitFile(self):
-        self.updatedProgressTextSlot("4/4 Committing file...")
+        self.updatedProgressTextSlot(catalog.i18nc("@info:status", "4/4 Committing file..."))
         self.updateProgress.emit(0)
         url = self._cloudUrl + "/api/cxy/v2/gcode/uploadGcode"
         response = requests.post(
@@ -233,7 +237,7 @@ class CrealityCloudUtils(QObject):
             raise Exception("oss auth api error: "+json.dumps(response))
         
     def uploadOss(self):
-        self.updatedProgressTextSlot("3/4 Uploading file...")
+        self.updatedProgressTextSlot(catalog.i18nc("@info:status", "3/4 Uploading file..."))
         self.getOssAuth()
         self._ossKey = self._bucketInfo["prefixPath"] + "/" + \
             self.getFileMd5(self._gzipFilePath) + ".gcode.gz"

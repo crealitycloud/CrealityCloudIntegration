@@ -2,7 +2,7 @@ import QtQuick 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.1
-
+import UM 1.1 as UM
 
 import "CloudAPI.js" as CloudAPI
 
@@ -25,7 +25,7 @@ Item {
         id: text_1
         x: 57
         y: 144
-        text: qsTr("File Name")
+        text: catalog.i18nc("@label", "File Name")
         font.family: "Tahoma"
         font.pixelSize: 12
     }
@@ -36,7 +36,7 @@ Item {
         y: 450
         width: 68
         height: 35
-        text: qsTr("Logout")
+        text: catalog.i18nc("@action:button", "Logout")
         onClicked: {
             CloudUtils.clearToken()
             bodyLoader.source = "Login.qml"
@@ -49,7 +49,7 @@ Item {
         y: 450
         width: 68
         height: 35
-        text: qsTr("Upload")
+        text: catalog.i18nc("@action:button", "Upload")
 
         onClicked: {
             disconnectSlot()// Don't work?
@@ -57,12 +57,12 @@ Item {
             var fileName = fileNameField.text
             // File name cannot be empty
             if (fileName === "") {
-                pluginRootWindow.showMessage("Error. File name is empty")
+                pluginRootWindow.showMessage(catalog.i18nc("@error", "File name cannot be empty"))
                 return
             }
             // File name cannot have special symbols
             if (fileName.indexOf(":") !== -1 || fileName.indexOf('"') !== -1  || fileName.indexOf("|") !== -1 || fileName.indexOf("*") !== -1) {
-                pluginRootWindow.showMessage("Error. File name can't contain \*, \"\", | , : symbols")
+                pluginRootWindow.showMessage(catalog.i18nc("@error", "File name can't contain \*, \"\", | , : symbols"))
                 return
             }
             CloudUtils.saveUploadFile(fileName)
@@ -134,11 +134,11 @@ Item {
                 statusImg.source = "res/good.gif"
                 progressBar.visible = false
 
-                updateProgressText("File is uploaded !")
+                updateProgressText(catalog.i18nc("@info:status", "File is uploaded !"))
                 disconnectSlot()  // Disconnecting until onClicked does not take effect.WHY? 
                 break
             case "bad":
-                updateProgressText("Upload failed !")
+                updateProgressText(catalog.i18nc("@info:status", "Upload failed !"))
                 statusImg.source = "res/bad.gif"
                 progressBar.visible = false
                 disconnectSlot()

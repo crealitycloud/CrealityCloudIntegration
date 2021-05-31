@@ -14,6 +14,8 @@ from UM.Message import Message
 from UM.PluginRegistry import PluginRegistry
 from UM.OutputDevice.OutputDevice import OutputDevice
 from UM.OutputDevice import OutputDeviceError
+from UM.i18n import i18nCatalog
+catalog = i18nCatalog("uranium")
 
 
 class CrealityCloudOutputDevice(OutputDevice):
@@ -21,9 +23,10 @@ class CrealityCloudOutputDevice(OutputDevice):
         super().__init__("crealitycloud")
 
         self._pluginId = pluginId
-        self.setName("Local File")
-        self.setShortDescription("Upload to Creality Cloud")
-        self.setDescription("Upload to Creality Cloud")
+        self.setName(catalog.i18nc("@item:inmenu", "Local File"))
+        self.setShortDescription(catalog.i18nc("@action:button Preceded by 'Ready to'.", "Upload to Creality Cloud"))
+        self.setDescription(catalog.i18nc(
+            "@action:button Preceded by 'Ready to'.", "Upload to Creality Cloud"))
         self.setIconName("upload_gcode")
         self.utils = CrealityCloudUtils()
         self.utils.saveGCodeStarted.connect(self.saveGCode)
@@ -50,6 +53,8 @@ class CrealityCloudOutputDevice(OutputDevice):
 
     def _createDialogue(self):
         Application.getInstance()._qml_engine.rootContext().setContextProperty("CloudUtils", self.utils)
+        # Application.getInstance()._qml_engine.rootContext(
+        # ).setContextProperty("catalog", catalog)
         qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), "PluginMain.qml")
         component = Application.getInstance().createQmlComponent(qml_file)
         
@@ -64,20 +69,22 @@ class CrealityCloudOutputDevice(OutputDevice):
             job.setFileName(file_name)
             job.progress.connect(self._onJobProgress)
             job.finished.connect(self._onWriteJobFinished)
-            message = Message("Saving to <filename>{0}</filename>".format(file_name),
-                              0, False, -1 , "Saving")
+            message = Message(catalog.i18nc("@info:progress Don't translate the XML tags <filename>!", "Saving to <filename>{0}</filename>").format(file_name),
+                              0, False, -1, catalog.i18nc("@info:title", "Saving"))
             message.show()
             job.setMessage(message)
             self._writing = True
             job.start()
-            self.utils.updatedProgressTextSlot("1/4 Output gcode file to local...")
+            self.utils.updatedProgressTextSlot(catalog.i18nc("@info:status", "1/4 Output gcode file to local..."))
             self.utils.updateStatus.emit("upload")
         except PermissionError as e:
             Logger.log("e", "Permission denied when trying to write to %s: %s", file_name, str(e))
-            raise OutputDeviceError.PermissionDeniedError("Permission denied when trying to save <filename>{0}</filename>".format(file_name)) from e
+            raise OutputDeviceError.PermissionDeniedError(catalog.i18nc(
+                "@info:status Don't translate the XML tags <filename>!", "Permission denied when trying to save <filename>{0}</filename>").format(file_name)) from e
         except OSError as e:
             Logger.log("e", "Operating system would not let us write to %s: %s", file_name, str(e))
-            raise OutputDeviceError.WriteRequestFailedError("Could not save to <filename>{0}</filename>: <message>{1}</message>".format()) from e
+            raise OutputDeviceError.WriteRequestFailedError(catalog.i18nc(
+                "@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format()) from e
 
     def _onJobProgress(self, job, progress):
         self.writeProgress.emit(self, progress)
@@ -90,14 +97,9 @@ class CrealityCloudOutputDevice(OutputDevice):
             self.writeSuccess.emit(self)
             job.getStream().close()
             self.utils.gzipFile()
-            # self.utils.uploadOss()
-            # self.utils.commitFile()
-            # thread = jobThread()
-            # thread.start()
-            # thread.join()
             
         else:
-            message = Message("Could not save to <filename>{0}</filename>: <message>{1}</message>".format(job.getFileName(), str(job.getError())), lifetime = 0, title = "Warning")
+            message = Message(catalog.i18nc("@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), lifetime = 0, title = catalog.i18nc("@info:title", "Warning"))
             message.show()
             self.writeError.emit(self)
             job.getStream().close()

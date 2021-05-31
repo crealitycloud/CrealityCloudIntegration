@@ -52,7 +52,7 @@ Item {
                 y: 59
                 width: 77
                 height: 27
-                text: qsTr("Refresh")
+                text: catalog.i18nc("@action:button", "Click the refresh")
                 onClicked: {
                     requestQrCode()
                 }
@@ -63,7 +63,7 @@ Item {
                 x: 15
                 y: 106
                 color: "#ffffff"
-                text: qsTr("QR code has expired")
+                text: catalog.i18nc("@info:warning", "QR code has expired")
                 font.family: "Tahoma"
                 font.bold: true
                 font.pixelSize: 14
@@ -122,9 +122,11 @@ Item {
         id: qrText_1
         x: 81
         y: 107
-        width: 278
+        width: 742
         height: 33
-        text: qsTr("Scan the code to log in")
+        text: catalog.i18nc("@text:window", "Scan the code to log in")
+        horizontalAlignment: Text.AlignHCenter
+        anchors.horizontalCenter: parent.horizontalCenter
         font.family: "Tahoma"
         font.bold: true
         font.pixelSize: 24
@@ -134,7 +136,9 @@ Item {
         id: qrText_2
         x: 94
         y: 153
-        text: qsTr("Me section in app > Scan icon on top")
+        text: catalog.i18nc("@text:window", "Me section in app > Scan icon on top")
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
         font.pixelSize: 13
     }
 
@@ -142,10 +146,12 @@ Item {
         id: qrLink
         x: 140
         y: 456
-        width: 160
+        width: 368
         height: 16
         color: "#1987ea"
-        text: 'Download Creality Cloud APP'
+        text: catalog.i18nc("@text:window", 'Download Creality Cloud APP')
+        horizontalAlignment: Text.AlignHCenter
+        anchors.horizontalCenter: parent.horizontalCenter
         font.underline: true
         lineHeight: 1.4
         font.family: "Tahoma"

@@ -3,11 +3,12 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.1
 import QtQml 2.2
-
+import UM 1.1 as UM
 import "CloudAPI.js" as CloudAPI
 
 Window {
     id: pluginRootWindow
+    UM.I18nCatalog { id: catalog; name: "uranium"}
     visible: false
     width: 440
     height: 540
@@ -17,7 +18,7 @@ Window {
     maximumWidth: width
     maximumHeight: height
 
-    title: qsTr("Creality Cloud Plugin")
+    title: catalog.i18nc("@title:window", "Creality Cloud Plugin")
 
     property string token: ""
     property string userId: ""
@@ -98,7 +99,7 @@ Window {
                 x: 68
                 y: 22
                 color: "#ffffff"
-                text: qsTr("Creality Cloud")
+                text: catalog.i18nc("@title:window", "Creality Cloud")
                 font.family: "Tahoma"
                 font.pixelSize: 17
             }
