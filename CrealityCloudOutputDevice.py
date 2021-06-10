@@ -46,7 +46,7 @@ class CrealityCloudOutputDevice(OutputDevice):
         self._nodes = nodes
         if self.plugin_window is not None:
             self.plugin_window = None
-        
+        self.writeStarted.emit(self)
 
         self.plugin_window = self._createDialogue()
         self.plugin_window.show()
