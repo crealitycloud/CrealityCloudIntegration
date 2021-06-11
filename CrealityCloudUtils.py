@@ -170,25 +170,31 @@ class CrealityCloudUtils(QObject):
                 "e", "file compress faild")
             self.updateStatus.emit("bad")
 
-    def _onCompressFileJobFinished(self, job):
+    def _onCompressFileJobFinished(self, job: Job) -> None:
         self.uploadOss()
 
-    def _onCompressFileJobProgress(self, job, progress):
+    def _onCompressFileJobProgress(self, job: Job, progress: float) -> None:
         self.updateProgress.emit(progress)
 
     # Calculate file MD5
-    def getFileMd5(self, fileName):
-        mObj = hashlib.md5()
-        with open(fileName,'rb') as fObj:
-            while True:
-                data = fObj.read(4096)
-                if not data:
-                    break
-                mObj.update(data)
+    def getFileMd5(self, fileName: str) -> str:
+        try:
+            mObj = hashlib.md5()
+            with open(fileName,'rb') as fObj:
+                while True:
+                    data = fObj.read(4096)
+                    if not data:
+                        break
+                    mObj.update(data)
+        except Exception as e:
+            Logger.log(
+                "e", "Failed to evaluate %s file MD5: %s", fileName, str(e))
+            raise OutputDeviceError.WriteRequestFailedError(catalog.i18nc(
+                "@info:status Don't translate the XML tags <filename> or <message>!", "Could not evaluate <filename>{0}</filename> MD5: <message>{1}</message>").format(fileName)) from e
+        else:
+            return mObj.hexdigest()
 
-        return mObj.hexdigest()
-
-    def commitFile(self):
+    def commitFile(self) -> None:
         self.updatedProgressTextSlot(catalog.i18nc("@info:status", "4/4 Committing file..."))
         self.updateProgress.emit(0)
         url = self._cloudUrl + "/api/cxy/v2/gcode/uploadGcode"

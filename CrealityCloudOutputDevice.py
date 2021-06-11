@@ -84,12 +84,12 @@ class CrealityCloudOutputDevice(OutputDevice):
         except OSError as e:
             Logger.log("e", "Operating system would not let us write to %s: %s", file_name, str(e))
             raise OutputDeviceError.WriteRequestFailedError(catalog.i18nc(
-                "@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format()) from e
+                "@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format(file_name)) from e
 
-    def _onJobProgress(self, job, progress):
+    def _onJobProgress(self, job: WriteFileJob, progress) -> None:
         self.writeProgress.emit(self, progress)
 
-    def _onWriteJobFinished(self, job):
+    def _onWriteJobFinished(self, job: WriteFileJob) -> None:
         self._writing = False
         self._stream.close()
         self.writeFinished.emit(self)
