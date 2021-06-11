@@ -50,10 +50,10 @@ class CrealityCloudUtils(QObject):
         self._qnam = QNetworkAccessManager()
         self._qnam.finished.connect
         self._duid = self._generateDUID()
-        self._userInfo = {"token": "", "userId": ""}
+        self._userInfo = {"token": "", "userId": ""} # type: Dict[str, str]
         self._bucketInfo = {"endpoint": "", "bucket": "", "prefixPath": "", "accessKeyId": "",
                             "secretAccessKey": "", "sessionToken": "", "lifeTime": "",
-                            "expiredTime": ""}
+                            "expiredTime": ""}  # type: Dict[str, str]
         self._ossKey = ""
         self._appDataFolder = os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "CrealityCloud")
         self._tokenFile = os.path.join(self._appDataFolder, "token")
@@ -211,7 +211,7 @@ class CrealityCloudUtils(QObject):
             self.updateStatus.emit("bad")
             Logger.log("e", "oss commit api: %s", json.dumps(response))
 
-    def getCommonHeaders(self) -> Dict:
+    def getCommonHeaders(self) -> Dict[str, str]:
         headers = {
             "Content-Type": "application/json; charset=UTF-8",
             "__CXY_APP_ID_": "creality_model",
@@ -312,7 +312,7 @@ class CompressFileJob(Job):
 
 
 class UploadFileJob(Job):
-    def __init__(self, bucketInfo: dict, ossKey: str, uploadFilePath: str):
+    def __init__(self, bucketInfo: Dict[str, str], ossKey: str, uploadFilePath: str):
         super().__init__()
         self._bucketInfo = bucketInfo
         self._ossKey = ossKey
