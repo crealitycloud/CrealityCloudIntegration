@@ -87,16 +87,18 @@ class CrealityCloudUtils(QObject):
         return self._env
 
     def _generateDUID(self):
-        macAddress = ""
-        nets = QNetworkInterface.allInterfaces()
-        # Filter out the MAC address
-        for net in nets:
-            if net.flags()&QNetworkInterface.IsUp and \
-            net.flags()&QNetworkInterface.IsRunning and not\
-            (net.flags()&QNetworkInterface.IsLoopBack):
-                macAddress = str(net.hardwareAddress())
-                break
-        return macAddress
+        # macAddress = ""
+        # nets = QNetworkInterface.allInterfaces()
+        # # Filter out the MAC address
+        # for net in nets:
+        #     if net.flags()&QNetworkInterface.IsUp and \
+        #     net.flags()&QNetworkInterface.IsRunning and not\
+        #     (net.flags()&QNetworkInterface.IsLoopBack):
+        #         macAddress = str(net.hardwareAddress())
+        #         break
+        # return macAddress
+        return str(uuid.uuid1())[-12:]
+
 
     @pyqtSlot(str, str)
     def saveToken(self, token, userId):
