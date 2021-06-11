@@ -1,10 +1,10 @@
 import os
 from . CrealityCloudUtils import CrealityCloudUtils
-from PyQt5.QtCore import *
+from PyQt5.QtCore import QObject
 from PyQt5.QtGui import *
 from PyQt5.QtNetwork import *
 from PyQt5.QtQml import *
-from PyQt5.QtQuick import (QQuickView)
+# from PyQt5.QtQuick import (QQuickView)
 
 from UM.Application import Application
 from UM.Logger import Logger

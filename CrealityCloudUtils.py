@@ -28,10 +28,11 @@ importExtLib("oss2")
 from oss2 import SizedFileAdapter, determine_part_size, headers
 from oss2.models import PartInfo
 import oss2
-from PyQt5.QtCore import (QSysInfo, pyqtProperty, pyqtSignal, pyqtSlot, QObject, QUrl, QVariant, QFileInfo, QFile, QByteArray, QUuid, QStandardPaths)
-from PyQt5.QtNetwork import (QNetworkAccessManager, QNetworkReply, QNetworkRequest, QNetworkInterface)
+from PyQt5.QtCore import (QSysInfo, pyqtSignal, pyqtSlot, QObject, QStandardPaths)
+from PyQt5.QtNetwork import (QNetworkAccessManager)
 
 from UM.Job import Job
+from UM.OutputDevice import OutputDeviceError
 catalog = i18nCatalog("uranium")
 
 
