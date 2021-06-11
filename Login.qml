@@ -8,8 +8,6 @@ import "CloudAPI.js" as CloudAPI
 Item {
     id: loginItem
     anchors.fill: parent
-    width: 440
-    height: 540
 
     property int expireTime: 0
     property bool requestSwitch: false
