@@ -18,7 +18,10 @@ def importExtLib(libName):
 
 importExtLib("jmespath")
 importExtLib("crcmod")
-importExtLib("Crypto")
+if sys.platform.startswith('darwin'):
+    importExtLib("Crypto-mac")
+else:
+    importExtLib("Crypto")
 importExtLib("aliyunsdkcore")
 importExtLib("aliyunsdkkms")
 importExtLib("oss2")
