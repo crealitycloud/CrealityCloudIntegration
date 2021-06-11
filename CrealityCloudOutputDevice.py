@@ -19,7 +19,7 @@ catalog = i18nCatalog("uranium")
 
 
 class CrealityCloudOutputDevice(OutputDevice):
-    def __init__(self, pluginId):
+    def __init__(self, pluginId: str):
         super().__init__("crealitycloud")
 
         self._pluginId = pluginId
@@ -36,7 +36,7 @@ class CrealityCloudOutputDevice(OutputDevice):
         self._nodes = None
         self._stream = None
 
-    def requestWrite(self, nodes, file_name = None, limit_mimetypes = None, file_handler = None, **kwargs):
+    def requestWrite(self, nodes, file_name = None, limit_mimetypes = None, file_handler = None, **kwargs) -> None:
         if self._writing:
             raise OutputDeviceError.DeviceBusyError()
 
@@ -51,7 +51,7 @@ class CrealityCloudOutputDevice(OutputDevice):
         self.plugin_window = self._createDialogue()
         self.plugin_window.show()
 
-    def _createDialogue(self):
+    def _createDialogue(self) -> QObject:
         Application.getInstance()._qml_engine.rootContext().setContextProperty("CloudUtils", self.utils)
         # Application.getInstance()._qml_engine.rootContext(
         # ).setContextProperty("catalog", catalog)
@@ -60,7 +60,7 @@ class CrealityCloudOutputDevice(OutputDevice):
         
         return component
 
-    def saveGCode(self, file_name):
+    def saveGCode(self, file_name: str) -> None:
         file_writer = Application.getInstance().getMeshFileHandler().getWriter("GCodeWriter")
         Logger.log("d", "Writing GCode to %s", file_name)
         self._stream = open(file_name, "wt", encoding = "utf-8")

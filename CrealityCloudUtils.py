@@ -1,3 +1,4 @@
+from typing import Dict
 from UM.Logger import Logger
 from UM.i18n import i18nCatalog
 import os, sys
@@ -72,22 +73,22 @@ class CrealityCloudUtils(QObject):
     updateStatus = pyqtSignal(str)
 
     @pyqtSlot(result=str)
-    def getOsVersion(self):
+    def getOsVersion(self) -> str:
         return self._osVersion
 
     @pyqtSlot(result=str)
-    def getDUID(self):
+    def getDUID(self) -> str:
         return self._duid
 
     @pyqtSlot(result=str)
-    def getCloudUrl(self):
+    def getCloudUrl(self) -> str:
         return self._cloudUrl
 
     @pyqtSlot(result=str)
-    def getEnv(self):
+    def getEnv(self) -> str:
         return self._env
 
-    def _generateDUID(self):
+    def _generateDUID(self) -> str:
         # macAddress = ""
         # nets = QNetworkInterface.allInterfaces()
         # # Filter out the MAC address
@@ -102,7 +103,7 @@ class CrealityCloudUtils(QObject):
 
 
     @pyqtSlot(str, str)
-    def saveToken(self, token, userId):
+    def saveToken(self, token: str, userId: str) -> None:
         self._userInfo["token"] = token
         self._userInfo["userId"] = userId
         os.makedirs(self._appDataFolder, exist_ok=True)
@@ -111,7 +112,7 @@ class CrealityCloudUtils(QObject):
         file.close()
 
     @pyqtSlot(result=str)
-    def loadToken(self):
+    def loadToken(self) -> str:
         os.makedirs(self._appDataFolder, exist_ok=True)
         if not os.path.exists(self._tokenFile):
             return ""
@@ -121,40 +122,40 @@ class CrealityCloudUtils(QObject):
         return self._userInfo["token"]
 
     @pyqtSlot(result=str)
-    def getUserId(self):
+    def getUserId(self) -> str:
         return self._userInfo["userId"]
 
     @pyqtSlot()
-    def clearToken(self):
+    def clearToken(self) -> None:
         os.remove(self._tokenFile)
         self._userInfo["token"] = ""
         self._userInfo["userId"] = ""
 
     @pyqtSlot(str)
-    def qmlLog(self, text):
+    def qmlLog(self, text: str) -> None:
         Logger.log("d", "CrealityCloudUtils: %s", text)
         
 
     @pyqtSlot(str)
-    def saveUploadFile(self, fileName):
+    def saveUploadFile(self, fileName: str) -> None:
         self._fileName = fileName + ".gcode"
         self._filePath = os.path.join(self._appDataFolder, self._fileName)
         self.saveGCodeStarted.emit(self._filePath)
 
     @pyqtSlot(result=str)
-    def defaultFileName(self):
+    def defaultFileName(self) -> str:
         return self._defaultFileName
 
     @pyqtSlot(str)
-    def setDefaultFileName(self, filename):
+    def setDefaultFileName(self, filename: str) -> None:
         self._defaultFileName = filename
 
-    def clearUploadFile(self):
+    def clearUploadFile(self) -> None:
         os.remove(self._filePath)
         os.remove(self._gzipFilePath)
 
     # Compression gcode file
-    def gzipFile(self):
+    def gzipFile(self) -> None:
         if os.path.isfile(self._filePath) is False:
             return
         self.updatedProgressTextSlot(catalog.i18nc("@info:status", "2/4 Compressing file..."))
@@ -204,8 +205,7 @@ class CrealityCloudUtils(QObject):
             self.updateStatus.emit("bad")
             Logger.log("e", "oss commit api: %s", json.dumps(response))
 
-
-    def getCommonHeaders(self):
+    def getCommonHeaders(self) -> Dict:
         headers = {
             "Content-Type": "application/json; charset=UTF-8",
             "__CXY_APP_ID_": "creality_model",
@@ -219,7 +219,7 @@ class CrealityCloudUtils(QObject):
         }
         return headers
 
-    def getOssAuth(self):
+    def getOssAuth(self) -> None:
         url = self._cloudUrl + "/api/cxy/common/getOssInfo"
         url2 = self._cloudUrl + "/api/account/getAliyunInfo"
         response = requests.post(url, data="{}", headers=self.getCommonHeaders()).text
@@ -242,7 +242,7 @@ class CrealityCloudUtils(QObject):
         else:
             raise Exception("oss auth api error: "+json.dumps(response))
         
-    def uploadOss(self):
+    def uploadOss(self) -> None:
         self.updatedProgressTextSlot(catalog.i18nc("@info:status", "3/4 Uploading file..."))
         self.getOssAuth()
         self._ossKey = self._bucketInfo["prefixPath"] + "/" + \
@@ -258,14 +258,13 @@ class CrealityCloudUtils(QObject):
                 "e", "oss upload faild")
             self.updateStatus.emit("bad")
 
-
-    def _onUploadFileJobFinished(self, job):
+    def _onUploadFileJobFinished(self, job: Job) -> None:
         self.commitFile()
 
-    def _onUploadFileJobProgress(self, job, progress):
+    def _onUploadFileJobProgress(self, job: Job, progress: float) -> None:
         self.updateProgress.emit(progress)
 
-    def updatedProgressTextSlot(self, message):
+    def updatedProgressTextSlot(self, message: str) -> None:
         Logger.log("i", "%s" % message)
         self.updateProgressText.emit(message)
 
