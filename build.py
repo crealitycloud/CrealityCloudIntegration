@@ -13,7 +13,7 @@ def clear(filepath):
                 clear(cur_path)
 
 def package():
-    path = "./output/CrealityCloudIntegrationv101a"
+    path = "./output/CrealityCloudIntegration"
     # isExists = os.path.exists(path)
     # if not isExists:
     #     os.makedirs(path)

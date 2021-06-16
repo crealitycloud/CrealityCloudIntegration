@@ -10,8 +10,10 @@ import requests
 import importlib
 #Import package into sys.modules so that the library can reference itself with absolute imports.
 this_plugin_path = os.path.dirname(__file__)
-def importExtLib(libName):
-    path = os.path.join(this_plugin_path, libName, "__init__.py")
+def importExtLib(libName, dirName=""):
+    if(dirName == ""):
+        dirName = libName
+    path = os.path.join(this_plugin_path, dirName, "__init__.py")
     spec = importlib.util.spec_from_file_location(libName, path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[libName] = module
@@ -20,7 +22,7 @@ def importExtLib(libName):
 importExtLib("jmespath")
 importExtLib("crcmod")
 if sys.platform.startswith('darwin'):
-    importExtLib("Crypto-mac")
+    importExtLib("Crypto", "Crypto-mac")
 else:
     importExtLib("Crypto")
 importExtLib("aliyunsdkcore")
