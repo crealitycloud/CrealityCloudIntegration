@@ -1,3 +1,4 @@
 *.qmlc
 __pycache__/
 *.jsc
+output/
