@@ -24,6 +24,21 @@ function getUserInfo(token, userId, callback) {
     })
 }
 
+function getVerCode(account, callback) {
+    var getUrl = api_url + "/api/account/getVerifyCode"
+    sendForm(getUrl, JSON.stringify({"account": account, "verifyCodeType": 6, "accountType": 1}), callback)
+}
+
+function quickLogin(phone, countryCode, verCode, callback) {
+    var getUrl = api_url + "/api/account/quickLogin"
+    sendForm(getUrl, JSON.stringify({ "phoneNumber": phone, "phoneAreaCode": countryCode, "verifyCode": verCode }), callback)
+}
+
+function accountLogin(type, account, password, callback) {
+    var getUrl = api_url + "/api/account/loginV2"
+    sendForm(getUrl, JSON.stringify({ "type": type, "account": account, "password": password }), callback)
+}
+
 //AJAX request tool
 function sendForm(url, params, callback, header) {
     var http = new XMLHttpRequest()

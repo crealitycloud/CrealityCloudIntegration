@@ -64,10 +64,13 @@ class CrealityCloudUtils(QObject):
 
         if (self._env == "test"):
             self._cloudUrl = "http://2-model-admin-dev.crealitygroup.com"
+            self._webUrl = "http://model-dev.crealitygroup.com"
         elif(self._env == "release_local"):
             self._cloudUrl = "https://model-admin.crealitygroup.com"
+            self._webUrl = "https://www.crealitycloud.cn"
         else:
             self._cloudUrl = "https://model-admin2.creality.com"
+            self._webUrl = "https://www.crealitycloud.com"
 
     saveGCodeStarted = pyqtSignal(str)
     updateProgressText = pyqtSignal(str)
@@ -85,6 +88,10 @@ class CrealityCloudUtils(QObject):
     @pyqtSlot(result=str)
     def getCloudUrl(self) -> str:
         return self._cloudUrl
+
+    @pyqtSlot(result=str)
+    def getWebUrl(self) -> str:
+        return self._webUrl
 
     @pyqtSlot(result=str)
     def getEnv(self) -> str:
