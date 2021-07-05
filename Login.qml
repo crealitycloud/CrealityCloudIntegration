@@ -333,6 +333,39 @@ Item {
                     }
                 }
             }
+
+            Text {
+                text: qsTr(" | ")
+                font.pixelSize: 13
+            }
+
+            Text {
+                text: qsTr("Setting")
+                font.wordSpacing: -0.5
+                font.letterSpacing: -1
+                font.pixelSize: 13
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if(!pluginRootWindow.settingWindow){
+                            var component = Qt.createComponent("Setting.qml")
+                            pluginRootWindow.settingWindow = component.createObject(pluginRootWindow)
+                            pluginRootWindow.settingWindow.show()
+                        }
+                        
+                    }
+                    onEntered: {
+                        parent.color = "#1987ea"
+                        parent.font.underline = true
+                    }
+                    onExited: {
+                        parent.color = "black"
+                        parent.font.underline = false
+                    }
+                }
+            }
         }
 
         Timer {
@@ -514,7 +547,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: Qt.openUrlExternally("https://model.creality.com/")
+                onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl())
             }
         }
 

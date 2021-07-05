@@ -22,6 +22,7 @@ Window {
 
     property string token: ""
     property string userId: ""
+    property var settingWindow
 
     function showBusy() {
         busyLayer.visible = true
@@ -126,11 +127,23 @@ Window {
         }
     }
     Component.onCompleted: {
+        init()
+    }
+    onClosing: {
+        bodyLoader.source = ""
+    }
+    function init() {
         CloudAPI.os_version = CloudUtils.getOsVersion()
         CloudAPI.duid = CloudUtils.getDUID()
         CloudAPI.api_url = CloudUtils.getCloudUrl()
         var token = CloudUtils.loadToken()
         var userId = CloudUtils.getUserId()
+        if (CloudUtils.getEnv() == "release_local") {
+            logoBg.color = "#E4E5E7"
+        }else {
+            logoBg.color = "#0f2d79"
+        }
+
         if (token === "") {
             bodyLoader.source = "Login.qml"
         }else {
@@ -144,9 +157,5 @@ Window {
                 }
             })
         }
-
     }
-      onClosing: {
-          bodyLoader.source = ""
-      }
 }

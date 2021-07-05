@@ -46,6 +46,10 @@ class CrealityCloudUtils(QObject):
 
         # Modify this parameter to configure the server. test, release_local, release_oversea
         self._env = "test"
+        self._testEnv = "http://2-model-admin-dev.crealitygroup.com"
+        self._localEnv = "https://model-admin.crealitygroup.com"
+        self._overseaEnv = "https://model-admin2.creality.com"
+        self._cloudUrl = ""
         self._filePath = ""
         self._gzipFilePath = ""
         self._osVersion = QSysInfo.productType() + " " + QSysInfo.productVersion()
@@ -59,18 +63,11 @@ class CrealityCloudUtils(QObject):
         self._ossKey = ""
         self._appDataFolder = os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "CrealityCloud")
         self._tokenFile = os.path.join(self._appDataFolder, "token")
+        self._urlFile = os.path.join(self._appDataFolder, "cloudurl")
         self._defaultFileName = ""
         self._fileName = ""
 
-        if (self._env == "test"):
-            self._cloudUrl = "http://2-model-admin-dev.crealitygroup.com"
-            self._webUrl = "http://model-dev.crealitygroup.com"
-        elif(self._env == "release_local"):
-            self._cloudUrl = "https://model-admin.crealitygroup.com"
-            self._webUrl = "https://www.crealitycloud.cn"
-        else:
-            self._cloudUrl = "https://model-admin2.creality.com"
-            self._webUrl = "https://www.crealitycloud.com"
+        self.autoSetUrl()
 
     saveGCodeStarted = pyqtSignal(str)
     updateProgressText = pyqtSignal(str)
@@ -110,7 +107,6 @@ class CrealityCloudUtils(QObject):
         # return macAddress
         return str(uuid.uuid1())[-12:]
 
-
     @pyqtSlot(str, str)
     def saveToken(self, token: str, userId: str) -> None:
         self._userInfo["token"] = token
@@ -118,6 +114,14 @@ class CrealityCloudUtils(QObject):
         os.makedirs(self._appDataFolder, exist_ok=True)
         file = open(os.path.join(self._appDataFolder, "token"), "w")
         file.write(json.dumps(self._userInfo))
+        file.close()
+
+    @pyqtSlot(str)
+    def saveUrl(self, env: str) -> None:
+        #os.remove(self._urlFile)
+        os.makedirs(self._appDataFolder, exist_ok=True)
+        file = open(os.path.join(self._appDataFolder, "cloudurl"), "w")
+        file.write(env)
         file.close()
 
     @pyqtSlot(result=str)
@@ -129,6 +133,15 @@ class CrealityCloudUtils(QObject):
         self._userInfo = json.loads(file.readline())
         file.close()
         return self._userInfo["token"]
+
+    def loadUrl(self) -> str:
+        os.makedirs(self._appDataFolder, exist_ok=True)
+        if not os.path.exists(self._urlFile):
+            return ""
+        file = open(self._urlFile, "r")
+        env = file.readline()
+        file.close()
+        return env
 
     @pyqtSlot(result=str)
     def getUserId(self) -> str:
@@ -283,6 +296,37 @@ class CrealityCloudUtils(QObject):
         Logger.log("i", "%s" % message)
         self.updateProgressText.emit(message)
 
+    def getReponseTime(self, url: str) -> int:
+        try:
+            r = requests.get(url)
+            returnTime = r.elapsed.total_seconds()
+        except:
+            returnTime = 10000
+        return returnTime
+
+    @pyqtSlot()
+    def autoSetUrl(self) -> None:
+        env = self.loadUrl()
+        if env:
+            self._env = env
+        else:
+            localTime = self.getReponseTime(self._localEnv)
+            overseaTime = self.getReponseTime(self._overseaEnv)
+            if localTime < overseaTime: 
+                self._env = "release_local"
+            else:
+                self._env = "release_oversea"
+            self.saveUrl(self._env)
+
+        if self._env == "test":
+            self._cloudUrl = self._testEnv
+            self._webUrl = "http://model-dev.crealitygroup.com"
+        elif self._env == "release_local":
+            self._cloudUrl = self._localEnv
+            self._webUrl = "https://www.crealitycloud.cn"
+        else:
+            self._cloudUrl = self._overseaEnv
+            self._webUrl = "https://www.crealitycloud.com"
       
 
 class CompressFileJob(Job):
