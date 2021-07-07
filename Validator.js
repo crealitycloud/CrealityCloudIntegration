@@ -40,6 +40,7 @@ var regexs = {
     /**
      * @descrition 匹配 URL
      */
+    internationPhone:/^\d{1,17}$/,
     url:/[a-zA-z]+:\/\/[^\s]/,
     money: /^(0|[1-9]\d*)(\.\d+)?$/,
     english: /^[A-Za-z]+$/,
@@ -58,6 +59,7 @@ var _testHook = {
     is_tel:function(field){return regexs.fax.test( backVal(field) );},
     // 验证手机
     is_phone:function(field){return regexs.phone.test( backVal(field) );},
+    is_internationphone: function (field) { return regexs.internationPhone.test(backVal(field)); },
     // 验证URL
     is_url:function(field){return regexs.url.test( backVal(field) );},
     is_money: function (field) {return regexs.money.test(backVal(field));},

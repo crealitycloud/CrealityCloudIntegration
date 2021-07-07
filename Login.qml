@@ -26,6 +26,7 @@ Item {
         property int verCodeTime: 60
 
         Item {
+            id: element1
             height: 260
             anchors.right: parent.right
             anchors.rightMargin: 0
@@ -200,6 +201,32 @@ Item {
                                     pluginRootWindow.showMessage("Error: " + data["msg"])
                                 }
                             })
+                    }
+                }
+            }
+
+            Text {
+                id: resetLink
+                color: "#999999"
+                text: qsTr("Forget Password?")
+                anchors.right: parent.right
+                anchors.rightMargin: 0
+                anchors.top: loginButton.bottom
+                anchors.topMargin: 10
+                font.pixelSize: 12
+                visible: false
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?resetpassword=1")
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#1987ea"
+                        parent.font.underline = true
+                    }
+                    onExited: {
+                        parent.color = "#999999"
+                        parent.font.underline = false
                     }
                 }
             }
@@ -426,6 +453,7 @@ Item {
             mobileQuickLoginLabel.font.bold = true
             mobileLoginLable.font.bold = false
             emailLoginLabel.font.bold = false
+            resetLink.visible = false
             cleanField()
         }
         function switchPhoneLogin() {
@@ -439,6 +467,7 @@ Item {
             mobileLoginLable.font.bold = true
             mobileQuickLoginLabel.font.bold = false
             emailLoginLabel.font.bold = false
+            resetLink.visible = true
             cleanField()
         }
         function switchEmailLogin() {
@@ -452,6 +481,7 @@ Item {
             emailLoginLabel.font.bold = true
             mobileLoginLable.font.bold = false
             mobileQuickLoginLabel.font.bold = false
+            resetLink.visible = true
             cleanField()
         }
         function fieldValidator() {
@@ -463,7 +493,7 @@ Item {
             let email = emailField.text
             switch (accountLogin.loginType) {
                 case "quick":
-                    if (v.required(countryCode) && v.required(mobile)) {
+                    if (v.required(countryCode) && v.required(mobile) && v.isInternationphone(mobile)) {
                         verButton.enabled = true
                         if(v.required(code)) {
                             loginButton.enabled = true
@@ -476,7 +506,7 @@ Item {
                     }
                     break
                 case "mobile":
-                    if (v.required(countryCode) && v.required(mobile) && v.required(password)) {
+                    if (v.required(countryCode) && v.required(mobile) && v.required(password) && v.isInternationphone(mobile)) {
                         loginButton.enabled = true
                     }else {
                         loginButton.enabled = false
