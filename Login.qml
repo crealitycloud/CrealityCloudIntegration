@@ -1,5 +1,6 @@
 import QtQuick 2.2
-import QtQuick.Controls 2.3
+import QtQuick.Controls 2.2
+import QtQuick.Templates 2.2 as T
 import QtQuick.Controls.Styles 1.4
 
 import "CloudAPI.js" as CloudAPI
@@ -35,16 +36,38 @@ Item {
 
             ComboBox {
                 id: phoneSelect
-                width: 150
+                width: 130
                 height: 40
                 anchors.top: parent.top
                 anchors.topMargin: 0
                 down: true
-                displayText: "+" + model.get(currentIndex).phone
+                //displayText: "+" + model.get(currentIndex).phone
                 model: ListModel {id: "phoneSelectModel"}
                 delegate: ItemDelegate{
                     text:  nameEn + " " +phone
-                    font.letterSpacing: -1
+                    font.letterSpacing: -0.5
+                }
+                contentItem: Label {
+                    text: "+ " + phoneSelect.model.get(phoneSelect.currentIndex).phone
+                    font: phoneSelect.font
+                    leftPadding : 10
+                    verticalAlignment: Text.AlignVCenter
+                }
+                popup: Popup {
+                    y: phoneSelect.height - 1
+                    background: Rectangle {
+                        border.width: 1
+                        border.color: "gray"
+                    }
+                    width: 190
+                    implicitHeight: contentItem.implicitHeight
+                    contentItem: ListView {
+                        clip: true
+                        implicitHeight: contentHeight
+                        model: phoneSelect.popup.visible ? phoneSelect.delegateModel : null
+                        currentIndex: phoneSelect.highlightedIndex
+                        ScrollBar.vertical: ScrollBar { }
+                    }
                 }
                 Component.onCompleted: {
                     var dict = CountryCode.dict.allCountries

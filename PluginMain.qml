@@ -46,6 +46,8 @@ Window {
     MessageDialog {
         id: msgDialog
         title: "Error"
+        icon: StandardIcon.Warning
+        modality: Qt.ApplicationModal
 
         onAccepted: {
             msgDialog.visible = false
@@ -139,9 +141,9 @@ Window {
         var token = CloudUtils.loadToken()
         var userId = CloudUtils.getUserId()
         if (CloudUtils.getEnv() == "release_local") {
-            logoBg.color = "#E4E5E7"
+            logoBg.color = "#77ACF1"
         }else {
-            logoBg.color = "#0f2d79"
+            logoBg.color = "#04009A"
         }
 
         if (token === "") {
