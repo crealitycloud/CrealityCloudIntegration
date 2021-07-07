@@ -5,6 +5,7 @@ import QtQuick.Controls 1.4
 Window {
     id: settingWindow
     title: "Setting"
+    modality: Qt.ApplicationModal
     width: 300
     height: 400
 
@@ -77,12 +78,11 @@ Window {
             CloudUtils.saveUrl(env)
             CloudUtils.autoSetUrl()
             pluginRootWindow.init()
-            pluginRootWindow.settingWindow = undefined
-            settingWindow.close()
+            pluginRootWindow.settingWindow.close()
         }
     }
 
-    Component.onCompleted: {
+    onVisibleChanged: {
         if (CloudUtils.getEnv() === "release_local") {
             serverSet.currentIndex = 1
         }else {

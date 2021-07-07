@@ -352,9 +352,8 @@ Item {
                         if(!pluginRootWindow.settingWindow){
                             var component = Qt.createComponent("Setting.qml")
                             pluginRootWindow.settingWindow = component.createObject(pluginRootWindow)
-                            pluginRootWindow.settingWindow.show()
                         }
-                        
+                        pluginRootWindow.settingWindow.show()
                     }
                     onEntered: {
                         parent.color = "#1987ea"
