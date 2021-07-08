@@ -25,7 +25,7 @@ Window {
             font.pixelSize: 23
         }
 
-        Item {
+        Row {
             id: row
             height: 40
             anchors.top: title.bottom
@@ -34,25 +34,29 @@ Window {
             anchors.rightMargin: 40
             anchors.left: parent.left
             anchors.leftMargin: 0
+            spacing: 10
 
             Text {
                 id: set1
                 text: qsTr("Server")
                 font.family: "Tahoma"
                 verticalAlignment: Text.AlignVCenter
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 0
-                anchors.top: parent.top
-                anchors.topMargin: 0
+                height: parent.height
                 font.pixelSize: 15
             }
 
-            ComboBox {
-                id: serverSet
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.top: parent.top
-                model: ["International server", "China server"]
+            ExclusiveGroup{id: mos}
+            RadioButton {
+                id: serverRadio1
+                exclusiveGroup: mos
+                text: "International"
+                height: parent.height
+            }
+            RadioButton {
+                id: serverRadio2
+                exclusiveGroup: mos
+                text: "China"
+                height: parent.height
             }
 
         }
@@ -69,7 +73,7 @@ Window {
         anchors.bottomMargin: 20
         onClicked: {
             var env = ""
-            if (serverSet.currentIndex === 0) {
+            if (mos.current.text === "International") {
                 env = "release_oversea"
             }else {
                 env = "release_local"
@@ -84,9 +88,9 @@ Window {
 
     onVisibleChanged: {
         if (CloudUtils.getEnv() === "release_local") {
-            serverSet.currentIndex = 1
+            serverRadio2.checked = true
         }else {
-            serverSet.currentIndex = 0
+            serverRadio1.checked = true
         }
     }
 
