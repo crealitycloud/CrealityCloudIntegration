@@ -218,7 +218,7 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?resetpassword=1")
+                    onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?resetpassword = 0")
                     hoverEnabled: true
                     onEntered: {
                         parent.color = "#1987ea"

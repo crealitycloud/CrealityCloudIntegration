@@ -5,12 +5,15 @@ import QtQuick.Dialogs 1.1
 import UM 1.1 as UM
 
 import "CloudAPI.js" as CloudAPI
+import "Validator.js" as Validator
 
 Item {
     id: sendViewRoot
     anchors.fill: parent
     width: 440
     height: 540
+
+    property var v: new Validator.Validator()
 
     TextField {
         id: fileNameField
@@ -56,7 +59,7 @@ Item {
             connectSlot()
             var fileName = fileNameField.text
             // File name cannot be empty
-            if (fileName === "") {
+            if (!v.required(fileName) || fileName.indexOf(' ') !== -1) {
                 pluginRootWindow.showMessage(catalog.i18nc("@error", "File name cannot be empty"))
                 return
             }
