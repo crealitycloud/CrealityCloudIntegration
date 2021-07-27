@@ -7,6 +7,8 @@ set(INSTALL_PATH "lib/cura/plugins/CrealityCloudIntegration"
     "The path to install the cloud plugin to. Should ideally be relative to CMAKE_INSTALL_PREFIX"
     )
 
-install(DIRECTORY ./ DESTINATION INSTALL_PATH
+install(DIRECTORY ./ DESTINATION ${INSTALL_PATH}
         PATTERN ".github" EXCLUDE
+        PATTERN ".git" EXCLUDE
+        PATTERN ".gitignore" EXCLUDE
         )
