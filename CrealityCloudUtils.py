@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from UM.Logger import Logger
 from UM.i18n import i18nCatalog
 import os, sys
@@ -31,17 +31,30 @@ importExtLib("oss2")
 from oss2 import SizedFileAdapter, determine_part_size, headers
 from oss2.models import PartInfo
 import oss2
-from PyQt5.QtCore import (QSysInfo, pyqtSignal, pyqtSlot, QObject, QStandardPaths)
+from PyQt5.QtCore import (QSysInfo, pyqtSignal, pyqtSlot, pyqtProperty, QObject, QStandardPaths, QUrl)
 from PyQt5.QtNetwork import (QNetworkAccessManager)
 
 from UM.Job import Job
 from UM.OutputDevice import OutputDeviceError
 catalog = i18nCatalog("uranium")
+from cura.CuraApplication import CuraApplication
+from UM.Resources import Resources
 
 
 class CrealityCloudUtils(QObject):
 
+    __instance = None
+
+    @classmethod
+    def getInstance(cls, *args, **kwargs) -> "CrealityCloudUtils":
+        if cls.__instance is None:
+            cls.__instance = cls(*args, **kwargs)
+        return cls.__instance
+    
     def __init__(self, parent=None):
+        if self.__instance is not None:
+            raise RuntimeError("This is a Singleton. use getInstance()")
+        
         super(CrealityCloudUtils, self).__init__(parent)
 
         # Modify this parameter to configure the server. test, release_local, release_oversea
@@ -61,18 +74,22 @@ class CrealityCloudUtils(QObject):
                             "secretAccessKey": "", "sessionToken": "", "lifeTime": "",
                             "expiredTime": ""}  # type: Dict[str, str]
         self._ossKey = ""
-        self._appDataFolder = os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "CrealityCloud")
+        self._appDataFolder = Resources.getStoragePath(Resources.Resources, "CrealityCloud")#os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "CrealityCloud")
         self._tokenFile = os.path.join(self._appDataFolder, "token")
         self._urlFile = os.path.join(self._appDataFolder, "cloudurl")
+        self.modelFilePath = os.path.join(self._appDataFolder, "models")
+        self._isDownloading = False
         self._defaultFileName = ""
         self._fileName = ""
-
+        self._downfileCount = 0
+        self._importfileCount = 0
         self.autoSetUrl()
 
     saveGCodeStarted = pyqtSignal(str)
     updateProgressText = pyqtSignal(str)
     updateProgress = pyqtSignal(float)
     updateStatus = pyqtSignal(str)
+    downloadingStateChanged = pyqtSignal()
 
     @pyqtSlot(result=str)
     def getOsVersion(self) -> str:
@@ -327,7 +344,150 @@ class CrealityCloudUtils(QObject):
         else:
             self._cloudUrl = self._overseaEnv
             self._webUrl = "https://www.crealitycloud.com"
-      
+    
+    def getLangCode(self) -> str:
+        code = CuraApplication.getInstance().getPreferences().getValue("general/language")
+        if code == "en_US":
+            return "0"
+        elif code == "cs_CZ":
+            return "0"
+        elif code == "de_DE":
+            return "8"
+        elif code == "es_ES":
+            return "7"
+        elif code == "fi_FI":
+            return "0"
+        elif code == "fr_FR":
+            return "9"
+        elif code == "it_IT":
+            return "0"
+        elif code == "ja_JP":
+            return "10"
+        elif code == "ko_KR":
+            return "5"
+        elif code == "th_TH":
+            return "12"
+        elif code == "nl_NL":
+            return "0"
+        elif code == "pl_PL":
+            return "0"
+        elif code == "pt_BR":
+            return "11"
+        elif code == "pt_PT":
+            return "11"
+        elif code == "ru_RU":
+            return "4"
+        elif code == "tr_TR":
+            return "0"
+        elif code == "zh_CN":
+            return "1"
+        elif code == "zh_TW":
+            return "2"
+        else:
+            return "0"
+
+    def getModelHeaders(self) -> Dict[str, str]:
+        headers = {
+            "Content-Type": "application/json; charset=UTF-8",
+            "__CXY_APP_ID_": "creality_model",
+            "__CXY_OS_LANG_": self.getLangCode(),
+            "__CXY_DUID_": self._duid,
+            "__CXY_OS_VER_": self._osVersion,
+            "__CXY_PLATFORM_": "6",
+            "__CXY_REQUESTID_": str(uuid.uuid1())
+        }
+        return headers
+    
+    def getCategoryListResult(self, type: int) -> str:
+        url = self._cloudUrl + "/api/cxy/category/categoryList"#self._testEnv
+        response = requests.post(url, data=json.dumps({"type": type}), headers=self.getModelHeaders()).text
+        return response
+    
+    def getPageModelLibraryList(self, page: int, pageSize: int, listType: int, categoryId: int) -> str:
+        url = self._cloudUrl + "/api/cxy/model/modelGroupList"#self._testEnv
+        response = requests.post(url, 
+                    data=json.dumps({"page": page, "pageSize": pageSize, "listType": listType, "categoryId": categoryId}), 
+                    headers=self.getModelHeaders()).text
+        return response
+
+    def getModelGroupDetailInfo(self, page: int, pageSize: int, groupId: str) -> str:
+        url = self._cloudUrl + "/api/cxy/v2/model/modelList"#self._testEnv
+        response = requests.post(url, 
+                    data=json.dumps({"page": page, "pageSize": pageSize, "groupId": groupId}), 
+                    headers=self.getModelHeaders()).text
+        return response
+
+    def downloadModel(self, urls: List[str], filepaths: List[str]) -> bool:
+        self._isDownloading = True
+        self.downloadingStateChanged.emit()
+        job = DownloadModelJob(urls, filepaths)
+        job.finished.connect(self._DownloadModelJobFinished)
+        job.start()
+    
+    def _DownloadModelJobFinished(self, job: Job) -> None:
+        
+        filenames = job.getFileNames()
+        CuraApplication.getInstance().fileCompleted.connect(self._showImportFileFinished)
+        self._downfileCount = 0
+        self._importfileCount = 0
+        for stlfile in filenames:           
+            if os.path.exists(stlfile):
+                #print("it has downloaded file:%s"%stlfile)
+                self._downfileCount += 1
+                CuraApplication.getInstance().readLocalFile(QUrl().fromLocalFile(stlfile))#
+    
+    def _showImportFileFinished(self, filename: str) -> None:
+        #Logger.log("i", "------------import file:%s success!"%filename)
+        self._importfileCount += 1
+        if self._importfileCount == self._downfileCount:
+            CuraApplication.getInstance().fileCompleted.disconnect(self._showImportFileFinished)
+            self._isDownloading = False
+            self.downloadingStateChanged.emit()
+            #Logger.log("i", "All import complete.")
+
+    @pyqtProperty(bool, notify=downloadingStateChanged)
+    def getDownloadState(self) -> bool:
+        return self._isDownloading
+
+    def getModelSearchResult(self, page: int, pageSize: int, keyword: str) -> str:
+        url = self._cloudUrl + "/api/cxy/search/modelSearch"#self._testEnv
+        response = requests.post(url, 
+                    data=json.dumps({"page": page, "pageSize": pageSize, "keyword": keyword}), 
+                    headers=self.getModelHeaders()).text
+        return response
+
+class DownloadModelJob(Job):
+    def __init__(self, urls: List[str], filepaths: List[str]):
+        super().__init__()
+        self._message = None
+        self._urls = urls
+        self._filepaths = filepaths
+        self.progress.connect(self._onProgress)
+        self.finished.connect(self._onFinished)
+
+    def getFileNames(self) -> List[str]:
+        return self._filepaths
+
+    def _onFinished(self, job: Job) -> None:
+        if self == job and self._message is not None:
+            self._message.hide()
+            self._message = None
+                
+    def _onProgress(self, job: Job, amount: float) -> None:
+        if self == job and self._message:
+            self._message.setProgress(amount)
+    
+    def run(self) -> None:
+        Job.yieldThread()
+        try:
+            count = len(self._urls)
+            for index in range(count):
+                r = requests.get(self._urls[index])
+                with open(self._filepaths[index], "wb") as f:
+                    f.write(r.content)
+        except Exception as e:
+            Logger.log("e", e)
+
 
 class CompressFileJob(Job):
 

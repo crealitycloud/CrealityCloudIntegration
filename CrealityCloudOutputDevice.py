@@ -28,7 +28,7 @@ class CrealityCloudOutputDevice(OutputDevice):
         self.setDescription(catalog.i18nc(
             "@action:button Preceded by 'Ready to'.", "Upload to Creality Cloud"))
         self.setIconName("upload_gcode")
-        self.utils = CrealityCloudUtils()
+        self.utils = CrealityCloudUtils.getInstance()
         self.utils.saveGCodeStarted.connect(self.saveGCode)
 
         self.plugin_window = None
@@ -52,9 +52,6 @@ class CrealityCloudOutputDevice(OutputDevice):
         self.plugin_window.show()
 
     def _createDialogue(self) -> QObject:
-        Application.getInstance()._qml_engine.rootContext().setContextProperty("CloudUtils", self.utils)
-        # Application.getInstance()._qml_engine.rootContext(
-        # ).setContextProperty("catalog", catalog)
         qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), "PluginMain.qml")
         component = Application.getInstance().createQmlComponent(qml_file)
         
