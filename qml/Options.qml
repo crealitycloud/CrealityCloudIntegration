@@ -4,8 +4,8 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.1
 import UM 1.1 as UM
 
-import "CloudAPI.js" as CloudAPI
-import "Validator.js" as Validator
+import "../js/CloudAPI.js" as CloudAPI
+import "../js/Validator.js" as Validator
 
 Item {
     id: sendViewRoot
@@ -131,10 +131,10 @@ Item {
                 text_1.visible = false
                 logoutBt.visible = false
                 uploadBt.visible = false
-                statusImg.source = "res/upload.gif"
+                statusImg.source = "../res/upload.gif"
                 break
             case "good":
-                statusImg.source = "res/good.gif"
+                statusImg.source = "../res/good.gif"
                 progressBar.visible = false
 
                 updateProgressText(catalog.i18nc("@info:status", "File is uploaded !"))
@@ -142,7 +142,7 @@ Item {
                 break
             case "bad":
                 updateProgressText(catalog.i18nc("@info:status", "Upload failed !"))
-                statusImg.source = "res/bad.gif"
+                statusImg.source = "../res/bad.gif"
                 progressBar.visible = false
                 disconnectSlot()
                 break

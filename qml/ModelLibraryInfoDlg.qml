@@ -82,7 +82,7 @@ Window{
 
             currentModelLibraryPage = 1;
             isDetailPage = false
-            console.log("current page: %1".arg(currentModelLibraryPage))
+            //console.log("current page: %1".arg(currentModelLibraryPage))
         }
         else{
             console.log("create BasicButton fail!")
@@ -256,7 +256,7 @@ Window{
                     modelScrollvPos = 0;
                     ManageModelBrowser.loadPageModelLibraryList(1, key, false)                   
                     totalPage = ManageModelBrowser.getTotalPage(key, pageSize)               
-                    console.log("current page: %1".arg(currentModelLibraryPage))                    
+                    //console.log("current page: %1".arg(currentModelLibraryPage))                    
                 }
                 else{
                     buttonMap[key].defaultBtnBgColor = "#F5F5F5"
@@ -270,7 +270,7 @@ Window{
         if (currentModelLibraryPage+1 <= totalPage)
         {
             currentModelLibraryPage++;
-            console.log("current page--%1".arg(currentModelLibraryPage))
+            //console.log("current page--%1".arg(currentModelLibraryPage))
             if(sourceType == 1)
                 ManageModelBrowser.loadPageModelLibraryList(currentModelLibraryPage, currentBtnType, true)
             else if(sourceType == 2)

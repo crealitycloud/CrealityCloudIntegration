@@ -1,24 +1,20 @@
 import QtQuick 2.2
-import QtQuick.Window 2.2
+//import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.1
 import QtQml 2.2
 import UM 1.1 as UM
-import "CloudAPI.js" as CloudAPI
+import "../js/CloudAPI.js" as CloudAPI
 
-Window {
+BasicDialog {
     id: pluginRootWindow
     UM.I18nCatalog { id: catalog; name: "uranium"}
     visible: false
-    width: 440
-    height: 540
-    modality: Qt.ApplicationModal
-    minimumWidth: width
-    minimumHeight: height
-    maximumWidth: width
-    maximumHeight: height
-
+    width: 600
+    height: 443  
+    titleHeight: 30
     title: catalog.i18nc("@title:window", "Creality Cloud Plugin")
+    closeIcon: "../res/btn_close_n.png"
 
     property string token: ""
     property string userId: ""
@@ -53,15 +49,14 @@ Window {
             msgDialog.visible = false
         }
     }
-
     Rectangle {
         id: rootRect
         anchors.fill: parent
-
+        anchors.topMargin:titleHeight
 
         Rectangle {
             id: busyLayer
-            anchors.fill: parent
+            anchors.fill: parent            
             color: "black"
             opacity: 0.5
             visible: false
@@ -79,38 +74,39 @@ Window {
         }
 
         Rectangle {
-            id: logoBg
-            x: 0
-            y: 0
-            width: 440
-            height: 63
-            color: "#0f2d79"
+            id: logoBg           
+            width: parent.width
+            height: 73
+            color: "white"
             z: 2
 
             BorderImage {
                 id: logo
-                x: 20
-                y: 17
-                width: 34
+                anchors.centerIn: parent
+                anchors.horizontalCenterOffset: -width
+                width: 36
                 height: 34
                 transformOrigin: Item.Center
-                source: "res/logo.png"
+                source: "../res/logo.png"
             }
 
             Text {
                 id: logoText
-                x: 68
-                y: 22
-                color: "#ffffff"
+                anchors.left: logo.right
+                anchors.leftMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
+                color: "#333333"
                 text: catalog.i18nc("@title:window", "Creality Cloud")
-                font.family: "Tahoma"
-                font.pixelSize: 17
+                font.family: "Source Han Sans CN Normal"
+                font.pixelSize: 20
+                font.weight: Font.Bold
             }
 
             Text {
                 id: testLabel
-                x: 180
-                y: 22
+                anchors.left: logoText.right
+                anchors.leftMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
                 color: "#ffffff"
                 width: 40
                 height: 19
@@ -121,12 +117,30 @@ Window {
             }
         }
 
+        Item {
+            id: idSeparator
+            anchors.top: logoBg.bottom;
+            width:parent.width
+            height: 1
+            Rectangle
+            {
+                anchors.fill: parent
+                color: "#42BDD8"
+                opacity: 0.5
+            }
+        }
+
         Loader {
             id: bodyLoader
             anchors.fill: parent
-            // source: "Login.qml"
-
+            anchors.topMargin: 74
         }
+    }
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        border.width: 1
+        border.color: "#42BDD8"
     }
     Component.onCompleted: {
         init()
@@ -140,11 +154,6 @@ Window {
         CloudAPI.api_url = CloudUtils.getCloudUrl()
         var token = CloudUtils.loadToken()
         var userId = CloudUtils.getUserId()
-        if (CloudUtils.getEnv() == "release_local") {
-            logoBg.color = "#77ACF1"
-        }else {
-            logoBg.color = "#04009A"
-        }
 
         if (token === "") {
             bodyLoader.source = "Login.qml"

@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import "qqr.js" as QRCodeBackend
+import "../js/qqr.js" as QRCodeBackend
 
 Canvas {
     id: canvas

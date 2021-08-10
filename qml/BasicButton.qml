@@ -20,6 +20,7 @@ Item {
     property var btnRadius: 14
     property var btnBorderW: 1
     property var pixSize: 14
+    property var fontWeight: Font.Normal
 
     signal sigButtonClicked()
     signal sigButtonClickedWithKey(string str)
@@ -29,7 +30,7 @@ Item {
         width: parent.width
         height: parent.height
         font.family: "Source Han Sans CN Normal"
-        font.weight: Font.Normal
+        font.weight: fontWeight
         font.pixelSize: pixSize
         contentItem: Item {
             Text {

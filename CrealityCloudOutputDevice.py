@@ -52,7 +52,7 @@ class CrealityCloudOutputDevice(OutputDevice):
         self.plugin_window.show()
 
     def _createDialogue(self) -> QObject:
-        qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), "PluginMain.qml")
+        qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), "qml/PluginMain.qml")
         component = Application.getInstance().createQmlComponent(qml_file)
         
         return component
