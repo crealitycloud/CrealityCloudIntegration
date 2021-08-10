@@ -133,6 +133,7 @@ Window {
     }
     onClosing: {
         bodyLoader.source = ""
+        CloudUtils.clearUploadFile()
     }
     function init() {
         CloudAPI.os_version = CloudUtils.getOsVersion()

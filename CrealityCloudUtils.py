@@ -172,9 +172,13 @@ class CrealityCloudUtils(QObject):
     def setDefaultFileName(self, filename: str) -> None:
         self._defaultFileName = filename
 
+    @pyqtSlot()
     def clearUploadFile(self) -> None:
-        os.remove(self._filePath)
-        os.remove(self._gzipFilePath)
+        try:
+            os.remove(self._filePath)
+            os.remove(self._gzipFilePath)
+        except Exception as e:
+            Logger.log("e", "Clean temp gcode falid")
 
     # Compression gcode file
     def gzipFile(self) -> None:
@@ -228,7 +232,7 @@ class CrealityCloudUtils(QObject):
             self.updateProgress.emit(1)
             Logger.log("d", "upload success")
             self.updateStatus.emit("good")
-            self.clearUploadFile()
+            # self.clearUploadFile()
         else:
             self.updateStatus.emit("bad")
             Logger.log("e", "oss commit api: %s", json.dumps(response))
