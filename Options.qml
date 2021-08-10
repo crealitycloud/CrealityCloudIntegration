@@ -29,7 +29,7 @@ Item {
         x: 57
         y: 144
         text: catalog.i18nc("@label", "File Name")
-        font.family: "Tahoma"
+        font.family: "Verdana"
         font.pixelSize: 12
     }
 

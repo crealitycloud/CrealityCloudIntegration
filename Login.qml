@@ -2,6 +2,7 @@ import QtQuick 2.2
 import QtQuick.Controls 2.2
 import QtQuick.Templates 2.2 as T
 import QtQuick.Controls.Styles 1.4
+import UM 1.1 as UM
 
 import "CloudAPI.js" as CloudAPI
 import "CountryCode.js" as CountryCode
@@ -237,7 +238,7 @@ Item {
             height: 24
             text: qsTr("Log In")
             font.bold: true
-            font.family: "Tahoma"
+            font.family: "Verdana"
             anchors.right: parent.right
             anchors.rightMargin: 0
             anchors.left: parent.left
@@ -594,7 +595,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             font.underline: true
             lineHeight: 1.4
-            font.family: "Tahoma"
+            font.family: "Verdana"
             font.pixelSize: 12
             MouseArea {
                 anchors.fill: parent
@@ -610,7 +611,7 @@ Item {
             anchors.topMargin: 80
             horizontalAlignment: Text.AlignHCenter
             anchors.horizontalCenter: parent.horizontalCenter
-            font.family: "Tahoma"
+            font.family: "Verdana"
             font.bold: true
             font.pixelSize: 24
         }
@@ -698,7 +699,7 @@ Item {
                     anchors.top: refreshBt.bottom
                     anchors.topMargin: 10
                     anchors.horizontalCenter: parent.horizontalCenter
-                    font.family: "Tahoma"
+                    font.family: "Verdana"
                     font.bold: true
                     font.pixelSize: 14
                 }

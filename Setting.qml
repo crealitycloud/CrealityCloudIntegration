@@ -39,7 +39,7 @@ Window {
             Text {
                 id: set1
                 text: qsTr("Server")
-                font.family: "Tahoma"
+                font.family: "Verdana"
                 verticalAlignment: Text.AlignVCenter
                 height: parent.height
                 font.pixelSize: 15

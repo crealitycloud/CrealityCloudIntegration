@@ -103,7 +103,7 @@ Window {
                 y: 22
                 color: "#ffffff"
                 text: catalog.i18nc("@title:window", "Creality Cloud")
-                font.family: "Tahoma"
+                font.family: "Verdana"
                 font.pixelSize: 17
             }
 
@@ -116,7 +116,7 @@ Window {
                 height: 19
                 visible: CloudUtils.getEnv() === "test"
                 text: qsTr("test")
-                font.family: "Tahoma"
+                font.family: "Verdana"
                 font.pixelSize: 12
             }
         }
