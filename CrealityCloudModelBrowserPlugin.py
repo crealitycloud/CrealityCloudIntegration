@@ -18,11 +18,16 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         super().__init__()
         self.setMenuName(i18n_catalog.i18nc("@item:inmenu", "Creality Integration"))
         self.addMenuItem(i18n_catalog.i18nc("@item:inmenu", "Model Library"), self._showModelBrowser)
+        self.addMenuItem(i18n_catalog.i18nc("@item:inmenu", "My Model"), self._showModelBrowser)
+        self.addMenuItem(i18n_catalog.i18nc("@item:inmenu", "My Gcode"), self._showModelBrowser)
+        self.addMenuItem(i18n_catalog.i18nc("@item:inmenu", "Upload Model"), None)
+        self.addMenuItem(i18n_catalog.i18nc("@item:inmenu", "Settings"), self._showSettingDlg)
 
         self._utils = CrealityCloudUtils.getInstance()
         self._modelBrowserDialog = None
         self._pageSize = 28
         self._listType = 2
+        self._settingDlg = None
         CuraApplication.getInstance().applicationShuttingDown.connect(self.clearTmpfiles)
 
     def _showModelBrowser(self) -> None:
@@ -34,6 +39,14 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         if self._modelBrowserDialog:
             self._modelBrowserDialog.show()
             self.loadCategoryListResult()
+    
+    def _showSettingDlg(self) -> None:
+        if not self._settingDlg:
+            plugin_dir_path = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
+            path = os.path.join(plugin_dir_path, "qml/Setting.qml")
+            self._settingDlg = CuraApplication.getInstance().createQmlComponent(path)
+        if self._settingDlg:
+            self._settingDlg.show()
 
     @pyqtSlot(int)
     def loadCategoryListResult(self, type: int = 2) -> None:

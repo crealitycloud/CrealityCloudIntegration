@@ -81,8 +81,8 @@ Window {
 
             CloudUtils.saveUrl(env)
             CloudUtils.autoSetUrl()
-            pluginRootWindow.init()
-            pluginRootWindow.settingWindow.close()
+            //pluginRootWindow.init()
+            close();//pluginRootWindow.settingWindow.close()
         }
     }
 

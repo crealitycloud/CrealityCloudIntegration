@@ -542,6 +542,7 @@ Item {
                     }
                     CloudUtils.saveUrl(env)
                     CloudUtils.autoSetUrl()
+                    CloudAPI.api_url = CloudUtils.getCloudUrl()
                 }
             }
 
@@ -708,6 +709,8 @@ Item {
     Item {
         id: qrItem
         anchors.fill: parent
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
         z: 2
         visible: false
 
@@ -837,7 +840,7 @@ Item {
             width: 170
             height: 170
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 100
+            anchors.bottomMargin: 80
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.horizontalCenterOffset: 0
             Behavior on anchors.horizontalCenterOffset {PropertyAnimation {duration: 300} }

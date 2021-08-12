@@ -10,15 +10,13 @@ import "../js/Validator.js" as Validator
 Item {
     id: sendViewRoot
     anchors.fill: parent
-    width: 440
-    height: 540
 
     property var v: new Validator.Validator()
 
     TextField {
         id: fileNameField
-        x: 125
-        y: 140
+        x: 205
+        y: 39
         width: 274
         height: 23
         text: CloudUtils.defaultFileName()
@@ -26,8 +24,8 @@ Item {
 
     Text {
         id: text_1
-        x: 57
-        y: 144
+        x: 137
+        y: 43
         text: catalog.i18nc("@label", "File Name")
         font.family: "Tahoma"
         font.pixelSize: 12
@@ -35,8 +33,8 @@ Item {
 
     Button {
         id: logoutBt
-        x: 59
-        y: 450
+        x: 139
+        y: 248
         width: 68
         height: 35
         text: catalog.i18nc("@action:button", "Logout")
@@ -48,8 +46,8 @@ Item {
 
     Button {
         id: uploadBt
-        x: 331
-        y: 450
+        x: 411
+        y: 248
         width: 68
         height: 35
         text: catalog.i18nc("@action:button", "Upload")
@@ -74,8 +72,8 @@ Item {
 
     ProgressBar {
         id: progressBar
-        x: 59
-        y: 352
+        x: 139
+        y: 251
         width: 340
         height: 15
         minimumValue: 0
@@ -99,8 +97,8 @@ Item {
 
     Text {
         id: progressText
-        x: 81
-        y: 321
+        x: 161
+        y: 220
         width: 297
         height: 25
         visible: false
@@ -112,8 +110,8 @@ Item {
 
     AnimatedImage {
         id: statusImg
-        x: 170
-        y: 169
+        x: 250
+        y: 68
         width: 100
         height: 100
         fillMode: Image.PreserveAspectFit
