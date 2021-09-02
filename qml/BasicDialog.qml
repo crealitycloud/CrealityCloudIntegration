@@ -10,7 +10,7 @@ Window {
     property string title: ""
     property string titleBackground:  "#42BDD8"
     property var titleIcon: ""
-    property var closeIcon: ""
+    property var closeIcon: "../res/btn_close_n.png"
     property var titleHeight: 30
     property alias btnEnabled: closeButton.enabled
 
@@ -78,8 +78,8 @@ Window {
             anchors.right: parent.right
             onClicked: {
                 //console.log("close button clicked.");
-                //eo_askDialog.visible = false;
-                eo_askDialog.close();
+                eo_askDialog.visible = false;
+                //eo_askDialog.close();
 				dialogClosed()
             }
             contentItem: Item
@@ -106,7 +106,7 @@ Window {
     {
     	id: mainLayout
         anchors.fill: parent
-		color: "transparent"
+		color: "white"//"transparent"
         opacity: 1      
     }
     DropShadow {

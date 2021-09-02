@@ -63,7 +63,7 @@ class CrealityCloudUtils(QObject):
         self._localEnv = "https://model-admin.crealitygroup.com"
         self._overseaEnv = "https://model-admin2.creality.com"
         self._cloudUrl = ""
-        self._filePath = ""
+        self._filePath = ""# path of saved gcode file
         self._gzipFilePath = ""
         self._osVersion = QSysInfo.productType() + " " + QSysInfo.productVersion()
         self._qnam = QNetworkAccessManager()
@@ -74,22 +74,36 @@ class CrealityCloudUtils(QObject):
                             "secretAccessKey": "", "sessionToken": "", "lifeTime": "",
                             "expiredTime": ""}  # type: Dict[str, str]
         self._ossKey = ""
-        self._appDataFolder = Resources.getStoragePath(Resources.Resources, "CrealityCloud")#os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "CrealityCloud")
+        self._appDataFolder = Resources.getStoragePath(Resources.Resources, "CrealityCloud")
         self._tokenFile = os.path.join(self._appDataFolder, "token")
         self._urlFile = os.path.join(self._appDataFolder, "cloudurl")
-        self.modelFilePath = os.path.join(self._appDataFolder, "models")
-        self._isDownloading = False
         self._defaultFileName = ""
-        self._fileName = ""
+        self._fileName = ""# gcode file name
+
+        self._isLogin = False
+        self.modelGcodeDir = os.path.join(self._appDataFolder, "model_gcode")
+        self._downloadType = 0 # 1 and 2: stl, 3: gcode
+        self._isDownloading = False
         self._downfileCount = 0
         self._importfileCount = 0
+        self._uploadFileList = []
+        self._uploadFileCounts = 0
+        self._filekeyList = []
+
         self.autoSetUrl()
+        #self.loadToken()
 
     saveGCodeStarted = pyqtSignal(str)
     updateProgressText = pyqtSignal(str)
     updateProgress = pyqtSignal(float)
     updateStatus = pyqtSignal(str)
+
     downloadingStateChanged = pyqtSignal()
+
+    saveStlEnd = pyqtSignal(list)
+    createModelsStarted = pyqtSignal()
+
+    loginSuccess = pyqtSignal(int, str, str, str)
 
     @pyqtSlot(result=str)
     def getOsVersion(self) -> str:
@@ -160,6 +174,14 @@ class CrealityCloudUtils(QObject):
         file.close()
         return env
 
+    @pyqtSlot(bool)
+    def setLogin(self, flag=bool) -> None:
+        self._isLogin = flag
+
+    @pyqtSlot(result=bool)
+    def getLogin(self) -> bool:
+        return self._isLogin
+
     @pyqtSlot(result=str)
     def getUserId(self) -> str:
         return self._userInfo["userId"]
@@ -210,7 +232,7 @@ class CrealityCloudUtils(QObject):
             self.updateStatus.emit("bad")
 
     def _onCompressFileJobFinished(self, job: Job) -> None:
-        self.uploadOss()
+        self.uploadOss(1, '')
 
     def _onCompressFileJobProgress(self, job: Job, progress: float) -> None:
         self.updateProgress.emit(progress)
@@ -286,25 +308,46 @@ class CrealityCloudUtils(QObject):
             self._bucketInfo["expiredTime"] = response["result"]["aliyunInfo"]["expiredTime"]
         else:
             raise Exception("oss auth api error: "+json.dumps(response))
-        
-    def uploadOss(self) -> None:
-        self.updatedProgressTextSlot(catalog.i18nc("@info:status", "3/4 Uploading file..."))
-        self.getOssAuth()
-        self._ossKey = self._bucketInfo["prefixPath"] + "/" + \
-            self.getFileMd5(self._gzipFilePath) + ".gcode.gz"
+    
+    def setOssKey(self, key: str) -> None:
+        self._ossKey = key
+    
+    def uploadOss(self, type: int, filename: str) -> None:
+        obj_file = ''
+        if type == 1:
+            self.updatedProgressTextSlot(catalog.i18nc("@info:status", "3/4 Uploading file..."))
+            self.getOssAuth()
+            obj_file = self._gzipFilePath
+            self._ossKey = self._bucketInfo["prefixPath"] + "/" + \
+                self.getFileMd5(obj_file) + ".gcode.gz"          
+        elif type == 2:
+            obj_file = filename           
+            self.setOssKey(self.getFileKey(self.getFileMd5(obj_file), 0))
+            self._uploadFileList.append(obj_file)
+            self._filekeyList.append(self._ossKey)
         Logger.log("d", self._ossKey)
+
         try:
-            job = UploadFileJob(self._bucketInfo, self._ossKey, self._gzipFilePath)
-            job.progress.connect(self._onCompressFileJobProgress)
+            job = UploadFileJob(self._bucketInfo, self._ossKey, obj_file)
+            job.setType(type)
+            if type == 1:
+                job.progress.connect(self._onUploadFileJobProgress)
             job.finished.connect(self._onUploadFileJobFinished)
             job.start()
         except Exception as e:
             Logger.log(
                 "e", "oss upload faild")
-            self.updateStatus.emit("bad")
+            if type == 1:
+                self.updateStatus.emit("bad")
 
     def _onUploadFileJobFinished(self, job: Job) -> None:
-        self.commitFile()
+        if job.getType() == 1:
+            self.commitFile()
+        elif job.getType() == 2:
+            self._uploadFileCounts += 1
+            if self._uploadFileCounts ==  len(self._uploadFileList):
+                self.createModelsStarted.emit()
+                self._uploadFileCounts = 0
 
     def _onUploadFileJobProgress(self, job: Job, progress: float) -> None:
         self.updateProgress.emit(progress)
@@ -403,12 +446,7 @@ class CrealityCloudUtils(QObject):
         response = requests.post(url, data=json.dumps({"type": type}), headers=self.getModelHeaders()).text
         return response
     
-    def getPageModelLibraryList(self, page: int, pageSize: int, listType: int, categoryId: int) -> str:
-        url = self._cloudUrl + "/api/cxy/model/modelGroupList"#self._testEnv
-        response = requests.post(url, 
-                    data=json.dumps({"page": page, "pageSize": pageSize, "listType": listType, "categoryId": categoryId}), 
-                    headers=self.getModelHeaders()).text
-        return response
+    
 
     def getModelGroupDetailInfo(self, page: int, pageSize: int, groupId: str) -> str:
         url = self._cloudUrl + "/api/cxy/v2/model/modelList"#self._testEnv
@@ -417,10 +455,11 @@ class CrealityCloudUtils(QObject):
                     headers=self.getModelHeaders()).text
         return response
 
-    def downloadModel(self, urls: List[str], filepaths: List[str]) -> bool:
+    def downloadModel(self, downType: int, urls: List[str], filepaths: List[str]) -> bool:
+        self._downloadType = downType
         self._isDownloading = True
         self.downloadingStateChanged.emit()
-        job = DownloadModelJob(urls, filepaths)
+        job = DownloadJob(urls, filepaths)
         job.finished.connect(self._DownloadModelJobFinished)
         job.start()
     
@@ -430,11 +469,26 @@ class CrealityCloudUtils(QObject):
         CuraApplication.getInstance().fileCompleted.connect(self._showImportFileFinished)
         self._downfileCount = 0
         self._importfileCount = 0
-        for stlfile in filenames:           
-            if os.path.exists(stlfile):
-                #print("it has downloaded file:%s"%stlfile)
+        for downloadedFile in filenames:
+            if os.path.exists(downloadedFile):
+                #print("it has downloaded file:%s"%downloadedFile)
                 self._downfileCount += 1
-                CuraApplication.getInstance().readLocalFile(QUrl().fromLocalFile(stlfile))#
+
+                if(self._downloadType == 3):#gcode
+                    try:
+                        extractedFile = os.path.splitext(downloadedFile)[0] + '.gcode'
+                        print("extratedFilename:",extractedFile)
+                        job = ExtractFileJob(downloadedFile, extractedFile)
+                        job.finished.connect(self._onExtractFileJobFinished)
+                        job.start()
+                    except Exception as e:
+                        Logger.log("e", "file extract failed")                        
+                else:#stl
+                    CuraApplication.getInstance().readLocalFile(QUrl().fromLocalFile(downloadedFile), "open_as_model")
+    
+    def _onExtractFileJobFinished(self, job: Job) -> None:
+        file = job.getFileName()
+        CuraApplication.getInstance().readLocalFile(QUrl().fromLocalFile(file))
     
     def _showImportFileFinished(self, filename: str) -> None:
         #Logger.log("i", "------------import file:%s success!"%filename)
@@ -456,7 +510,73 @@ class CrealityCloudUtils(QObject):
                     headers=self.getModelHeaders()).text
         return response
 
-class DownloadModelJob(Job):
+    def getPageModelLibraryList(self, page: int, pageSize: int, listType: int, categoryId: int) -> str:
+        url = self._cloudUrl + "/api/cxy/model/modelGroupList"#self._testEnv
+        response = ""
+        if listType == 2:
+            response = requests.post(url, 
+                        data=json.dumps({"page": page, "pageSize": pageSize, "listType": listType, "categoryId": categoryId}), 
+                        headers=self.getModelHeaders()).text
+        elif listType == 7:
+            response = requests.post(url, 
+                        data=json.dumps({"page": page, "pageSize": pageSize, "listType": listType}), 
+                        headers=self.getCommonHeaders()).text
+        return response
+
+    def getModelGDeleteRes(self, modelGid: str) -> str:
+        url = self._cloudUrl + "/api/cxy/model/modelGroupDelete"#self._testEnv
+        response = requests.post(url, 
+                    data=json.dumps({"id": modelGid}), 
+                    headers=self.getCommonHeaders()).text
+        return response
+
+    def getGcodeListRes(self, page: int, pageSize: int) -> str:
+        url = self._cloudUrl + "/api/cxy/v2/gcode/ownerList"#self._testEnv
+        response = requests.post(url, 
+                    data=json.dumps({"page": page, "pageSize": pageSize, "isUpload": True}),
+                    headers=self.getCommonHeaders()).text
+        return response
+    
+    def getGcodeDelRes(self, id: str) -> str:
+        url = self._cloudUrl + "/api/cxy/v2/gcode/deleteGcode"#self._testEnv
+        response = requests.post(url, 
+                    data=json.dumps({"id": id}),
+                    headers=self.getCommonHeaders()).text
+        return response
+
+    def getFileKey(self, md5: str, fileType: int) -> str:
+        url = self._cloudUrl + "/api/cxy/common/filePreUpload"#self._testEnv
+        response = requests.post(url, 
+                    data=json.dumps({"md5s": md5, "fileType": fileType}),
+                    headers=self.getCommonHeaders()).text
+        response = json.loads(response)
+        if (response["code"] == 0):
+            return response["result"]["list"][0]["fileKey"]
+        else:
+            raise Exception("get filekey error: "+json.dumps(response))
+
+    def getModelGroupCreateRes(self, categoryId:int, groupName:str, groupDesc:str, bShare:bool, modelType:int, license:str, bIsOriginal:bool) -> str:
+        url = self._cloudUrl + "/api/cxy/model/modelGroupCreate"#self._testEnv       
+        modelList = []
+        length = len(self._filekeyList)
+        for i in range(length):
+            itemDict = {
+                "fileKey":self._filekeyList[i], "fileName":os.path.basename(self._uploadFileList[i]), "fileSize":os.path.getsize(self._uploadFileList[i])
+            }
+            modelList.append(itemDict)
+
+        contentDict = {
+            "groupItem":{"categoryId":categoryId, "groupName":groupName, "groupDesc":groupDesc, "share":bShare, "type":modelType, "license":license, "isOriginal":bIsOriginal},
+            "modelList": modelList
+        }
+
+        response = requests.post(url, data=json.dumps(contentDict), headers=self.getCommonHeaders()).text
+        self._filekeyList.clear()
+        self._uploadFileList.clear()
+        return response
+
+
+class DownloadJob(Job):
     def __init__(self, urls: List[str], filepaths: List[str]):
         super().__init__()
         self._message = None
@@ -531,8 +651,15 @@ class UploadFileJob(Job):
         self._ossKey = ossKey
         self._uploadFilePath = uploadFilePath
         self._message = None
+        self._type = 1
         self.progress.connect(self._onProgress)
         self.finished.connect(self._onFinished)
+
+    def setType(self, type: int) -> None:
+        self._type = type
+
+    def getType(self) -> int:
+        return self._type
 
     def _onFinished(self, job: Job) -> None:
         if self == job and self._message is not None:
@@ -572,3 +699,32 @@ class UploadFileJob(Job):
         # Check integrity
         # with open(self._uploadFilePath, 'rb') as fileobj:
         #     assert bucket.get_object(self._ossKey).read() == fileobj.read()
+
+
+class ExtractFileJob(Job):
+    def __init__(self, inputFilePath: str, outputFilePath: str):
+        super().__init__()
+        self._inputFilePath = inputFilePath
+        self._outputFilePath = outputFilePath
+        self._message = None
+        self.progress.connect(self._onProgress)
+        self.finished.connect(self._onFinished)
+
+    def getFileName(self) -> str:
+        return self._outputFilePath
+
+    def _onFinished(self, job: Job) -> None:
+        if self == job and self._message is not None:
+            self._message.hide()
+            self._message = None
+
+    def _onProgress(self, job: Job, amount: float) -> None:
+        if self == job and self._message:
+            self._message.setProgress(amount)
+
+    def run(self) -> None:
+        Job.yieldThread()
+        with gzip.GzipFile(self._inputFilePath, 'rb') as inF:
+            with open(self._outputFilePath, 'wb') as outF:
+                s = inF.read()
+                outF.write(s)

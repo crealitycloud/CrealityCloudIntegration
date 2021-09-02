@@ -17,6 +17,7 @@ Item {
     property var btnAvtarImage: ""
     property var modelGroupId: ""
     property var modelCount: 0
+    property alias btnDelVis: idBtnDel.visible
 
     property alias text: propertyButton.text
     property bool btnEnabled:true
@@ -34,6 +35,7 @@ Item {
 
     signal sigButtonClicked(var id, var name, var count, var author, var avtar)
     signal sigButtonDownClicked(var groupid, var count)
+    signal sigBtnDelClicked(var groupid)
 
     Button {
         id : propertyButton
@@ -76,7 +78,9 @@ Item {
                             img_src: btnAvtarImage
                         }
                         Label{
-                            width: propertyButton.width - idBtnImport.width - idAvtarImage.width -30
+                            width: idBtnDel.visible == true ? 
+                                    propertyButton.width - idAvtarImage.width - idBtnImport.width - idBtnDel.width - 30 :
+                                    propertyButton.width - idAvtarImage.width - idBtnImport.width - 30
                             height: 11
                             clip :true
                             verticalAlignment: Text.AlignVCenter
@@ -96,6 +100,18 @@ Item {
                             onClicked:
                             {	
                                 sigButtonDownClicked(modelGroupId, modelCount)
+                            }
+                        }
+                        BasicSkinButton{
+                            id: idBtnDel
+                            width: 20; height: 22
+                            imgW:width-2; imgH:height-2;
+                            tipText: catalog.i18nc("@Tip:Button", "Delete all")//删除全部
+                            btnImgUrl: "../res/btn_del.png"
+                            visible: false
+                            onClicked:
+                            {	
+                                sigBtnDelClicked(modelGroupId); console.log("del modelGroup")
                             }
                         }
                     }
