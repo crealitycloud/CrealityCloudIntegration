@@ -4,15 +4,18 @@ import QtQuick.Controls 1.4 as T
 import QtQuick.Layouts 1.0
 import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.1
+import UM 1.1 as UM
 
 BasicDialog{
     id: idDialog
     width: 600
     height: 428
     titleHeight : 30
-    title: qsTr("Upload Model")
-    property var saveWay: 1;
+    UM.I18nCatalog { id: catalog; name: "uranium"}
 
+    title: catalog.i18nc("@title:window", "Upload Model")
+
+    property var saveWay: 1;
     property var categoryId:0
     property var groupName:""
     property var groupDesc:""
@@ -96,7 +99,7 @@ BasicDialog{
                 {
                     id:idText
                     height:logoImage.height
-                    text: qsTr("Creality Cloud")
+                    text: catalog.i18nc("@title:window", "Creality Cloud")
                     font.pixelSize:20 
                     verticalAlignment: Qt.AlignVCenter
                     horizontalAlignment: Qt.AlignLeft
@@ -131,7 +134,7 @@ BasicDialog{
                 id: idGroupNameLabel
                 width:100
                 height:28
-                text: qsTr("Group Name:")
+                text: catalog.i18nc("@title:Label", "Group Name:")
                 font.pixelSize: 12
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
@@ -139,8 +142,7 @@ BasicDialog{
             TextField {
                 id: idModelGroupInput
                 font.pixelSize:12
-                placeholderText: qsTr("Please enter the model group name")
-                //baseValidator:RegExpValidator { regExp: /^\S{100}$/ }
+                placeholderText: catalog.i18nc("@tip:textfield", "Please enter the model group name")
                 width: grid_wrapper.width-idGroupNameLabel.width-110
                 height : 28
                 text: ""
@@ -151,7 +153,7 @@ BasicDialog{
                 id: idGroupDescLabel
                 width:100
                 height:28
-                text: qsTr("Description:")
+                text: catalog.i18nc("@title:Label", "Description:")
                 font.pixelSize: 12
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
@@ -165,7 +167,7 @@ BasicDialog{
                     width: idScrollView.width
                     height:idScrollView.height
                     wrapMode: TextEdit.Wrap
-                    placeholderText: qsTr("Please enter the model group description")
+                    placeholderText: catalog.i18nc("@tip:textfield", "Please enter the model group description")
                     text: ""
                     font.pixelSize: 12
                     font.family: "Source Han Sans CN Normal"
@@ -182,7 +184,7 @@ BasicDialog{
                 id: idUploadWay
                 width:100
                 height:28
-                text: qsTr("Upload Way:")
+                text: catalog.i18nc("@title:Label", "Upload Way:")
                 font.pixelSize: 12
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
@@ -191,14 +193,14 @@ BasicDialog{
             RadioButton {
                 id: wayRadio1
                 ButtonGroup.group: radioGroup
-                text: "separate"
+                text: catalog.i18nc("@title:Radio", "separate")
                 checked: true
                 anchors.verticalCenter: parent.verticalCenter
             }
             RadioButton {
                 id: wayRadio2
                 ButtonGroup.group: radioGroup
-                text: "combination"
+                text: catalog.i18nc("@title:Radio", "combination")
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -207,7 +209,7 @@ BasicDialog{
                 id: idGroupType
                 width:100
                 height:28
-                text: qsTr("Group Type:")
+                text: catalog.i18nc("@title:Label", "Group Type:")
                 font.pixelSize: 12
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
@@ -228,7 +230,7 @@ BasicDialog{
                 id: idModelType
                 width:100
                 height:28
-                text: qsTr("Model Type:")
+                text: catalog.i18nc("@title:Label", "Model Type:")
                 font.pixelSize: 12
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
@@ -241,8 +243,10 @@ BasicDialog{
                 currentIndex: 0
                 model: ListModel {
                     id: idModelTypeModel
-                    ListElement{key: 1; modelData: qsTr("Normal Model")}
-                    ListElement{key: 2; modelData: qsTr("3D Photo Model")}
+                }
+                Component.onCompleted: {
+                    idModelTypeModel.append({key: 1, modelData: catalog.i18nc("@title:Label", "Normal Model")})
+                    idModelTypeModel.append({key: 2, modelData: catalog.i18nc("@title:Label", "3D Photo Model")})
                 }
             }
         }
@@ -256,7 +260,7 @@ BasicDialog{
                 id :idOriginalCheckBox
                 width: 100
                 height: 18
-                text: qsTr("Original")
+                text: catalog.i18nc("@title:checkbox", "Original")
                 visible: true
                 checked: false
                 anchors.verticalCenter: parent.verticalCenter
@@ -277,7 +281,7 @@ BasicDialog{
                 anchors.verticalCenter: parent.verticalCenter
                 width: 100
                 height: 18
-                text: qsTr("Share")
+                text: catalog.i18nc("@title:checkbox", "Share")
                 visible: true
             }
         }
@@ -289,7 +293,7 @@ BasicDialog{
                 id: idLicenseLabel
                 width:100-4
                 height:28
-                text: qsTr("License Type:")
+                text: catalog.i18nc("@title:Label", "License Type:")
                 font.pixelSize: 12
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
@@ -359,7 +363,7 @@ BasicDialog{
             btnRadius:3
             btnBorderW:0
             defaultBtnBgColor: "#B4B4B4"
-            text: qsTr("Upload")
+            text: catalog.i18nc("@text:btn", "Upload")
             enabled: (idModelGroupInput.text != "")&&(idDescText.text != "")
             onSigButtonClicked:
             {
@@ -399,7 +403,7 @@ BasicDialog{
             btnRadius:3
             btnBorderW:0
             defaultBtnBgColor: "#B4B4B4"
-            text: qsTr("Cancel")
+            text: catalog.i18nc("@text:btn", "Cancel")
             onSigButtonClicked:
             {
                 idDialog.close();
@@ -466,7 +470,7 @@ BasicDialog{
             {
                 id:idFinishText
                 height:logoImage.sourceSize.height
-                text: bRes ? qsTr("Uploaded Successfully") : ""
+                text: bRes ? catalog.i18nc("@title:Label", "Uploaded Successfully!") : catalog.i18nc("@title:Label", "Upload failed!")
                 font.pixelSize:14
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft

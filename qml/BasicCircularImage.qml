@@ -14,7 +14,7 @@ Rectangle {
         fillMode: Image.PreserveAspectFit
         visible: false
         anchors.fill: parent
-        source: img_src//
+        source: img_src
         sourceSize: Qt.size(parent.size, parent.size)
         antialiasing: true
     }

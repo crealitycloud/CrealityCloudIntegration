@@ -14,8 +14,8 @@ BasicDialog {
     titleHeight: 30
     title: catalog.i18nc("@title:window", "userinfo")
     property var userImg: ""
-    property var userName: "小李"
-    property var userId: "ID: 7356441234"
+    property var userName: "unknow"
+    property var userId: "ID: 0000011111"
 
     signal sigLogout();
     function showPersonInfo(tuserImg, tuserName, tuserId)
@@ -52,7 +52,7 @@ BasicDialog {
         BasicButton{
             id: idLoginBtn
             width: 140; height: 36
-            text: "退出登录"
+            text: catalog.i18nc("@text:btn", "Log out")
             btnTextColor: "white"
             defaultBtnBgColor : "#B4B4B4"
             anchors.horizontalCenter: parent.horizontalCenter
@@ -61,10 +61,8 @@ BasicDialog {
             btnRadius: 3
             btnBorderW: 0
             onSigButtonClicked: {
-                console.log("login out")
                 close();
                 sigLogout();
-                
             }
         }
     }

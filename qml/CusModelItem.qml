@@ -5,7 +5,6 @@ import QtQuick.Layouts 1.0
 import UM 1.1 as UM
 
 Item{
-    //property var modelimage: ""
     property var modelname: ""
     property var modelid: ""
     property var keystr: 0// number starts with 1

@@ -13,10 +13,7 @@ i18n_catalog = i18nCatalog("uranium")
 import os
 from cura.CuraApplication import CuraApplication
 
-from UM.FileHandler.FileHandler import FileHandler
-from UM.OutputDevice.OutputDeviceManager import OutputDeviceManager
 from UM.Message import Message
-from UM.Scene.SceneNode import SceneNode
 from UM.Scene.Selection import Selection
 import UM.Qt.QtApplication
 from UM.FileHandler.WriteFileJob import WriteFileJob
@@ -49,7 +46,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     def _createModelDialog(self) -> None:
         if not self._modelBrowserDialog:
             plugin_dir_path = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
-            path = os.path.join(plugin_dir_path, "qml/ModelLibraryInfoDlg.qml")
+            path = os.path.join(plugin_dir_path, "qml/ModelLibraryMainPage.qml")
             self._modelBrowserDialog = CuraApplication.getInstance().createQmlComponent(path, {"ManageModelBrowser": self})
     
     def _showModelLibrary(self) -> None:
@@ -63,9 +60,9 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         if self._loginDlg:
             self._loginDlg.setProperty("nextPage", 0)
 
-    def _showMyModelDlg(self) -> None:
-        self._createModelDialog()
+    def _showMyModelDlg(self) -> None:       
         if self._utils.getLogin():
+            self._createModelDialog()
             if self._modelBrowserDialog:
                 self._modelBrowserDialog.setProperty("categoryCurIndex", self._category[1]-1)
                 self._modelBrowserDialog.setProperty("selCategory", self._category[1])
@@ -75,9 +72,9 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         else:
             self._showLoginDlg(1)
             
-    def _showMyGcodeDlg(self) -> None:
-        self._createModelDialog()
+    def _showMyGcodeDlg(self) -> None:       
         if self._utils.getLogin():
+            self._createModelDialog()
             if self._modelBrowserDialog:
                 self._modelBrowserDialog.setProperty("categoryCurIndex", self._category[2]-1)
                 self._modelBrowserDialog.setProperty("selCategory", self._category[2])
@@ -95,14 +92,14 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
                 haveModel = True
                 break
         if haveModel is not True:
-            tipDlg = Message(i18n_catalog.i18nc("@info:status","Please import the model first"), 
-                title = i18n_catalog.i18nc("@info:title", "tip"))
+            tipDlg = Message(i18n_catalog.i18nc("@info:status","Please import the model first!"), 
+                title = i18n_catalog.i18nc("@Tip:title", "Tip"))
             tipDlg.show()
             return
 
         if not Selection.hasSelection():
-            tipDlg = Message(i18n_catalog.i18nc("@info:status","Please select the model first"), 
-                title = i18n_catalog.i18nc("@info:title", "tip"))
+            tipDlg = Message(i18n_catalog.i18nc("@info:status","Please select the model first!"), 
+                title = i18n_catalog.i18nc("@Tip:title", "Tip"))
             tipDlg.show()
             return
 
@@ -130,18 +127,23 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             self._settingDlg = CuraApplication.getInstance().createQmlComponent(path)
         if self._settingDlg:
             self._settingDlg.show()
+    
+    @pyqtSlot(result="QStringList")
+    def getCategoryText(self) -> List[str]:
+        categoryText = []
+        categoryText.append(i18n_catalog.i18nc("@item:inmenu", "Model Library"))
+        categoryText.append(i18n_catalog.i18nc("@item:inmenu", "My Model"))
+        categoryText.append(i18n_catalog.i18nc("@item:inmenu", "My Gcode"))
+        return categoryText
 
     def _showLoginDlg(self, type:int) -> None:
         if not self._loginDlg:
-            plugin_dir_path = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
-            path = os.path.join(plugin_dir_path, "qml/Login.qml")
-            self._loginDlg = CuraApplication.getInstance().createQmlComponent(path)
+            self._loginDlg = self._utils.getLoginDlg()
         if self._loginDlg:
             self._loginDlg.setProperty("nextPage", type)
             self._loginDlg.show()
 
     def loginRes(self, type: int, userimg: str, username: str, userid: str) -> None:
-        print("trigger type:",type)
         if type == 1:
             self._showMyModelDlg()           
             self._modelBrowserDialog.showuserInfo(userimg, username)
@@ -150,7 +152,6 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             self._modelBrowserDialog.showuserInfo(userimg, username)
         elif type == 3:
             self._showUploadModelDlg()
-            self._modelBrowserDialog.showuserInfo(userimg, username)
 
     @pyqtSlot(int)
     def loadCategoryListResult(self, type: int = 2) -> None:
@@ -179,7 +180,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         if selCategory == 1:
             strjson = self._utils.getPageModelLibraryList(1, self._pageSize, self._listType[0], id)
         elif selCategory == 2:
-            strjson = self._utils.getPageModelLibraryList(1, self._pageSize, self._listType[1], id)
+            strjson = self._utils.getPageModelLibraryList(1, self._pageSize, self._listType[1], -1)
         response = json.loads(strjson)
         totalPage = 0
         if (response["code"] == 0):
@@ -259,7 +260,6 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
                     totalPage += 1
                 self._modelBrowserDialog.setProperty("sourceType", 2)
                 self._modelBrowserDialog.setProperty("currentModelLibraryPage", page)
-                print("model current page:%d"%page)
                 self._modelBrowserDialog.setProperty("totalPage", totalPage)
                 self._modelBrowserDialog.showSearchPage()#
                 self._modelBrowserDialog.showNofoundTip(False)
@@ -277,9 +277,15 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         strjson = self._utils.getPageModelLibraryList(page, self._pageSize, self._listType[1], -1)
         response = json.loads(strjson)
         if (response["code"] == 0):
+            if page == 1:
+                totalPage = 1
+                totalPage = self.getTotalPage(2, -1, self._pageSize)
+                self._modelBrowserDialog.setProperty("currentModelLibraryPage", page)
+                self._modelBrowserDialog.setProperty("totalPage", totalPage)
+
             self._modelBrowserDialog.setModelLibraryList(strjson, additionFlag)
         else:
-            self._modelBrowserDialog.showMessage(response["msg"])
+            self._modelBrowserDialog.showMessage("mymodel:"+response["msg"])
         
     @pyqtSlot(str)
     def deleteModelGroup(self, modelGid: str) -> None:
@@ -303,12 +309,11 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
                 if totalCount % pageSize != 0:
                     totalPage += 1
                 self._modelBrowserDialog.setProperty("curMyGcodePage", page)
-                print("gocde current page:%d"%page)
                 self._modelBrowserDialog.setProperty("totalPageMyGcode", totalPage)
 
             self._modelBrowserDialog.setMyGcodeList(strjson, additionFlag)
         else:
-            self._modelBrowserDialog.showMessage(response["msg"])
+            self._modelBrowserDialog.showMessage("mygcode:"+response["msg"])
 
     @pyqtSlot(str)
     def deleteGcode(self, gcodeId: str) -> None:

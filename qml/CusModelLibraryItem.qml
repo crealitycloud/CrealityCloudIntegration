@@ -57,7 +57,7 @@ Item {
                         smooth: true
                         cache: false
                         fillMode: Image.PreserveAspectFit
-                        source: btnModelImage//
+                        source: btnModelImage
                     }
                     
                     Label{
@@ -96,7 +96,6 @@ Item {
                             imgW:width-2; imgH:height-2;
                             tipText: catalog.i18nc("@Tip:Button", "Import all")
                             btnImgUrl: "../res/btn_download.png"
-                            //anchors.verticalCenter: parent.verticalCenter
                             onClicked:
                             {	
                                 sigButtonDownClicked(modelGroupId, modelCount)
@@ -106,12 +105,12 @@ Item {
                             id: idBtnDel
                             width: 20; height: 22
                             imgW:width-2; imgH:height-2;
-                            tipText: catalog.i18nc("@Tip:Button", "Delete all")//删除全部
+                            tipText: catalog.i18nc("@Tip:Button", "Delete all")
                             btnImgUrl: "../res/btn_del.png"
                             visible: false
                             onClicked:
                             {	
-                                sigBtnDelClicked(modelGroupId); console.log("del modelGroup")
+                                sigBtnDelClicked(modelGroupId);
                             }
                         }
                     }

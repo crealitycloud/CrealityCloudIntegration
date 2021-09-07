@@ -4,7 +4,6 @@ from PyQt5.QtCore import QObject
 from PyQt5.QtGui import *
 from PyQt5.QtNetwork import *
 from PyQt5.QtQml import *
-# from PyQt5.QtQuick import (QQuickView)
 
 from UM.Application import Application
 from UM.Logger import Logger
@@ -56,12 +55,11 @@ class CrealityCloudOutputDevice(OutputDevice):
             self._showLoginDlg()           
 
     def _createDialogue(self) -> QObject:
-        qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), "qml/Options.qml")
+        qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), "qml/UploadGcodeDlg.qml")
         component = Application.getInstance().createQmlComponent(qml_file)
         return component
 
     def slotshowUploadGcodeDlg(self, type: int) -> None:
-        print("trigger type:",type)
         if type == 4:
             if self.plugin_window is None:
                 self.plugin_window = self._createDialogue()
@@ -70,9 +68,7 @@ class CrealityCloudOutputDevice(OutputDevice):
 
     def _showLoginDlg(self) -> None:
         if not self._loginDlg:
-            plugin_dir_path = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
-            path = os.path.join(plugin_dir_path, "qml/Login.qml")
-            self._loginDlg = Application.getInstance().createQmlComponent(path)
+            self._loginDlg = self.utils.getLoginDlg()
         if self._loginDlg:
             self._loginDlg.setProperty("nextPage", 4)
             self._loginDlg.show()
@@ -113,11 +109,9 @@ class CrealityCloudOutputDevice(OutputDevice):
         if job.getResult():
             self.writeSuccess.emit(self)
             job.getStream().close()
-            self.utils.gzipFile()
-            
+            self.utils.gzipFile()           
         else:
             message = Message(catalog.i18nc("@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), lifetime = 0, title = catalog.i18nc("@info:title", "Warning"))
             message.show()
             self.writeError.emit(self)
             job.getStream().close()
-

@@ -77,7 +77,6 @@ Window {
             implicitWidth: 30
             anchors.right: parent.right
             onClicked: {
-                //console.log("close button clicked.");
                 eo_askDialog.visible = false;
                 //eo_askDialog.close();
 				dialogClosed()
@@ -106,7 +105,7 @@ Window {
     {
     	id: mainLayout
         anchors.fill: parent
-		color: "white"//"transparent"
+		color: "white"
         opacity: 1      
     }
     DropShadow {

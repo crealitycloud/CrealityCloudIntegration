@@ -31,7 +31,7 @@ importExtLib("oss2")
 from oss2 import SizedFileAdapter, determine_part_size, headers
 from oss2.models import PartInfo
 import oss2
-from PyQt5.QtCore import (QSysInfo, pyqtSignal, pyqtSlot, pyqtProperty, QObject, QStandardPaths, QUrl)
+from PyQt5.QtCore import (QSysInfo, pyqtSignal, pyqtSlot, pyqtProperty, QObject, QUrl)
 from PyQt5.QtNetwork import (QNetworkAccessManager)
 
 from UM.Job import Job
@@ -69,7 +69,7 @@ class CrealityCloudUtils(QObject):
         self._qnam = QNetworkAccessManager()
         self._qnam.finished.connect
         self._duid = self._generateDUID()
-        self._userInfo = {"token": "", "userId": ""} # type: Dict[str, str]
+        self._userInfo = {"token": "", "userId": "", "userImg":"", "userName":""} # type: Dict[str, str]
         self._bucketInfo = {"endpoint": "", "bucket": "", "prefixPath": "", "accessKeyId": "",
                             "secretAccessKey": "", "sessionToken": "", "lifeTime": "",
                             "expiredTime": ""}  # type: Dict[str, str]
@@ -81,6 +81,7 @@ class CrealityCloudUtils(QObject):
         self._fileName = ""# gcode file name
 
         self._isLogin = False
+        self._loginDlg = None
         self.modelGcodeDir = os.path.join(self._appDataFolder, "model_gcode")
         self._downloadType = 0 # 1 and 2: stl, 3: gcode
         self._isDownloading = False
@@ -91,7 +92,6 @@ class CrealityCloudUtils(QObject):
         self._filekeyList = []
 
         self.autoSetUrl()
-        #self.loadToken()
 
     saveGCodeStarted = pyqtSignal(str)
     updateProgressText = pyqtSignal(str)
@@ -138,10 +138,12 @@ class CrealityCloudUtils(QObject):
         # return macAddress
         return str(uuid.uuid1())[-12:]
 
-    @pyqtSlot(str, str)
-    def saveToken(self, token: str, userId: str) -> None:
+    @pyqtSlot(str, str, str, str)
+    def saveToken(self, token: str, userId: str, userImg: str, userName: str) -> None:
         self._userInfo["token"] = token
         self._userInfo["userId"] = userId
+        self._userInfo["userImg"] = userImg
+        self._userInfo["userName"] = userName
         os.makedirs(self._appDataFolder, exist_ok=True)
         file = open(os.path.join(self._appDataFolder, "token"), "w")
         file.write(json.dumps(self._userInfo))
@@ -182,15 +184,34 @@ class CrealityCloudUtils(QObject):
     def getLogin(self) -> bool:
         return self._isLogin
 
+    @pyqtSlot(result=QObject)
+    def getLoginDlg(self) -> QObject:
+        if not self._loginDlg:
+            plugin_dir_path = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
+            path = os.path.join(plugin_dir_path, "qml/Login.qml")
+            self._loginDlg = CuraApplication.getInstance().createQmlComponent(path)
+
+        return self._loginDlg
+
     @pyqtSlot(result=str)
     def getUserId(self) -> str:
         return self._userInfo["userId"]
+
+    @pyqtSlot(result=str)
+    def getUserImg(self) -> str:
+        return self._userInfo["userImg"]
+    
+    @pyqtSlot(result=str)
+    def getUserName(self) -> str:
+        return self._userInfo["userName"]
 
     @pyqtSlot()
     def clearToken(self) -> None:
         os.remove(self._tokenFile)
         self._userInfo["token"] = ""
         self._userInfo["userId"] = ""
+        self._userInfo["userImg"] = ""
+        self._userInfo["userName"] = ""
 
     @pyqtSlot(str)
     def qmlLog(self, text: str) -> None:
@@ -442,14 +463,12 @@ class CrealityCloudUtils(QObject):
         return headers
     
     def getCategoryListResult(self, type: int) -> str:
-        url = self._cloudUrl + "/api/cxy/category/categoryList"#self._testEnv
+        url = self._cloudUrl + "/api/cxy/category/categoryList"
         response = requests.post(url, data=json.dumps({"type": type}), headers=self.getModelHeaders()).text
         return response
     
-    
-
     def getModelGroupDetailInfo(self, page: int, pageSize: int, groupId: str) -> str:
-        url = self._cloudUrl + "/api/cxy/v2/model/modelList"#self._testEnv
+        url = self._cloudUrl + "/api/cxy/v2/model/modelList"
         response = requests.post(url, 
                     data=json.dumps({"page": page, "pageSize": pageSize, "groupId": groupId}), 
                     headers=self.getModelHeaders()).text
@@ -471,13 +490,11 @@ class CrealityCloudUtils(QObject):
         self._importfileCount = 0
         for downloadedFile in filenames:
             if os.path.exists(downloadedFile):
-                #print("it has downloaded file:%s"%downloadedFile)
                 self._downfileCount += 1
 
                 if(self._downloadType == 3):#gcode
                     try:
                         extractedFile = os.path.splitext(downloadedFile)[0] + '.gcode'
-                        print("extratedFilename:",extractedFile)
                         job = ExtractFileJob(downloadedFile, extractedFile)
                         job.finished.connect(self._onExtractFileJobFinished)
                         job.start()
@@ -491,27 +508,25 @@ class CrealityCloudUtils(QObject):
         CuraApplication.getInstance().readLocalFile(QUrl().fromLocalFile(file))
     
     def _showImportFileFinished(self, filename: str) -> None:
-        #Logger.log("i", "------------import file:%s success!"%filename)
         self._importfileCount += 1
         if self._importfileCount == self._downfileCount:
             CuraApplication.getInstance().fileCompleted.disconnect(self._showImportFileFinished)
             self._isDownloading = False
             self.downloadingStateChanged.emit()
-            #Logger.log("i", "All import complete.")
 
     @pyqtProperty(bool, notify=downloadingStateChanged)
     def getDownloadState(self) -> bool:
         return self._isDownloading
 
     def getModelSearchResult(self, page: int, pageSize: int, keyword: str) -> str:
-        url = self._cloudUrl + "/api/cxy/search/modelSearch"#self._testEnv
+        url = self._cloudUrl + "/api/cxy/search/modelSearch"
         response = requests.post(url, 
                     data=json.dumps({"page": page, "pageSize": pageSize, "keyword": keyword}), 
                     headers=self.getModelHeaders()).text
         return response
 
     def getPageModelLibraryList(self, page: int, pageSize: int, listType: int, categoryId: int) -> str:
-        url = self._cloudUrl + "/api/cxy/model/modelGroupList"#self._testEnv
+        url = self._cloudUrl + "/api/cxy/model/modelGroupList"
         response = ""
         if listType == 2:
             response = requests.post(url, 
@@ -524,28 +539,28 @@ class CrealityCloudUtils(QObject):
         return response
 
     def getModelGDeleteRes(self, modelGid: str) -> str:
-        url = self._cloudUrl + "/api/cxy/model/modelGroupDelete"#self._testEnv
+        url = self._cloudUrl + "/api/cxy/model/modelGroupDelete"
         response = requests.post(url, 
                     data=json.dumps({"id": modelGid}), 
                     headers=self.getCommonHeaders()).text
         return response
 
     def getGcodeListRes(self, page: int, pageSize: int) -> str:
-        url = self._cloudUrl + "/api/cxy/v2/gcode/ownerList"#self._testEnv
+        url = self._cloudUrl + "/api/cxy/v2/gcode/ownerList"
         response = requests.post(url, 
                     data=json.dumps({"page": page, "pageSize": pageSize, "isUpload": True}),
                     headers=self.getCommonHeaders()).text
         return response
     
     def getGcodeDelRes(self, id: str) -> str:
-        url = self._cloudUrl + "/api/cxy/v2/gcode/deleteGcode"#self._testEnv
+        url = self._cloudUrl + "/api/cxy/v2/gcode/deleteGcode"
         response = requests.post(url, 
                     data=json.dumps({"id": id}),
                     headers=self.getCommonHeaders()).text
         return response
 
     def getFileKey(self, md5: str, fileType: int) -> str:
-        url = self._cloudUrl + "/api/cxy/common/filePreUpload"#self._testEnv
+        url = self._cloudUrl + "/api/cxy/common/filePreUpload"
         response = requests.post(url, 
                     data=json.dumps({"md5s": md5, "fileType": fileType}),
                     headers=self.getCommonHeaders()).text
@@ -556,7 +571,7 @@ class CrealityCloudUtils(QObject):
             raise Exception("get filekey error: "+json.dumps(response))
 
     def getModelGroupCreateRes(self, categoryId:int, groupName:str, groupDesc:str, bShare:bool, modelType:int, license:str, bIsOriginal:bool) -> str:
-        url = self._cloudUrl + "/api/cxy/model/modelGroupCreate"#self._testEnv       
+        url = self._cloudUrl + "/api/cxy/model/modelGroupCreate"      
         modelList = []
         length = len(self._filekeyList)
         for i in range(length):

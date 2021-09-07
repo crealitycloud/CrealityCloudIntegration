@@ -1,10 +1,12 @@
 import QtQuick 2.2
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
+import UM 1.1 as UM
 
 Window {
     id: settingWindow
-    title: "Setting"
+    UM.I18nCatalog { id: catalog; name: "uranium"}
+    title: catalog.i18nc("@title:window", "Setting")
     modality: Qt.ApplicationModal
     width: 300
     height: 400
@@ -17,19 +19,11 @@ Window {
         anchors.topMargin: 40
         anchors.fill: parent
 
-        Text {
-            id: title
-            text: qsTr("Setting")
-            font.family: "Verdana"
-            font.bold: true
-            font.pixelSize: 23
-        }
-
         Row {
             id: row
             height: 40
-            anchors.top: title.bottom
-            anchors.topMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 0
             anchors.right: parent.right
             anchors.rightMargin: 40
             anchors.left: parent.left
@@ -38,7 +32,7 @@ Window {
 
             Text {
                 id: set1
-                text: qsTr("Server")
+                text: catalog.i18nc("@title:Label", "Server")
                 font.family: "Tahoma"
                 verticalAlignment: Text.AlignVCenter
                 height: parent.height
@@ -49,13 +43,13 @@ Window {
             RadioButton {
                 id: serverRadio1
                 exclusiveGroup: mos
-                text: "International"
+                text: catalog.i18nc("@text:ComboBox", "International")
                 height: parent.height
             }
             RadioButton {
                 id: serverRadio2
                 exclusiveGroup: mos
-                text: "China"
+                text: catalog.i18nc("@text:ComboBox", "China")
                 height: parent.height
             }
 
@@ -66,14 +60,14 @@ Window {
     Button {
         id: okBtn
         width: 80
-        text: "OK"
+        text: catalog.i18nc("@text:btn", "OK")
         anchors.right: parent.right
         anchors.rightMargin: 40
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
         onClicked: {
             var env = ""
-            if (mos.current.text === "International") {
+            if(serverRadio1.checked){
                 env = "release_oversea"
             }else {
                 env = "release_local"
@@ -81,8 +75,7 @@ Window {
 
             CloudUtils.saveUrl(env)
             CloudUtils.autoSetUrl()
-            //pluginRootWindow.init()
-            close();//pluginRootWindow.settingWindow.close()
+            close();
         }
     }
 

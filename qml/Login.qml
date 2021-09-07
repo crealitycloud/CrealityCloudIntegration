@@ -1,8 +1,6 @@
 import QtQuick 2.10
 import QtQuick.Controls 2.3
 import QtQuick.Dialogs 1.1
-//import QtQuick.Controls 1.4
-//import QtQuick.Templates 2.2 as T
 import QtQuick.Controls.Styles 1.4
 import UM 1.1 as UM
 import "../js/CloudAPI.js" as CloudAPI
@@ -48,7 +46,7 @@ BasicDialog {
         resetLink.anchors.topMargin = 6;
         loginButton.anchors.bottomMargin = 73;
         serverSetting.anchors.bottomMargin = 35;
-        signUpTip1.anchors.bottomMargin = 52;
+        signUpTip1.anchors.bottomMargin = 45;
     }
     function showBusy() {
         busyLayer.visible = true
@@ -63,8 +61,8 @@ BasicDialog {
         msgDialog.visible = true
     }
 
-    function saveToken(token, userId) {
-        CloudUtils.saveToken(token, userId)
+    function saveToken(token, userId, userImg, userName) {
+        CloudUtils.saveToken(token, userId, userImg, userName)
         pluginRootWindow.token = token
         pluginRootWindow.userId = userId
     }
@@ -90,7 +88,7 @@ BasicDialog {
         resetLink.anchors.topMargin = 10;
         loginButton.anchors.bottomMargin = 43;
         serverSetting.anchors.bottomMargin = 5;
-        signUpTip1.anchors.bottomMargin = 22;
+        signUpTip1.anchors.bottomMargin = 15;
     }
     function switchPhoneLogin() {
         loginType = "mobile"
@@ -107,7 +105,7 @@ BasicDialog {
         resetLink.anchors.topMargin = 10;
         loginButton.anchors.bottomMargin = 43;
         serverSetting.anchors.bottomMargin = 5;
-        signUpTip1.anchors.bottomMargin = 22;
+        signUpTip1.anchors.bottomMargin = 15;
     }
     function mobilePhoneLogin() {
         if(phoneLoginType === "quick")
@@ -193,19 +191,18 @@ BasicDialog {
     }
 
     function loginScuess(token, userId) {
-        pluginRootWindow.saveToken(token, userId)
+        
         CloudUtils.setLogin(true);
         CloudAPI.getUserInfo(token, userId, function(data) {              
             if (data["code"] === 0) {
                 userImg = data["result"]["userInfo"]["base"]["avatar"]
                 userName = data["result"]["userInfo"]["base"]["nickName"]
-                var userid = data["result"]["userInfo"]["base"]["userId"]
-                console.log("login success");
-                CloudUtils.qmlLog(userImg+userName+userid);
-                
+                //var userid = data["result"]["userInfo"]["base"]["userId"]                
                 pluginRootWindow.hide()
-                sigLoginSuccess(nextPage, userImg, userName, userId);//
-                sigLoginRes(userImg, userName, userId)
+                pluginRootWindow.saveToken(token, userId, userImg, userName)
+
+                sigLoginSuccess(nextPage, userImg, userName, userId);
+                sigLoginRes(userImg, userName, userId)                      
             }
         })
 
@@ -213,7 +210,7 @@ BasicDialog {
 
     MessageDialog {
         id: msgDialog
-        title: "Error"
+        title: catalog.i18nc("@Tip:title", "Error")
         icon: StandardIcon.Warning
         modality: Qt.ApplicationModal
         onAccepted: {
@@ -254,20 +251,6 @@ BasicDialog {
                 font.pixelSize: 20
                 font.weight: Font.Bold
             }
-
-            Text {
-                id: testLabel
-                anchors.left: logoText.right
-                anchors.leftMargin: 8
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#ffffff"
-                width: 40
-                height: 19
-                visible: CloudUtils.getEnv() === "test"
-                text: qsTr("test")
-                font.family: "Tahoma"
-                font.pixelSize: 12
-            }
         }
         //Separator
         Item {
@@ -307,7 +290,7 @@ BasicDialog {
                     BasicButton {
                         id: emailLoginLabel
                         width: 120; height: 24
-                        text: qsTr("Email Login")
+                        text: catalog.i18nc("@title:Label", "Email Login")
                         btnTextColor: btnSelected ? "#42BDD8": (hovered ? "#42BDD8" : "#C7C7C7")
                         btnSelected: false
                         defaultBtnBgColor : "transparent"
@@ -336,7 +319,7 @@ BasicDialog {
                     BasicButton {
                         id: mobilephoneLoginLabel
                         width: 166; height: 24
-                        text: qsTr("Mobile Phone Login")
+                        text: catalog.i18nc("@title:Label", "Mobile Phone Login")
                         btnTextColor: btnSelected ? "#42BDD8": (hovered ? "#42BDD8" : "#C7C7C7")
                         btnSelected: true
                         defaultBtnBgColor : "transparent"
@@ -365,7 +348,7 @@ BasicDialog {
                     BasicButton {
                         id: scanQrcodeLoginLabel
                         width: 166; height: 24
-                        text: qsTr("Scan Qrcode Login")
+                        text: catalog.i18nc("@title:Label", "Scan Qrcode Login")
                         btnTextColor: btnSelected ? "#42BDD8": (hovered ? "#42BDD8" : "#C7C7C7")
                         btnSelected: false
                         defaultBtnBgColor : "transparent"
@@ -506,7 +489,7 @@ BasicDialog {
                         font.pixelSize: 14
                         font.weight: Font.Normal
                         selectByMouse: true
-                        placeholderText: qsTr("Please enter mobile number")
+                        placeholderText: catalog.i18nc("@tip:textfield", "Please enter mobile number")
                         onTextChanged: fieldValidator()
                     }
 
@@ -534,7 +517,7 @@ BasicDialog {
                             width: sourceSize.width
                             source: "../res/login_email.png"
                         }
-                        placeholderText: qsTr("Please enter your email address")
+                        placeholderText: catalog.i18nc("@tip:textfield", "Please enter your email address")
                         onTextChanged: fieldValidator()
                     }
 
@@ -564,7 +547,7 @@ BasicDialog {
                             width: sourceSize.width
                             source: "../res/login_passwd.png"
                         }
-                        placeholderText: qsTr("Please enter password")
+                        placeholderText: catalog.i18nc("@tip:textfield", "Please enter password")
                         Button{
                             id: eyeBtn
                             height:endImageEye.sourceSize.height
@@ -615,13 +598,13 @@ BasicDialog {
                             width: sourceSize.width
                             source: "../res/login_passwd.png"
                         }
-                        placeholderText: qsTr("Please enter verification code")
+                        placeholderText: catalog.i18nc("@tip:textfield", "Please enter verification code")
                         onTextChanged: fieldValidator()
                     }
 
                     Label {
                         id: mobileSwitchTypeLable
-                        text: qsTr("Password to login")
+                        text: catalog.i18nc("@title:Label", "Password to login")
                         anchors.right: parent.right
                         anchors.rightMargin: 0
                         anchors.bottom: verButton.top
@@ -639,13 +622,13 @@ BasicDialog {
                             onClicked: {
                                 if(phoneLoginType === "quick")
                                 {
-                                    mobileSwitchTypeLable.text = qsTr("Quick login")
+                                    mobileSwitchTypeLable.text = catalog.i18nc("@title:Label", "Quick login")
                                     phoneLoginType = "mobile";
                                     switchPhoneLogin();
                                 }
                                 else if(phoneLoginType === "mobile")
                                 {
-                                    mobileSwitchTypeLable.text = qsTr("Password to login")
+                                    mobileSwitchTypeLable.text = catalog.i18nc("@title:Label", "Password to login")
                                     phoneLoginType = "quick";
                                     switchQuickLogin();                            
                                 }
@@ -663,7 +646,7 @@ BasicDialog {
                     {
                         id: verButton
                         height: 36
-                        text: qsTr("Get Code")
+                        text: catalog.i18nc("@text:btn", "Get Code")
                         anchors.left: verCode.right
                         anchors.leftMargin: 20
                         anchors.right: parent.right
@@ -691,7 +674,7 @@ BasicDialog {
                     Label {
                         id: resetLink
                         color: "#42BDD8"
-                        text: qsTr("Forget Password?")
+                        text: catalog.i18nc("@title:Label", "Forget Password?")
                         anchors.right: parent.right
                         anchors.rightMargin: 0
                         anchors.top: passwordField.bottom
@@ -719,7 +702,7 @@ BasicDialog {
                         id: loginButton
                         height: 48
                         width: 408
-                        text: qsTr("Login In")
+                        text: catalog.i18nc("@text:btn", "Login In")
                         anchors.right: parent.right
                         anchors.rightMargin: 0
                         anchors.left: parent.left
@@ -734,7 +717,6 @@ BasicDialog {
                         btnTextColor: enabled ? "white" : "#333333"
                         onSigButtonClicked:
                         {
-                            //console.log("onSigButtonClicked loginClicked")
                             var mobile = phoneField.text
                             var countryCode = phoneSelectModel.get(phoneSelect.currentIndex).phone
                             var mobileVerCode = verCode.text
@@ -774,7 +756,7 @@ BasicDialog {
 
                     Text {
                         id: serverSetting
-                        text: qsTr("Server")
+                        text: catalog.i18nc("@title:Label", "Server")
                         width: 50; height: 30
                         clip: true;
                         elide: Text.ElideRight
@@ -796,12 +778,9 @@ BasicDialog {
                         anchors.leftMargin: 3
                         model: ListModel{
                             id: idServerModel
-                            ListElement{name: "International"}
-                            ListElement{name: "China"}
                         }
                         currentIndex : -1
                         onActivated: {
-                            //console.log("currentIndex changed --------",currentIndex);
                             var env = ""
                             if (textAt(currentIndex) === idServerModel.get(0).name){
                                 env = "release_oversea"
@@ -812,13 +791,17 @@ BasicDialog {
                             CloudUtils.autoSetUrl()
                             CloudAPI.api_url = CloudUtils.getCloudUrl()
                         }
+                        Component.onCompleted: {                           
+                            idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "International")})
+                            idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "China")})
+                        }
                     }
 
                     Text {
                         id: signUpTip1
-                        text: "No account? Please click "
+                        text: catalog.i18nc("@title:Label", "No account? Please click ")
                         anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 22//52
+                        anchors.bottomMargin: 15//45
                         anchors.right: parent.right
                         anchors.rightMargin: signUpTip2.width
                         color: "#333333"
@@ -828,7 +811,7 @@ BasicDialog {
 
                     Text {
                         id: signUpTip2
-                        text: "Sign Up"
+                        text: catalog.i18nc("@title:Label", "Sign Up")
                         height: 12
                         width: 50
                         anchors.top: signUpTip1.top
@@ -858,7 +841,7 @@ BasicDialog {
                         console.log(verCodeTime)
                         if (verCodeTime < 0) {
                             verButton.enabled = true
-                            verButton.text = qsTr("Get Code")
+                            verButton.text = catalog.i18nc("@text:btn", "Get Code")
                             verCodeTimer.stop()
                             verCodeTime = 60
                             return
@@ -1097,7 +1080,7 @@ BasicDialog {
         }
 
         if (token === "") {           
-            CloudUtils.setLogin(false);//
+            CloudUtils.setLogin(false);
         }else {
             showBusy()
             CloudAPI.getUserInfo(token, userId, function(data) {
@@ -1107,12 +1090,12 @@ BasicDialog {
                     pluginRootWindow.hide()
                     userImg = data["result"]["userInfo"]["base"]["avatar"]
                     userName = data["result"]["userInfo"]["base"]["nickName"]
-                    var userid = data["result"]["userInfo"]["base"]["userId"]
-                    CloudUtils.qmlLog(userImg+userName+userid);                   
-                    sigLoginSuccess(nextPage, userImg, userName, userId);//
+                    //var userid = data["result"]["userInfo"]["base"]["userId"]
+
+                    sigLoginSuccess(nextPage, userImg, userName, userId);
                     sigLoginRes(userImg, userName, userId)
                 }else {                   
-                    CloudUtils.setLogin(false);//
+                    CloudUtils.setLogin(false);
                 }
             })
         }

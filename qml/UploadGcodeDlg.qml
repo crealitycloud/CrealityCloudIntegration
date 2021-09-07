@@ -154,7 +154,7 @@ BasicDialog {
                 text: catalog.i18nc("@action:button", "Logout")
                 onClicked: {
                     CloudUtils.clearToken()
-                    //退出登录，返回
+
                     CloudUtils.setLogin(false);
                     close();
                 }
@@ -247,9 +247,8 @@ BasicDialog {
     }
 
     Component.onCompleted: {
-        console.log("uploadgcode init completed-------")
         rootRect.visible = true;
         fileNameField.text = CloudUtils.defaultFileName()
-        CloudUtils.qmlLog("defaultFileName: " + fileNameField.text)       
+        //CloudUtils.qmlLog("defaultFileName: " + fileNameField.text)
     }
 }

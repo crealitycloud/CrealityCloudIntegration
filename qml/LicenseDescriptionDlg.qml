@@ -3,13 +3,14 @@ import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.0
 import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.1
-
+import UM 1.1 as UM
 
 BasicDialog{
     id: idLicenseDlg
+    UM.I18nCatalog { id: catalog; name: "uranium"}
     width: 760
     height: 520
-    title: qsTr("Creality Cloud protect designer's copyrighted works")
+    title: catalog.i18nc("@title:window", "Creality Cloud protect designer's copyrighted works")
 
     ScrollView{
         anchors.top: parent.top
@@ -28,7 +29,7 @@ BasicDialog{
                 height:40
                 wrapMode: Text.WordWrap
                 color: "#333333"
-                text: qsTr("In Creality Cloud, your original work (inc 3D prints & articles) is restrictedly protected under Creative Commons Licenses 4.0. If you find any breach of agreement, please contact us to discuss further action.")
+                text: catalog.i18nc("@title:Label", "In Creality Cloud, your original work (inc 3D prints & articles) is restrictedly protected under Creative Commons Licenses 4.0. If you find any breach of agreement, please contact us to discuss further action.")
                 font.pixelSize:14
             }
             Row{
@@ -52,7 +53,7 @@ BasicDialog{
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
                         color: "#666666"
-                        text: qsTr("This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use.")
+                        text: catalog.i18nc("@title:Label","This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use.")
                         font.pixelSize:12
                     }
                 }
@@ -88,7 +89,7 @@ BasicDialog{
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
                         color: "#666666"
-                        text: qsTr("This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.")
+                        text: catalog.i18nc("@title:Label","This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.")
                         font.pixelSize:12
                     }
                 }
@@ -124,7 +125,7 @@ BasicDialog{
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
                         color: "#666666"
-                        text: qsTr("This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator.")
+                        text: catalog.i18nc("@title:Label","This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator.")
                         font.pixelSize:12
                     }
                 }
@@ -160,7 +161,7 @@ BasicDialog{
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
                         color: "#666666"
-                        text: qsTr("This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.")
+                        text: catalog.i18nc("@title:Label","This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.")
                         font.pixelSize:12
                     }
                 }
@@ -196,7 +197,7 @@ BasicDialog{
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
                         color: "#666666"
-                        text: qsTr("This license allows reusers to copy and distribute the material in any medium or format in unadapted form only, and only so long as attribution is given to the creator. The license allows for commercial use.")
+                        text: catalog.i18nc("@title:Label","This license allows reusers to copy and distribute the material in any medium or format in unadapted form only, and only so long as attribution is given to the creator. The license allows for commercial use.")
                         font.pixelSize:12
                     }
                 }
@@ -232,7 +233,7 @@ BasicDialog{
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
                         color: "#666666"
-                        text: qsTr("This license allows reusers to copy and distribute the material in any medium or format in unadapted form only, for noncommercial purposes only, and only so long as attribution is given to the creator.")
+                        text: catalog.i18nc("@title:Label","This license allows reusers to copy and distribute the material in any medium or format in unadapted form only, for noncommercial purposes only, and only so long as attribution is given to the creator.")
                         font.pixelSize:12
                     }
                 }
@@ -268,7 +269,7 @@ BasicDialog{
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
                         color: "#666666"
-                        text: qsTr("(aka CC Zero) is a public dedication tool, which allows creators to give up their copyright and put their works into the worldwide public domain.")
+                        text: catalog.i18nc("@title:Label","(aka CC Zero) is a public dedication tool, which allows creators to give up their copyright and put their works into the worldwide public domain.")
                         font.pixelSize:12
                     }
                 }

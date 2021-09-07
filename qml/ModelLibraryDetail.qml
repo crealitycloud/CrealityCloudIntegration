@@ -122,7 +122,7 @@ Item{
                     id: idDelAllBtn
                     width: 20; height: 22
                     imgW:width; imgH:height;
-                    tipText: catalog.i18nc("@Tip:Button", "Delete all")//删除全部
+                    tipText: catalog.i18nc("@Tip:Button", "Delete all")
                     btnImgNormal: "../res/btn_del.png"
                     btnImgHovered: "../res/btn_del.png"
                     btnImgPressed: "../res/btn_del.png"

@@ -30,7 +30,7 @@ Item{
             anchors.fill: parent
             color: isSelected ? "#F1F1F1" : 
                     (idBtn.hovered ? "#F1F1F1" : "white")
-            Flow{
+            Row{
                 x: 40; y: 5;
                 height: parent.height-10;
                 spacing: 100
@@ -52,7 +52,7 @@ Item{
                         id: idGcodeIcon
                         width: 36; height: width                   
                         anchors.verticalCenter: parent.verticalCenter
-                        opacity: isSelected ? 0.5 : 1
+                        //opacity: isSelected ? 0.5 : 1
                         Image{                       
                             anchors.fill: parent
                             mipmap: true
@@ -66,14 +66,14 @@ Item{
                         }
                     }
                     Label{
-                        width: 300//72
+                        width: 300
                         height: 36
                         clip :true
                         anchors.verticalCenter: parent.verticalCenter
                         verticalAlignment: Qt.AlignVCenter
                         text: model.gcodeFilename
                         elide: Text.ElideRight
-                        color: "#333333"
+                        color: "black"
                         font.family: "Source Han Sans CN Normal"
                         font.pixelSize: 12
                         font.weight: Font.Normal
@@ -105,7 +105,7 @@ Item{
                                 return model.gcodeFileSize+"B"
                             }
                         }
-                        color: "#999999"
+                        color: "#333333"
                         font.family: "Source Han Sans CN Normal"
                         font.pixelSize: 12
                         font.weight: Font.ExtraLight
@@ -115,7 +115,7 @@ Item{
                         width:16; height:17
                         imgW:width; imgH:height;
                         visible: isSelected ? true : false
-                        tipText: catalog.i18nc("@Tip:Button", "export")//导出Gcode
+                        tipText: catalog.i18nc("@Tip:Button", "Export")
                         btnImgNormal: "../res/btn_download.png"
                         btnImgHovered: "../res/btn_download_h.png"
                         btnImgPressed: "../res/btn_download_h.png"
@@ -129,13 +129,13 @@ Item{
                         width:16; height:17
                         imgW:width; imgH:height;
                         visible: false//isSelected ? true : false
-                        tipText: catalog.i18nc("@Tip:Button", "print")//打印
+                        tipText: catalog.i18nc("@Tip:Button", "Print")
                         btnImgNormal: "../res/btn_print.png"
                         btnImgHovered: "../res/btn_print_h.png"
                         btnImgPressed: "../res/btn_print_h.png"
                         onClicked:{
                             console.log("print")
-                            sigBtnPrtClicked(model.gcodeDownLink);
+                            //sigBtnPrtClicked(model.gcodeDownLink);
                         }
                     }
                     BasicSkinButton{
@@ -143,7 +143,7 @@ Item{
                         width:16; height:17
                         imgW:width; imgH:height;
                         visible: isSelected ? true : false
-                        tipText: catalog.i18nc("@Tip:Button", "delete")//删除
+                        tipText: catalog.i18nc("@Tip:Button", "Delete")
                         btnImgNormal: "../res/btn_del.png"
                         btnImgHovered: "../res/btn_del_h.png"
                         btnImgPressed: "../res/btn_del_h.png"

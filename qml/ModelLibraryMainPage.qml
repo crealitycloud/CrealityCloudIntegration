@@ -29,7 +29,7 @@ Window{
     property alias gcodeScrollvPos: idVScroll2.position
 
     property var curMyGcodePage: 1
-    property var totalPageMyGcode: 0
+    property var totalPageMyGcode: 1
 
     property var loginDlg: 0;
     property var userInfoDlg: 0;
@@ -38,18 +38,17 @@ Window{
 
     function setModelTypeComboData(strjson)
     {         
-        idModelTypeComboBox_model.clear();//先清空
+        idModelTypeComboBox_model.clear();
         var objectArray = JSON.parse(strjson);
         var objResult = objectArray.result.list;        
         for( var key in objResult)
         {
             idModelTypeComboBox_model.append({modelCategoryId: objResult[key].id, 
-                                        modelCategoryName: objResult[key].name})//添加数据
-            //点击模型分类，刷新界面
+                                        modelCategoryName: objResult[key].name})
         }
         idModelTypeComboBox.currentIndex = 0;
         curModelCategoryId = objResult[0].id;
-        //---initialize the mainPage
+
         if(sourceType == 2){
             idSearch.text = "" 
             showNofoundTip(false)
@@ -61,7 +60,6 @@ Window{
 
             idSearch.enabled = true;
         }
-        //---
 
         sourceType = 1
 
@@ -108,8 +106,6 @@ Window{
     }
     function setMyGcodeList(strjson, appendFlag)
     {
-        //idContentArea.visible = false;
-        //idMyGcodeContent.visible = true;
         if(!appendFlag){
             gcode_model.clear();
         }
@@ -220,15 +216,15 @@ Window{
         idTopInfoArea.visible = false;
 
         curSelModelGroupID = id
-        idModelLibraryDetail.modelName =  name;//
-        idModelLibraryDetail.modelCount = count;//
-        idModelLibraryDetail.modelAImg = avtar//
-        idModelLibraryDetail.modelAName = author//
+        idModelLibraryDetail.modelName =  name;
+        idModelLibraryDetail.modelCount = count;
+        idModelLibraryDetail.modelAImg = avtar
+        idModelLibraryDetail.modelAName = author
 
-        ManageModelBrowser.loadModelGroupDetailInfo(id, count);//
+        ManageModelBrowser.loadModelGroupDetailInfo(id, count);
     }
 
-    function onSigButtonDownClicked(modelGid, count)//mainPage：download model group /////
+    function onSigButtonDownClicked(modelGid, count)//mainPage：download model group
     {       
         ManageModelBrowser.importModelGroup(modelGid, count);
     }
@@ -266,7 +262,7 @@ Window{
             }			
         }
     }
-    function downloadModels()//detailPage：download model group /////
+    function downloadModels()//detailPage：download model group
     {
         var urlList = []; var fileList = []
         var url = ""; var filename = ""       
@@ -280,7 +276,7 @@ Window{
         ManageModelBrowser.importModel(urlList, fileList)
     }
 
-    function onDownloadModel(name, url)//detailPage：download a single model /////
+    function onDownloadModel(name, url)//detailPage：download a single model
     {
         var urlList = []; var fileList = []
         urlList.push(url);
@@ -290,11 +286,12 @@ Window{
 
     function flushModelLLByScroll()//Scroll to refresh
     {
+        console.log("totalPage---%1".arg(totalPage));
         if (currentModelLibraryPage+1 <= totalPage)
         {
             currentModelLibraryPage++;
             console.log("current page--%1".arg(currentModelLibraryPage))
-            if(selCategory == 1){//model lib
+            if(selCategory == 1){
                 if(sourceType == 1)//model 
                     ManageModelBrowser.loadPageModelLibraryList(currentModelLibraryPage, curModelCategoryId, true)
                 else if(sourceType == 2)//search result
@@ -309,6 +306,7 @@ Window{
 
     function flushMyGcodeByScroll()//scroll to refresh
     {
+        console.log("totalPageMyGcode:",totalPageMyGcode);
         if(curMyGcodePage+1 <= totalPageMyGcode)
         {
             curMyGcodePage++;
@@ -366,15 +364,10 @@ Window{
             loginDlg.show()
         }
         else{
-            var componentLogin = Qt.createComponent("Login.qml")
-            if (componentLogin.status === Component.Ready )
-            {
-                var obj = componentLogin.createObject(idModelLibraryDlg)
-                loginDlg = obj;
-                obj.nextPage = -1;
-                obj.show();
-                obj.sigLoginRes.connect(slotloginSuccess)
-            }
+            loginDlg = CloudUtils.getLoginDlg();
+            loginDlg.nextPage = -1;
+            loginDlg.show();
+            loginDlg.sigLoginRes.connect(slotloginSuccess)
         }
     }
 
@@ -382,10 +375,9 @@ Window{
     {
         console.log("login success in Model Page.")
         idLoginBtn.visible = false;
+        spaceRect.visible = true;
         userImg.visible = true;
         userName.visible = true;
-        userImg.img_src = img; 
-        userName.text = name;
       
         switch (idSelCategory.currentIndex){
             case 0:
@@ -406,6 +398,7 @@ Window{
     function logout()
     {
         idLoginBtn.visible = true;
+        spaceRect.visible = false;
         userImg.visible = false;
         userName.visible = false;
         userImg.img_src = "";
@@ -425,15 +418,17 @@ Window{
     }
     function initUI()
     {
-        /*idBackMainPage.visible = true;
-        idSelCategory.visible = true;
-        idModelTypeComboBox.visible = true;
-        idSearch.visible = true;
-        idSearch.text = "";
-        idSearchLabel.visible = true;
-        idLoginBtn.visible = true;
-        userImg.visible = true;
-        userName.visible = true;*/
+        var isLogin = CloudUtils.getLogin();
+        if(isLogin){
+            userImg.img_src = CloudUtils.getUserImg();
+            userName.text = CloudUtils.getUserName();
+        }
+
+        idLoginBtn.visible = !isLogin;
+        spaceRect.visible = isLogin
+        userImg.visible = isLogin;
+        userName.visible = isLogin;
+
         if(selCategory == 1)
         {
             idMyGcodeContent.visible = false;
@@ -447,13 +442,8 @@ Window{
             idModelTypeComboBox.visible = true;
             idSearch.visible = true;
             idSearch.text = "";
-            idSearchLabel.visible = false;
-            var isLogin = CloudUtils.getLogin();
-            idLoginBtn.visible = !isLogin;//没有登录显示
-            userImg.visible = isLogin;//登录显示
-            userName.visible = isLogin;//登录显示
-            
-            
+            idSearchLabel.visible = false;           
+                   
         }
         else if(selCategory == 2)
         {
@@ -467,11 +457,7 @@ Window{
             idModelTypeComboBox.visible = false;
             idSearch.visible = false;
             idSearch.text = "";
-            idSearchLabel.visible = false;
-            var isLogin = CloudUtils.getLogin();
-            idLoginBtn.visible = !isLogin;//没有登录显示
-            userImg.visible = isLogin;//登录显示
-            userName.visible = isLogin;//登录显示
+            idSearchLabel.visible = false;           
         }
         else if(selCategory == 3)
         {
@@ -484,11 +470,7 @@ Window{
             idModelTypeComboBox.visible = false;
             idSearch.visible = false;
             idSearch.text = "";
-            idSearchLabel.visible = false;
-            var isLogin = CloudUtils.getLogin();
-            idLoginBtn.visible = !isLogin;//没有登录显示
-            userImg.visible = isLogin;//登录显示
-            userName.visible = isLogin;//登录显示
+            idSearchLabel.visible = false;            
         }
     }
     function showSearchPage()
@@ -499,13 +481,14 @@ Window{
         idSearch.visible = false;
         idSearchLabel.visible = false;
         var isLogin = CloudUtils.getLogin();
-        idLoginBtn.visible = !isLogin;//没有登录显示
-        userImg.visible = isLogin;//登录显示
-        userName.visible = isLogin;//登录显示
+        idLoginBtn.visible = !isLogin;
 
         idBackMainPage.visible = true
         idSearch.visible = true
         idSearchLabel.visible = true
+        spaceRect.visible = false
+        userImg.visible = false;
+        userName.visible = false;
     }
  
 //--------------------------------------main page----------------------------------------------
@@ -516,7 +499,7 @@ Window{
     minimumHeight: 711
     //maximumWidth: 1920
     //maximumHeight: 1080
-    title: catalog.i18nc("@window:title", "Model Library")
+    title: catalog.i18nc("@title:window", "Creality Cloud Plugin")
     MouseArea {
         anchors.fill: parent
         focus: true
@@ -535,7 +518,7 @@ Window{
             id: idTopInfoArea           
             height: 68
             spacing: 20
-            BasicSkinButton{//从搜索页返回（返回模型库）
+            BasicSkinButton{
                 id: idBackMainPage
                 visible: false;
                 width: 20; height: 22
@@ -554,9 +537,10 @@ Window{
                     idSearch.visible = true;
                     idSearchLabel.visible = false;
                     var isLogin = CloudUtils.getLogin();
-                    idLoginBtn.visible = !isLogin;//没有登录显示
-                    userImg.visible = isLogin;//登录显示
-                    userName.visible = isLogin;//登录显示
+                    idLoginBtn.visible = !isLogin;
+                    spaceRect.visible = isLogin
+                    userImg.visible = isLogin;
+                    userName.visible = isLogin;
                 }
             }
             ComboBox {
@@ -565,14 +549,10 @@ Window{
                 anchors.verticalCenter: parent.verticalCenter
                 model: ListModel{
                     id: idCategory_model
-                    ListElement{name: "模型库"}
-                    ListElement{name: "我的模型"}
-                    ListElement{name: "我的切片"}
                 }
                 currentIndex : -1
                 onActivated: {
                     if(selCategory != currentIndex+1){
-                        console.log("Switch classification")
                         if(CloudUtils.getLogin()){
                             selCategory = currentIndex+1;
                             switch (currentIndex){ 
@@ -597,6 +577,13 @@ Window{
                             showLoginDlg()
                         }
                     }                             
+                }
+                Component.onCompleted: {
+                    var strlist = ManageModelBrowser.getCategoryText()
+                    var n = strlist.length;
+                    for(var i=0; i<n; i++){
+                        idCategory_model.append({name: strlist[i]});
+                    }
                 }
             }
             ComboBox {
@@ -628,7 +615,7 @@ Window{
                     if(curModelCategoryId != idModelTypeComboBox_model.get(currentIndex).modelCategoryId)
                     {
                         curModelCategoryId = idModelTypeComboBox_model.get(currentIndex).modelCategoryId;
-                        //再刷新界面
+
                         currentModelLibraryPage = 1;
                         modelScrollvPos = 0;
                         ManageModelBrowser.loadPageModelLibraryList(1, curModelCategoryId, false)
@@ -703,7 +690,7 @@ Window{
                     else
                         return true;
                 }
-                text: "登录"
+                text: catalog.i18nc("@text:btn", "Login")
                 btnTextColor: "white"
                 defaultBtnBgColor : "#B4B4B4"
                 anchors.verticalCenter: parent.verticalCenter
@@ -712,9 +699,31 @@ Window{
                 btnRadius: 3
                 btnBorderW: 0
                 onSigButtonClicked: {
-                    console.log("click the login btn")
                     showLoginDlg();
                 }
+            }
+            Rectangle{
+                id: spaceRect
+                visible: {
+                    if(CloudUtils.getLogin())
+                        return false;
+                    else
+                        return true;
+                }
+                width: {
+                    if(CloudUtils.getLogin()){
+                        if((selCategory === 2) || (selCategory === 3)){
+                            return idMainPage.width - idSelCategory.width - userImg.width - userName.width - 20*4;
+                        }else if(selCategory === 1){
+                            return idMainPage.width - idSelCategory.width - idModelTypeComboBox.width - idSearch.width -userImg.width - userName.width - 20*6;
+                        }
+                        else{
+                            return 0;
+                        }
+                    }else
+                        return 0;
+                }
+                height:46
             }
             BasicCircularImage{
                 id: userImg
@@ -730,8 +739,9 @@ Window{
                 MouseArea {
                     anchors.fill: parent
                     focus: true
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
                     onClicked: {
-                        console.log("click the userImg")
                         if(userInfoDlg){
                             userInfoDlg.showPersonInfo(userImg.img_src, userName.text, "ID: "+CloudUtils.getUserId());
                         }
@@ -757,7 +767,7 @@ Window{
                         return true;
                 }
                 width: 27; height: 14
-                text: "小李"
+                text: ""
                 color: "black"
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -773,7 +783,7 @@ Window{
                 height: idMainPage.height-idTopInfoArea.height-53;
                 Label{
                     id: idSearchResultTip
-                    anchors.verticalCenter: parent.verticalCenter;//anchors.centerIn: parent;
+                    anchors.verticalCenter: parent.verticalCenter;
                     width: parent.width
                     height: 50
                     horizontalAlignment: Text.AlignHCenter
@@ -832,7 +842,7 @@ Window{
             anchors.bottomMargin: 21
             visible: false
             detailSelCategory: selCategory
-            onSigReturn:{//从详情页返回(返回模型库、返回搜索页、返回我的模型)
+            onSigReturn:{
                 curSelModelGroupID = "";
                 isDetailPage = false;
                 idModelLibraryDetail.visible = false
@@ -882,7 +892,8 @@ Window{
                     model: ListModel{
                         id: gcode_model
                     }
-                    delegate: CusMyGcodeItem{
+                    delegate: CusMyGcodeItem
+                    {
                         onSigBtnDownClicked:{//url name
                             var urlList = []; var fileList = []
                             urlList.push(url);
@@ -901,7 +912,7 @@ Window{
                             }
                             
                             fileList.push("%1.gz".arg(name));
-                            ManageModelBrowser.importModel(urlList, fileList)//download gcode /////
+                            ManageModelBrowser.importModel(urlList, fileList)
                         }
                         /*onSigBtnPrtClicked():{//url
 
@@ -912,14 +923,14 @@ Window{
                     }
                 }
                 onVPositionChanged:{
-                        if((vSize + vPosition) === 1){
-                            if(refreshFlag){
-                                //console.log("scroll to refresh gcode...");
-                                flushMyGcodeByScroll();
-                            }
-                            refreshFlag = true;
+                    if((vSize + vPosition) === 1){
+                        if(refreshFlag){
+                            console.log("scroll to refresh gcode...");
+                            flushMyGcodeByScroll();
                         }
+                        refreshFlag = true;
                     }
+                }
             }
         }
     }
@@ -938,7 +949,7 @@ Window{
         id: deleteDialog
         title: catalog.i18nc("@Tip:title", "Tip")
         icon: StandardIcon.Question
-        text: "Are you sure to delete?"//确定要删除吗？
+        text: catalog.i18nc("@Tip:content", "Are you sure to delete?")
         standardButtons: StandardButton.Ok | StandardButton.Cancel
         modality: Qt.ApplicationModal
         visible: false
