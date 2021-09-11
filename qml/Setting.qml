@@ -1,13 +1,13 @@
 import QtQuick 2.2
-import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import UM 1.1 as UM
+import Cura 1.1 as Cura
 
-Window {
+BasicDialog
+{
     id: settingWindow
     UM.I18nCatalog { id: catalog; name: "uranium"}
     title: catalog.i18nc("@title:window", "Setting")
-    modality: Qt.ApplicationModal
     width: 300
     height: 400
 
@@ -37,18 +37,16 @@ Window {
                 verticalAlignment: Text.AlignVCenter
                 height: parent.height
                 font.pixelSize: 15
+                color: UM.Theme.getColor("text")
             }
 
-            ExclusiveGroup{id: mos}
-            RadioButton {
+            Cura.RadioButton {
                 id: serverRadio1
-                exclusiveGroup: mos
                 text: catalog.i18nc("@text:ComboBox", "International")
                 height: parent.height
             }
-            RadioButton {
+            Cura.RadioButton {
                 id: serverRadio2
-                exclusiveGroup: mos
                 text: catalog.i18nc("@text:ComboBox", "China")
                 height: parent.height
             }

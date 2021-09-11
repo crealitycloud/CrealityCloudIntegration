@@ -28,7 +28,14 @@ BasicDialog {
     Column{
         anchors.fill: parent
         anchors.topMargin: titleHeight
+        anchors.bottomMargin: 1
+        anchors.leftMargin: 1
+        anchors.rightMargin: 1
         spacing: 10
+        Rectangle{
+            width: 1
+            height: 5
+        }
         BasicCircularImage{
             id: iduserImg
             width: 70; height: 70
@@ -39,27 +46,24 @@ BasicDialog {
             id: iduserName
             width: 27; height: 14
             text: userName
-            color: "black"
+            color: UM.Theme.getColor("text")
+            font: UM.Theme.getFont("default")
             anchors.horizontalCenter: parent.horizontalCenter
         }
         Label{
             id: id_userid
             width: 88; height: 10
             text: userId
-            color: "black"
+            color: UM.Theme.getColor("text")
+            font: UM.Theme.getFont("default")
             anchors.horizontalCenter: parent.horizontalCenter
         }
         BasicButton{
             id: idLoginBtn
             width: 140; height: 36
             text: catalog.i18nc("@text:btn", "Log out")
-            btnTextColor: "white"
-            defaultBtnBgColor : "#B4B4B4"
+            hoveredBtnBgColor: defaultBtnBgColor
             anchors.horizontalCenter: parent.horizontalCenter
-            pixSize: 14
-            fontWeight: Font.Bold
-            btnRadius: 3
-            btnBorderW: 0
             onSigButtonClicked: {
                 close();
                 sigLogout();

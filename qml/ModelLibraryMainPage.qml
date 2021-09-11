@@ -5,6 +5,7 @@ import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.1
 
 import UM 1.1 as UM
+import Cura 1.1 as Cura
 
 Window{
     property var selCategory: 1 //1 model library, 2 my model library, 3 my gcode
@@ -35,7 +36,7 @@ Window{
     property var userInfoDlg: 0;
 
     UM.I18nCatalog { id: catalog; name: "uranium"}
-
+    color: UM.Theme.getColor("main_background")
     function setModelTypeComboData(strjson)
     {         
         idModelTypeComboBox_model.clear();
@@ -350,7 +351,7 @@ Window{
     }
 
     function showMessage(text) {
-        msgDialog.text = text;
+        msgDialog.myContent = text;
         msgDialog.visible = true
     }
 
@@ -515,7 +516,7 @@ Window{
         anchors.rightMargin: 41
         Row
         {
-            id: idTopInfoArea           
+            id: idTopInfoArea
             height: 68
             spacing: 20
             BasicSkinButton{
@@ -543,13 +544,14 @@ Window{
                     userName.visible = isLogin;
                 }
             }
-            ComboBox {
+            Cura.ComboBox {
                 id: idSelCategory
                 width:200; height: 28
                 anchors.verticalCenter: parent.verticalCenter
                 model: ListModel{
                     id: idCategory_model
                 }
+                textRole: "name"
                 currentIndex : -1
                 onActivated: {
                     if(selCategory != currentIndex+1){
@@ -586,7 +588,7 @@ Window{
                     }
                 }
             }
-            ComboBox {
+            Cura.ComboBox {
                 id: idModelTypeComboBox
                 width:200; height: 28
                 anchors.verticalCenter: parent.verticalCenter
@@ -595,7 +597,7 @@ Window{
                 }
                 textRole: "modelCategoryName"
                 currentIndex : -1
-                popup: Popup {
+                /*popup: Popup {
                     y: idModelTypeComboBox.height - 1
                     background: Rectangle {
                         border.width: 1
@@ -610,7 +612,7 @@ Window{
                         currentIndex: idModelTypeComboBox.highlightedIndex
                         ScrollBar.vertical: ScrollBar { }
                     }
-                }
+                }*/
                 onActivated: {
                     if(curModelCategoryId != idModelTypeComboBox_model.get(currentIndex).modelCategoryId)
                     {
@@ -673,10 +675,9 @@ Window{
                 anchors.verticalCenter: parent.verticalCenter
                 visible: false
                 text: catalog.i18nc("@info:label", "search results")
-                font.family: "Source Han Sans CN Normal"
-                font.weight: Font.Medium
-                font.pixelSize: 14
-                color: "#333333"
+                font: UM.Theme.getFont("medium")
+                renderType: Text.NativeRendering
+                color: UM.Theme.getColor("text")
                 verticalAlignment: Text.AlignVCenter
                 clip :true
                 elide: Text.ElideRight
@@ -691,13 +692,9 @@ Window{
                         return true;
                 }
                 text: catalog.i18nc("@text:btn", "Login")
-                btnTextColor: "white"
-                defaultBtnBgColor : "#B4B4B4"
+                hoveredBtnBgColor: defaultBtnBgColor
                 anchors.verticalCenter: parent.verticalCenter
-                pixSize: 14
                 fontWeight: Font.Bold
-                btnRadius: 3
-                btnBorderW: 0
                 onSigButtonClicked: {
                     showLoginDlg();
                 }
@@ -724,6 +721,7 @@ Window{
                         return 0;
                 }
                 height:46
+                color: "transparent"
             }
             BasicCircularImage{
                 id: userImg
@@ -768,7 +766,9 @@ Window{
                 }
                 width: 27; height: 14
                 text: ""
-                color: "black"
+                font: UM.Theme.getFont("default")
+                renderType: Text.NativeRendering
+                color: UM.Theme.getColor("text")
                 anchors.verticalCenter: parent.verticalCenter
             }
         }        
@@ -788,10 +788,9 @@ Window{
                     height: 50
                     horizontalAlignment: Text.AlignHCenter
                     visible: false;
-                    font.family: "Source Han Sans CN Normal"
-                    font.weight: Font.Normal
-                    font.pixelSize: 15
-                    color: "black"
+                    font: UM.Theme.getFont("medium")
+                    renderType: Text.NativeRendering
+                    color: UM.Theme.getColor("text")
                     clip :true                                           
                     text: catalog.i18nc("@info:label", "No results found!")
                 }
@@ -828,6 +827,11 @@ Window{
                             }
                             refreshFlag = true;
                         }
+                    }
+                    background: Rectangle {
+                        implicitWidth: parent.width;
+                        implicitHeight: parent.height;                   
+                        color: UM.Theme.getColor("main_background")
                     }
                 }                
             }                
@@ -894,6 +898,7 @@ Window{
                     }
                     delegate: CusMyGcodeItem
                     {
+                        width: parent.width;
                         onSigBtnDownClicked:{//url name
                             var urlList = []; var fileList = []
                             urlList.push(url);
@@ -930,39 +935,33 @@ Window{
                         }
                         refreshFlag = true;
                     }
-                }
+                }              
             }
         }
     }
 //-------------------------------------messagebox-------------------------------------------
-    MessageDialog{
+    BasicMessageDialog{
         id: msgDialog
-        title: catalog.i18nc("@Tip:title", "Tip")
-        icon: StandardIcon.Warning
-        modality: Qt.ApplicationModal
-        visible: false
-        onAccepted: {
+        mytitle: catalog.i18nc("@Tip:title", "Tip")
+        onAccept: {
             msgDialog.visible = false
         }
     }
-    MessageDialog{
+    BasicMessageDialog{
         id: deleteDialog
-        title: catalog.i18nc("@Tip:title", "Tip")
-        icon: StandardIcon.Question
-        text: catalog.i18nc("@Tip:content", "Are you sure to delete?")
-        standardButtons: StandardButton.Ok | StandardButton.Cancel
-        modality: Qt.ApplicationModal
-        visible: false
+        mytitle: catalog.i18nc("@Tip:title", "Tip")
+        btnCount: 2
+        myContent: catalog.i18nc("@Tip:content", "Are you sure to delete?")       
         property var modelGOrGcodeid: ""
-        onAccepted:{
-            msgDialog.visible = false
+        onAccept:{
+            deleteDialog.visible = false
             if(selCategory == 2)
                 ManageModelBrowser.deleteModelGroup(modelGOrGcodeid)
             else if(selCategory ==3)
                 ManageModelBrowser.deleteGcode(modelGOrGcodeid)
         }
-        onRejected:{
-            msgDialog.visible = false
+        onCancel:{
+            deleteDialog.visible = false
         }
     }
     AnimatedImage {

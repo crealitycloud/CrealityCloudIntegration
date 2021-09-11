@@ -22,14 +22,13 @@ Item {
     property alias text: propertyButton.text
     property bool btnEnabled:true
     property bool btnSelected:false
-    property color defaultBtnBgColor: "white"
-    property color hoveredBtnBgColor: "#F0E1C9"
+    property color defaultBtnBgColor: UM.Theme.getColor("viewport_overlay")//"white"
+    property color hoveredBtnBgColor: UM.Theme.getColor("toolbar_button_hover")//"#F0E1C9"
     property color selectedBtnBgColor: "blue"
-    property color btnTextColor: "black"
+    property color btnTextColor: UM.Theme.getColor("text")
 
     property var btnRadius: 0
     property var btnBorderW: 1
-    property var pixSize: 14
     property alias hovered: propertyButton.hovered
     property alias down: propertyButton.down
 
@@ -40,10 +39,8 @@ Item {
     Button {
         id : propertyButton
         width: parent.width
-        height: parent.height
-        font.family: "Source Han Sans CN Normal"
-        font.weight: Font.Normal
-        font.pixelSize: pixSize
+        height: parent.height       
+        
         contentItem: Item {
                 Column{
                     spacing: 5
@@ -62,11 +59,13 @@ Item {
                     
                     Label{
                         width: 147
-                        height: 12
+                        height: 20
                         clip :true
-                        text: btnNameText                      
-                        font.pixelSize: 12
-                        color: "#333333"
+                        elide: Text.ElideRight
+                        text: btnNameText
+                        verticalAlignment: Text.AlignVCenter
+                        font: UM.Theme.getFont("default")
+                        color: btnTextColor
                     }
                     
                     Row{
@@ -81,13 +80,14 @@ Item {
                             width: idBtnDel.visible == true ? 
                                     propertyButton.width - idAvtarImage.width - idBtnImport.width - idBtnDel.width - 30 :
                                     propertyButton.width - idAvtarImage.width - idBtnImport.width - 30
-                            height: 11
+                            height: 15
                             clip :true
+                            elide: Text.ElideRight
                             verticalAlignment: Text.AlignVCenter
                             anchors.verticalCenter: parent.verticalCenter
-                            text: btnAuthorText                      
-                            font.pixelSize: 14
-                            color: "#333333"
+                            text: btnAuthorText
+                            font: UM.Theme.getFont("medium")
+                            color: btnTextColor
                         }
 
                         BasicSkinButton{
@@ -130,7 +130,7 @@ Item {
                return propertyButton.hovered ?hoveredBtnBgColor:defaultBtnBgColor
             }
             border.width: btnBorderW
-            border.color: propertyButton.hovered? hoveredBtnBgColor : "#757575"
+            border.color: propertyButton.hovered? hoveredBtnBgColor : UM.Theme.getColor("lining")
         }
         onClicked:
         {

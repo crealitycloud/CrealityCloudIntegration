@@ -29,7 +29,7 @@ Item{
         contentItem: Rectangle{
             anchors.fill: parent
             color: isSelected ? "#F1F1F1" : 
-                    (idBtn.hovered ? "#F1F1F1" : "white")
+                    (idBtn.hovered ? "#F1F1F1" : UM.Theme.getColor("main_background"))
             Row{
                 x: 40; y: 5;
                 height: parent.height-10;
@@ -52,7 +52,6 @@ Item{
                         id: idGcodeIcon
                         width: 36; height: width                   
                         anchors.verticalCenter: parent.verticalCenter
-                        //opacity: isSelected ? 0.5 : 1
                         Image{                       
                             anchors.fill: parent
                             mipmap: true

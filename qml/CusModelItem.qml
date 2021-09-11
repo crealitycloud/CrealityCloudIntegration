@@ -24,14 +24,14 @@ Item{
     Row{
         spacing: 20
         BasicButton{
-            width: 160
+            width: 260
             height: 36
             btnRadius: 0
             btnBorderW: 0
             pixSize: 12
             btnTextColor: btnIsSelected? "white" : "#666666"
             btnText.width: width-10
-            defaultBtnBgColor: "#FFFFFF"
+            defaultBtnBgColor: "transparent"
             hoveredBtnBgColor: "#E1E1E1"
             selectedBtnBgColor: "#1E9BE2"
             btnSelected: btnIsSelected
@@ -42,9 +42,10 @@ Item{
         }
         Label{
             width: 80
-            height: 36
-            font.pixelSize: 12
+            height: 36            
             color: "#999999"
+            font: UM.Theme.getFont("default")   
+            renderType: Text.NativeRendering
             clip :true
             verticalAlignment: Qt.AlignVCenter
             text: {
@@ -64,7 +65,7 @@ Item{
                 {
                     return modeSize+"B"
                 }
-            }    
+            }
         }
         BasicSkinButton{
             anchors.verticalCenter: parent.verticalCenter

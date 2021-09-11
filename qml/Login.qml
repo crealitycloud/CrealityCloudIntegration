@@ -2,10 +2,11 @@ import QtQuick 2.10
 import QtQuick.Controls 2.3
 import QtQuick.Dialogs 1.1
 import QtQuick.Controls.Styles 1.4
-import UM 1.1 as UM
 import "../js/CloudAPI.js" as CloudAPI
 import "../js/CountryCode.js" as CountryCode
 import "../js/Validator.js" as Validator
+import UM 1.1 as UM
+import Cura 1.1 as Cura
 
 BasicDialog {
     id: pluginRootWindow
@@ -57,7 +58,7 @@ BasicDialog {
     }
 
     function showMessage(text) {
-        msgDialog.text = text;
+        msgDialog.myContent = text;
         msgDialog.visible = true
     }
 
@@ -208,12 +209,10 @@ BasicDialog {
 
     }
 
-    MessageDialog {
+    BasicMessageDialog{
         id: msgDialog
-        title: catalog.i18nc("@Tip:title", "Error")
-        icon: StandardIcon.Warning
-        modality: Qt.ApplicationModal
-        onAccepted: {
+        mytitle: catalog.i18nc("@Tip:title", "Error")     
+        onAccept: {
             msgDialog.visible = false
         }
     }
@@ -222,55 +221,19 @@ BasicDialog {
         id: rootRect
         anchors.fill: parent
         anchors.topMargin:titleHeight
-        //head logo
-        Rectangle {
-            id: logoBg           
-            width: parent.width
-            height: 73
-            color: "white"
-            z: 2
-
-            BorderImage {
-                id: logo
-                anchors.centerIn: parent
-                anchors.horizontalCenterOffset: -width
-                width: 36
-                height: 34
-                transformOrigin: Item.Center
-                source: "../res/logo.png"
-            }
-
-            Text {
-                id: logoText
-                anchors.left: logo.right
-                anchors.leftMargin: 8
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#333333"
-                text: catalog.i18nc("@title:window", "Creality Cloud")
-                font.family: "Source Han Sans CN Normal"
-                font.pixelSize: 20
-                font.weight: Font.Bold
-            }
+        anchors.leftMargin: 1
+        anchors.rightMargin: 1
+        anchors.bottomMargin: 1
+        color: UM.Theme.getColor("main_background")
+        CusHeadItem{
+            id: headLogo
+            anchors.fill: parent
         }
-        //Separator
-        Item {
-            id: idSeparator
-            anchors.top: logoBg.bottom;
-            width:parent.width
-            height: 1
-            Rectangle
-            {
-                anchors.fill: parent
-                color: "#42BDD8"
-                opacity: 0.5
-            }
-        }  
         //login page
         Item {
             id: loginItem
             anchors.fill: parent
-            anchors.topMargin: 74
-            
+            anchors.topMargin: 74            
             Item {
                 id: accountLogin
                 anchors.leftMargin: 96
@@ -291,7 +254,7 @@ BasicDialog {
                         id: emailLoginLabel
                         width: 120; height: 24
                         text: catalog.i18nc("@title:Label", "Email Login")
-                        btnTextColor: btnSelected ? "#42BDD8": (hovered ? "#42BDD8" : "#C7C7C7")
+                        btnTextColor: btnSelected ? UM.Theme.getColor("text"): (hovered ? UM.Theme.getColor("text") : UM.Theme.getColor("text_inactive"))
                         btnSelected: false
                         defaultBtnBgColor : "transparent"
                         hoveredBtnBgColor: "transparent"
@@ -301,11 +264,11 @@ BasicDialog {
                         btnRadius: 0
                         btnBorderW: 0
                         onSigButtonClicked: {
-                                pluginRootWindow.switchEmailLogin()                        
-                                emailLoginLabel.btnSelected = false
-                                mobilephoneLoginLabel.btnSelected = false
-                                scanQrcodeLoginLabel.btnSelected = false
-                                btnSelected = true;
+                            pluginRootWindow.switchEmailLogin()                        
+                            emailLoginLabel.btnSelected = false
+                            mobilephoneLoginLabel.btnSelected = false
+                            scanQrcodeLoginLabel.btnSelected = false
+                            btnSelected = true;
                         }
                     }
 
@@ -320,7 +283,7 @@ BasicDialog {
                         id: mobilephoneLoginLabel
                         width: 166; height: 24
                         text: catalog.i18nc("@title:Label", "Mobile Phone Login")
-                        btnTextColor: btnSelected ? "#42BDD8": (hovered ? "#42BDD8" : "#C7C7C7")
+                        btnTextColor: btnSelected ? UM.Theme.getColor("text"): (hovered ? UM.Theme.getColor("text") : UM.Theme.getColor("text_inactive"))
                         btnSelected: true
                         defaultBtnBgColor : "transparent"
                         hoveredBtnBgColor: "transparent"
@@ -330,11 +293,11 @@ BasicDialog {
                         btnRadius: 0
                         btnBorderW: 0
                         onSigButtonClicked: {
-                                mobilePhoneLogin();                     
-                                emailLoginLabel.btnSelected = false
-                                mobilephoneLoginLabel.btnSelected = false
-                                scanQrcodeLoginLabel.btnSelected = false
-                                btnSelected = true;
+                            mobilePhoneLogin();                     
+                            emailLoginLabel.btnSelected = false
+                            mobilephoneLoginLabel.btnSelected = false
+                            scanQrcodeLoginLabel.btnSelected = false
+                            btnSelected = true;
                         }
                     }
 
@@ -349,7 +312,7 @@ BasicDialog {
                         id: scanQrcodeLoginLabel
                         width: 166; height: 24
                         text: catalog.i18nc("@title:Label", "Scan Qrcode Login")
-                        btnTextColor: btnSelected ? "#42BDD8": (hovered ? "#42BDD8" : "#C7C7C7")
+                        btnTextColor: btnSelected ? UM.Theme.getColor("text"): (hovered ? UM.Theme.getColor("text") : UM.Theme.getColor("text_inactive"))
                         btnSelected: false
                         defaultBtnBgColor : "transparent"
                         hoveredBtnBgColor: "transparent"
@@ -359,11 +322,13 @@ BasicDialog {
                         btnRadius: 0
                         btnBorderW: 0
                         onSigButtonClicked: {
+                            if(!btnSelected){
                                 qrItemShow()
                                 emailLoginLabel.btnSelected = false
                                 mobilephoneLoginLabel.btnSelected = false
                                 scanQrcodeLoginLabel.btnSelected = false
                                 btnSelected = true;
+                            }
                         }
                     }
                 }
@@ -384,7 +349,6 @@ BasicDialog {
                         height: 36
                         anchors.top: parent.top
                         anchors.topMargin: 0
-                        down: true
                         model: ListModel { id: phoneSelectModel }
                         delegate: ItemDelegate{
                             width: 170
@@ -396,12 +360,13 @@ BasicDialog {
                                     id:myText
                                     height: 25
                                     text: nameEn + " " +phone
-                                    color: "#333333"
-                                    font: phoneSelect.font
+                                    color: (phoneSelect.highlightedIndex === index) ? "white" : "#333333"
+                                    font: UM.Theme.getFont("default")
+                                    clip: true
                                     elide: Text.ElideRight
                                     verticalAlignment: Text.AlignVCenter
                                 }
-                                color: (phoneSelect.highlightedIndex === index) ? "#42BDD8" : "white"
+                                color: (phoneSelect.highlightedIndex === index) ? "#0078D7" : "white"
                             }
                             hoverEnabled: phoneSelect.hoverEnabled
                         }
@@ -436,21 +401,21 @@ BasicDialog {
                                 height: headImagePhone.height
                                 width: phoneSelect.width - headImagePhone.width - phoneSelect.indicator.width - 29
                                 text: "+ " + phoneSelect.model.get(phoneSelect.currentIndex).phone
-                                font: phoneSelect.font
+                                font: UM.Theme.getFont("default")
                                 verticalAlignment: Text.AlignVCenter
                             }
                         }
                         background: Rectangle {
                                 color: "white"
                                 border.width: 1
-                                border.color: "#C7C7C7"
+                                border.color: "#ABABAB"
                         }
 
                         popup: Popup {
                             y: phoneSelect.height - 1
                             background: Rectangle {
                                 border.width: 1
-                                border.color: "#42BDD8"
+                                border.color: "#ABABAB"
                             }
                             width: 200
                             implicitHeight: contentItem.implicitHeight
@@ -609,13 +574,8 @@ BasicDialog {
                         anchors.rightMargin: 0
                         anchors.bottom: verButton.top
                         anchors.bottomMargin: 18
-                        font.wordSpacing: -0.5
-                        font.letterSpacing: -1
-                        font.capitalization: Font.MixedCase
-                        color: "#42BDD8"
-                        font.family: "Source Han Sans CN Normal"
-                        font.pixelSize: 12
-                        font.weight: Font.Normal
+                        color: "#0078D7"
+                        font: UM.Theme.getFont("small")
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
@@ -640,6 +600,7 @@ BasicDialog {
                                 parent.font.underline = false
                             }
                         }
+                        Component.onCompleted: font.pixelSize = 12
                     }
 
                     BasicButton
@@ -654,11 +615,8 @@ BasicDialog {
                         anchors.top: phoneSelect.bottom
                         anchors.topMargin: 40
                         enabled: false
-                        defaultBtnBgColor : "#42BDD8"
-                        hoveredBtnBgColor: "#42BDD8"
-                        btnRadius: 3
-                        btnBorderW: 0
-                        btnTextColor: enabled ? "white" : "#333333"
+                        hoveredBtnBgColor: defaultBtnBgColor
+                        btnTextColor: "#0078D7"
                         onSigButtonClicked: {
                             var phone = phoneSelectModel.get(phoneSelect.currentIndex).phone + phoneField.text
                             CloudAPI.getVerCode(phone, function(data) {
@@ -673,15 +631,13 @@ BasicDialog {
 
                     Label {
                         id: resetLink
-                        color: "#42BDD8"
+                        color: "#0078D7"
+                        font: UM.Theme.getFont("small")
                         text: catalog.i18nc("@title:Label", "Forget Password?")
                         anchors.right: parent.right
                         anchors.rightMargin: 0
                         anchors.top: passwordField.bottom
-                        anchors.topMargin: 10//6
-                        font.family: "Source Han Sans CN Normal"
-                        font.pixelSize: 12
-                        font.weight: Font.Normal
+                        anchors.topMargin: 10//6                        
                         visible: false
                         MouseArea {
                             anchors.fill: parent
@@ -695,6 +651,7 @@ BasicDialog {
                                 parent.font.underline = false
                             }
                         }
+                        Component.onCompleted: font.pixelSize = 12
                     }
 
                     BasicButton
@@ -710,11 +667,8 @@ BasicDialog {
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 43//73
                         enabled: false
-                        defaultBtnBgColor : "#42BDD8"
-                        hoveredBtnBgColor: "#42BDD8"
-                        btnRadius: 3
-                        btnBorderW: 0
-                        btnTextColor: enabled ? "white" : "#333333"
+                        hoveredBtnBgColor: defaultBtnBgColor
+                        fontWeight: Font.Bold
                         onSigButtonClicked:
                         {
                             var mobile = phoneField.text
@@ -756,6 +710,8 @@ BasicDialog {
 
                     Text {
                         id: serverSetting
+                        color: UM.Theme.getColor("text")
+                        font: UM.Theme.getFont("default")
                         text: catalog.i18nc("@title:Label", "Server")
                         width: 50; height: 30
                         clip: true;
@@ -763,13 +719,10 @@ BasicDialog {
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 5//35
                         anchors.left: parent.left
-                        anchors.leftMargin: 0
-                        font.wordSpacing: -0.5
-                        font.letterSpacing: -1
-                        font.pixelSize: 13
+                        anchors.leftMargin: 0                       
                         verticalAlignment: Text.AlignVCenter
                     }
-                    ComboBox {
+                    Cura.ComboBox {
                         id: idServer
                         width:130; height: 30
                         anchors.bottom: serverSetting.bottom
@@ -779,6 +732,7 @@ BasicDialog {
                         model: ListModel{
                             id: idServerModel
                         }
+                        textRole: "name"
                         currentIndex : -1
                         onActivated: {
                             var env = ""
@@ -799,28 +753,27 @@ BasicDialog {
 
                     Text {
                         id: signUpTip1
+                        color: UM.Theme.getColor("text")                     
+                        font: UM.Theme.getFont("small")
                         text: catalog.i18nc("@title:Label", "No account? Please click ")
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: 15//45
                         anchors.right: parent.right
                         anchors.rightMargin: signUpTip2.width
-                        color: "#333333"
-                        font.family: "Source Han Sans CN Normal"
-                        font.pixelSize: 12
+                        Component.onCompleted: font.pixelSize = 12
                     }
 
                     Text {
                         id: signUpTip2
+                        color: "#0078D7"
+                        font: UM.Theme.getFont("small")
                         text: catalog.i18nc("@title:Label", "Sign Up")
                         height: 12
                         width: 50
                         anchors.top: signUpTip1.top
                         anchors.topMargin: 0
                         anchors.left: signUpTip1.right
-                        anchors.leftMargin: 0
-                        color: "#42BDD8"
-                        font.family: "Source Han Sans CN Normal"
-                        font.pixelSize: 12
+                        anchors.leftMargin: 0                         
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
@@ -829,6 +782,7 @@ BasicDialog {
                             onEntered: parent.font.underline = true
                             onExited: parent.font.underline = false
                         }
+                        Component.onCompleted: font.pixelSize = 12
                     }
                 }
                 
@@ -864,7 +818,7 @@ BasicDialog {
                 property bool requestSwitch: false
 
                 Rectangle {
-                    color: "white"
+                    color: UM.Theme.getColor("main_background")
                     anchors.fill: parent
                 }
 
@@ -924,20 +878,22 @@ BasicDialog {
 
                 Text {
                     id: qrLink
-                    color: "#1987ea"
+                    color: "#0078D7"
                     text: catalog.i18nc("@text:window", 'Download Creality Cloud APP')
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 25
                     horizontalAlignment: Text.AlignHCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    font.underline: true
+                    anchors.horizontalCenter: parent.horizontalCenter                   
                     lineHeight: 1.4
-                    font.family: "Tahoma"
-                    font.pixelSize: 12
+                    font: UM.Theme.getFont("default")
+                    renderType: Text.NativeRendering
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
                         onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl())
+                        onEntered: parent.font.underline = true
+                        onExited: parent.font.underline = false
                     }
                 }
 
@@ -948,9 +904,9 @@ BasicDialog {
                     anchors.topMargin: 10
                     horizontalAlignment: Text.AlignHCenter
                     anchors.horizontalCenter: parent.horizontalCenter
-                    font.family: "Tahoma"
-                    font.bold: true
-                    font.pixelSize: 24
+                    font: UM.Theme.getFont("large")
+                    color: UM.Theme.getColor("text")
+                    renderType: Text.NativeRendering
                 }
 
                 Text {
@@ -960,7 +916,9 @@ BasicDialog {
                     anchors.topMargin: 10
                     anchors.horizontalCenter: parent.horizontalCenter
                     horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: 13
+                    font: UM.Theme.getFont("default")
+                    color: UM.Theme.getColor("text")
+                    renderType: Text.NativeRendering
                 }
 
                 Rectangle {
@@ -969,9 +927,10 @@ BasicDialog {
                     width: 208
                     height: 187
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 95
+                    anchors.bottomMargin: 80
                     anchors.right: parent.right
-                    anchors.rightMargin: -20
+                    anchors.rightMargin: 0
+                    color: "transparent"
                     Behavior on opacity {PropertyAnimation {duration: 300} }
                     Image {
                         anchors.fill: parent
@@ -1034,13 +993,12 @@ BasicDialog {
                             anchors.top: refreshBt.bottom
                             anchors.topMargin: 10
                             anchors.horizontalCenter: parent.horizontalCenter
-                            font.family: "Tahoma"
-                            font.bold: true
-                            font.pixelSize: 14
+                            font: UM.Theme.getFont("default_bold")
                         }
                     }
                 }
             }
+        }
         //busyLayer
         Rectangle {
             id: busyLayer
@@ -1061,23 +1019,23 @@ BasicDialog {
         }
     }
 
-
-    Component.onCompleted: {
-        console.log("login page init completed...")
-        sigLoginSuccess.connect(CloudUtils.loginSuccess);
-        mobilePhoneLogin()
-        CloudAPI.os_version = CloudUtils.getOsVersion()
-        CloudAPI.duid = CloudUtils.getDUID()
-        CloudAPI.api_url = CloudUtils.getCloudUrl()
-        var token = CloudUtils.loadToken()
-        var userId = CloudUtils.getUserId()
-
+    onVisibleChanged:{
         var env = CloudUtils.getEnv();
         if (env == "release_local"){
             idServer.currentIndex = 1
         }else{
             idServer.currentIndex = 0
         }
+    }
+
+    Component.onCompleted: {
+        sigLoginSuccess.connect(CloudUtils.loginSuccess);
+        mobilePhoneLogin()
+        CloudAPI.os_version = CloudUtils.getOsVersion()
+        CloudAPI.duid = CloudUtils.getDUID()
+        CloudAPI.api_url = CloudUtils.getCloudUrl()
+        var token = CloudUtils.loadToken()
+        var userId = CloudUtils.getUserId()       
 
         if (token === "") {           
             CloudUtils.setLogin(false);
@@ -1104,5 +1062,4 @@ BasicDialog {
     Component.onDestruction: {
         qrTimer.stop()
     }
-}
 }

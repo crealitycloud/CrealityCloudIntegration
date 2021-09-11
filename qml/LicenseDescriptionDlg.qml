@@ -1,8 +1,6 @@
 import QtQuick 2.10
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.0
-import QtQuick.Window 2.2
-import QtQuick.Dialogs 1.1
 import UM 1.1 as UM
 
 BasicDialog{
@@ -11,6 +9,7 @@ BasicDialog{
     width: 760
     height: 520
     title: catalog.i18nc("@title:window", "Creality Cloud protect designer's copyrighted works")
+    property var fontFamily: "Tahoma"
 
     ScrollView{
         anchors.top: parent.top
@@ -28,7 +27,8 @@ BasicDialog{
                 width:parent.width
                 height:40
                 wrapMode: Text.WordWrap
-                color: "#333333"
+                color: UM.Theme.getColor("text")
+                font.family: fontFamily
                 text: catalog.i18nc("@title:Label", "In Creality Cloud, your original work (inc 3D prints & articles) is restrictedly protected under Creative Commons Licenses 4.0. If you find any breach of agreement, please contact us to discuss further action.")
                 font.pixelSize:14
             }
@@ -43,8 +43,9 @@ BasicDialog{
                         width: parent.width
                         height: 14
                         wrapMode: Text.WordWrap
-                        color: "#333333"
+                        color: UM.Theme.getColor("text")
                         text: qsTr("CC BY")
+                        font.family: fontFamily
                         font.pixelSize:18
                         font.weight: "Bold"
                     }
@@ -52,7 +53,8 @@ BasicDialog{
                         width: parent.width
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
-                        color: "#666666"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: catalog.i18nc("@title:Label","This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use.")
                         font.pixelSize:12
                     }
@@ -79,7 +81,8 @@ BasicDialog{
                         width: parent.width
                         height: 14
                         wrapMode: Text.WordWrap
-                        color: "#333333"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: qsTr("CC BY-SA")
                         font.pixelSize:18
                         font.weight: "Bold"
@@ -88,7 +91,8 @@ BasicDialog{
                         width: parent.width
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
-                        color: "#666666"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: catalog.i18nc("@title:Label","This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, so long as attribution is given to the creator. The license allows for commercial use. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.")
                         font.pixelSize:12
                     }
@@ -115,7 +119,8 @@ BasicDialog{
                         width: parent.width
                         height: 14
                         wrapMode: Text.WordWrap
-                        color: "#333333"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: qsTr("CC BY-NC")
                         font.pixelSize:18
                         font.weight: "Bold"
@@ -124,7 +129,8 @@ BasicDialog{
                         width: parent.width
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
-                        color: "#666666"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: catalog.i18nc("@title:Label","This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator.")
                         font.pixelSize:12
                     }
@@ -151,7 +157,8 @@ BasicDialog{
                         width: parent.width
                         height: 14
                         wrapMode: Text.WordWrap
-                        color: "#333333"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: qsTr("CC BY-NC-SA")
                         font.pixelSize:18
                         font.weight: "Bold"
@@ -160,7 +167,8 @@ BasicDialog{
                         width: parent.width
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
-                        color: "#666666"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: catalog.i18nc("@title:Label","This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.")
                         font.pixelSize:12
                     }
@@ -187,7 +195,8 @@ BasicDialog{
                         width: parent.width
                         height: 14
                         wrapMode: Text.WordWrap
-                        color: "#333333"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: qsTr("CC BY-ND")
                         font.pixelSize:18
                         font.weight: "Bold"
@@ -196,7 +205,8 @@ BasicDialog{
                         width: parent.width
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
-                        color: "#666666"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: catalog.i18nc("@title:Label","This license allows reusers to copy and distribute the material in any medium or format in unadapted form only, and only so long as attribution is given to the creator. The license allows for commercial use.")
                         font.pixelSize:12
                     }
@@ -223,7 +233,8 @@ BasicDialog{
                         width: parent.width
                         height: 14
                         wrapMode: Text.WordWrap
-                        color: "#333333"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: qsTr("CC BY-NC-ND")
                         font.pixelSize:18
                         font.weight: "Bold"
@@ -232,7 +243,8 @@ BasicDialog{
                         width: parent.width
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
-                        color: "#666666"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: catalog.i18nc("@title:Label","This license allows reusers to copy and distribute the material in any medium or format in unadapted form only, for noncommercial purposes only, and only so long as attribution is given to the creator.")
                         font.pixelSize:12
                     }
@@ -259,7 +271,8 @@ BasicDialog{
                         width: parent.width
                         height: 14
                         wrapMode: Text.WordWrap
-                        color: "#333333"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: qsTr("CC0")
                         font.pixelSize:18
                         font.weight: "Bold"
@@ -268,7 +281,8 @@ BasicDialog{
                         width: parent.width
                         height: parent.height-14-5
                         wrapMode: Text.WordWrap
-                        color: "#666666"
+                        color: UM.Theme.getColor("text")
+                        font.family: fontFamily
                         text: catalog.i18nc("@title:Label","(aka CC Zero) is a public dedication tool, which allows creators to give up their copyright and put their works into the worldwide public domain.")
                         font.pixelSize:12
                     }

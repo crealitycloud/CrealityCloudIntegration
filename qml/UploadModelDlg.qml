@@ -1,10 +1,9 @@
 import QtQuick 2.10
 import QtQuick.Controls 2.3
-import QtQuick.Controls 1.4 as T
 import QtQuick.Layouts 1.0
-import QtQuick.Window 2.2
 import QtQuick.Dialogs 1.1
 import UM 1.1 as UM
+import Cura 1.1 as Cura
 
 BasicDialog{
     id: idDialog
@@ -74,50 +73,14 @@ BasicDialog{
     }
     Column{
         id: idLogoImageColumn
-        y: 30
-        Rectangle {
-            id:logoRect
-            width: idDialog.width
-            height: 74
-            color: "transparent"
-            Row
-            {
-                width: logoImage.width + idText.contentWidth
-                anchors{
-                    horizontalCenter: parent.horizontalCenter
-                    verticalCenter: parent.verticalCenter
-                }
-                spacing: 10
-                Image {
-                    id : logoImage
-                    width: 36
-                    height: 34
-                    source: "../res/logo.png"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-                Label
-                {
-                    id:idText
-                    height:logoImage.height
-                    text: catalog.i18nc("@title:window", "Creality Cloud")
-                    font.pixelSize:20 
-                    verticalAlignment: Qt.AlignVCenter
-                    horizontalAlignment: Qt.AlignLeft
-                }
-            }
+        x: 1
+        y: titleHeight
+        width: parent.width-2
+        height: 74
+        CusHeadItem{
+            id: headLogo
+            anchors.fill: parent
         }
-        Item {
-            id: name           
-            width:idDialog.width
-            height: 1
-            Rectangle
-            {
-                anchors.fill: parent
-                color: "#42BDD8"
-                opacity: 0.5
-            }
-        }
-        
     }
     Column{
         id: grid_wrapper
@@ -127,7 +90,7 @@ BasicDialog{
         anchors.left: parent.left
         anchors.leftMargin: 55
         anchors.rightMargin: 55
-        width: idDialog.width
+        width: idDialog.width - 2
         spacing: 5
         Row{
             Label {
@@ -135,13 +98,15 @@ BasicDialog{
                 width:100
                 height:28
                 text: catalog.i18nc("@title:Label", "Group Name:")
-                font.pixelSize: 12
+                color: UM.Theme.getColor("text")
+                font: UM.Theme.getFont("default")
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
             }
             TextField {
                 id: idModelGroupInput
-                font.pixelSize:12
+                selectByMouse: true
+                font: UM.Theme.getFont("default")
                 placeholderText: catalog.i18nc("@tip:textfield", "Please enter the model group name")
                 width: grid_wrapper.width-idGroupNameLabel.width-110
                 height : 28
@@ -154,7 +119,8 @@ BasicDialog{
                 width:100
                 height:28
                 text: catalog.i18nc("@title:Label", "Description:")
-                font.pixelSize: 12
+                color: UM.Theme.getColor("text")
+                font: UM.Theme.getFont("default")
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
             }
@@ -166,17 +132,18 @@ BasicDialog{
                     id:idDescText
                     width: idScrollView.width
                     height:idScrollView.height
+                    selectByMouse: true
                     wrapMode: TextEdit.Wrap
                     placeholderText: catalog.i18nc("@tip:textfield", "Please enter the model group description")
                     text: ""
                     font.pixelSize: 12
                     font.family: "Source Han Sans CN Normal"
-                    font.weight: Font.Normal
-                }
-                background: Rectangle {
-                    border.color: "#D7D7D7"
-                    color: "transparent"
-                }
+                    font.weight: Font.Normal    
+                    background: Rectangle {
+                        border.color: "#D7D7D7"
+                        color: "white"
+                    }               
+                }              
             }
         }
         Row{
@@ -185,19 +152,20 @@ BasicDialog{
                 width:100
                 height:28
                 text: catalog.i18nc("@title:Label", "Upload Way:")
-                font.pixelSize: 12
+                color: UM.Theme.getColor("text")
+                font: UM.Theme.getFont("default")
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
             }
             ButtonGroup{id: radioGroup}
-            RadioButton {
+            Cura.RadioButton {
                 id: wayRadio1
                 ButtonGroup.group: radioGroup
                 text: catalog.i18nc("@title:Radio", "separate")
                 checked: true
                 anchors.verticalCenter: parent.verticalCenter
             }
-            RadioButton {
+            Cura.RadioButton {
                 id: wayRadio2
                 ButtonGroup.group: radioGroup
                 text: catalog.i18nc("@title:Radio", "combination")
@@ -210,11 +178,12 @@ BasicDialog{
                 width:100
                 height:28
                 text: catalog.i18nc("@title:Label", "Group Type:")
-                font.pixelSize: 12
+                color: UM.Theme.getColor("text")
+                font: UM.Theme.getFont("default")
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
             }
-            ComboBox {
+            Cura.ComboBox {
                 id: idGroupTypeCombobox
                 height:25
                 width: grid_wrapper.width-idGroupNameLabel.width-110
@@ -223,6 +192,7 @@ BasicDialog{
                 model: ListModel {
                     id: idGroupTypeModel
                 }
+                textRole: "modelData"
             }
         }
         Row{
@@ -231,11 +201,12 @@ BasicDialog{
                 width:100
                 height:28
                 text: catalog.i18nc("@title:Label", "Model Type:")
-                font.pixelSize: 12
+                color: UM.Theme.getColor("text")
+                font: UM.Theme.getFont("default")
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
             }
-            ComboBox {
+            Cura.ComboBox {
                 id: idModelTypeCombobox
                 height:28
                 width: grid_wrapper.width-idGroupNameLabel.width-110
@@ -244,6 +215,7 @@ BasicDialog{
                 model: ListModel {
                     id: idModelTypeModel
                 }
+                textRole: "modelData"
                 Component.onCompleted: {
                     idModelTypeModel.append({key: 1, modelData: catalog.i18nc("@title:Label", "Normal Model")})
                     idModelTypeModel.append({key: 2, modelData: catalog.i18nc("@title:Label", "3D Photo Model")})
@@ -254,8 +226,9 @@ BasicDialog{
             Label {
                 width:100
                 height:28
+                color: "transparent"
             }
-            CheckBox
+            Cura.CheckBox
             {
                 id :idOriginalCheckBox
                 width: 100
@@ -275,7 +248,7 @@ BasicDialog{
                     }
                 }
             }
-            CheckBox
+            Cura.CheckBox
             {
                 id :idShareCheckBox
                 anchors.verticalCenter: parent.verticalCenter
@@ -294,11 +267,12 @@ BasicDialog{
                 width:100-4
                 height:28
                 text: catalog.i18nc("@title:Label", "License Type:")
-                font.pixelSize: 12
+                color: UM.Theme.getColor("text")
+                font: UM.Theme.getFont("default")
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
             }
-            ComboBox{
+            Cura.ComboBox{
                 id: idLicenseCombobox
                 height:28
                 width: grid_wrapper.width-idGroupNameLabel.width-110
@@ -314,6 +288,7 @@ BasicDialog{
                     ListElement{text : "CC BY-NC-ND";}
                     ListElement{text : "CC0 1.0";}
                 }
+                textRole: "text"
             }   
             Button {
                 id : idLicenseExplain
@@ -360,10 +335,9 @@ BasicDialog{
         BasicButton{
             width: 125
             height: 28
-            btnRadius:3
-            btnBorderW:0
-            defaultBtnBgColor: "#B4B4B4"
+            hoveredBtnBgColor: defaultBtnBgColor
             text: catalog.i18nc("@text:btn", "Upload")
+            fontWeight: Font.Bold
             enabled: (idModelGroupInput.text != "")&&(idDescText.text != "")
             onSigButtonClicked:
             {
@@ -400,10 +374,9 @@ BasicDialog{
         BasicButton{
             width: 125
             height: 28
-            btnRadius:3
-            btnBorderW:0
-            defaultBtnBgColor: "#B4B4B4"
+            hoveredBtnBgColor: defaultBtnBgColor
             text: catalog.i18nc("@text:btn", "Cancel")
+            fontWeight: Font.Bold
             onSigButtonClicked:
             {
                 idDialog.close();
@@ -421,7 +394,8 @@ BasicDialog{
                 horizontalCenter: parent.horizontalCenter
             }
             text: progressValue + "%"
-            font.pixelSize: 12
+            color: UM.Theme.getColor("text")
+            font: UM.Theme.getFont("default")
         }
         ProgressBar{
             id: progressBar
@@ -449,8 +423,9 @@ BasicDialog{
     Rectangle{
         id: idUploadSuccess
         visible: false
+        x: 1
         y: 35
-        width: idDialog.width
+        width: idDialog.width-2
         height: idDialog.height - titleHeight
         color: "transparent"
         Row{
@@ -469,9 +444,10 @@ BasicDialog{
             Label
             {
                 id:idFinishText
-                height:logoImage.sourceSize.height
+                height:idFinishImage.height
                 text: bRes ? catalog.i18nc("@title:Label", "Uploaded Successfully!") : catalog.i18nc("@title:Label", "Upload failed!")
-                font.pixelSize:14
+                color: UM.Theme.getColor("text")
+                font: UM.Theme.getFont("medium")
                 verticalAlignment: Qt.AlignVCenter
                 horizontalAlignment: Qt.AlignLeft
             }

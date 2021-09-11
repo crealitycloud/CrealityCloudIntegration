@@ -2,13 +2,16 @@ import QtQuick 2.10
 import QtQuick.Controls 2.3
 import QtQuick.Window 2.2
 import QtGraphicalEffects 1.0
+import UM 1.3 as UM
 
 Window {
-    id: eo_askDialog
+    id: base
     width: 300
     height: 200
     property string title: ""
-    property string titleBackground:  "#42BDD8"
+    property var titleBackground:  UM.Theme.getColor("main_window_header_background")
+    property var contentBackground: "transparent"
+    property var borderColor: UM.Theme.getColor("border")
     property var titleIcon: ""
     property var closeIcon: "../res/btn_close_n.png"
     property var titleHeight: 30
@@ -16,7 +19,7 @@ Window {
 
     flags: Qt.Dialog | Qt.FramelessWindowHint
     modality: Qt.ApplicationModal
-    color: "transparent"
+    color: UM.Theme.getColor("main_background")
 
 	signal dialogClosed()
     MouseArea {
@@ -27,12 +30,24 @@ Window {
         }
     }
     
-    Rectangle{//The title bar
+    Rectangle
+    {
+    	id: mainLayout
+        anchors.fill: parent
+		color: contentBackground
+        opacity: 1
+        border.color: borderColor
+        border.width: 1
+    }
+
+    //The title bar
+    Rectangle{
         id: titleBar
-        width: mainLayout.width
-        implicitHeight: 30
+        x: 1
+        y: 1
+        width: mainLayout.width-2
+        implicitHeight: titleHeight-1
         color: titleBackground
-        z:mainLayout.z + 1
        
         MouseArea{
             id: mouseControler
@@ -49,27 +64,22 @@ Window {
             }
             Text{
                 text: title
-				font.family: "Source Han Sans CN Normal"
-				font.weight: Font.Bold
-				font.pixelSize: 14
+                color: UM.Theme.getColor("text")
+                font: UM.Theme.getFont("medium")
                 anchors.left: parent.left
                 anchors.leftMargin: 10 + idTitleImg.width
                 anchors.verticalCenter: parent.verticalCenter
-                color: "#333333"
             }
-
             onPressed: {
                 clickPos = Qt.point(mouse.x,mouse.y)
             }
-
             onPositionChanged: {
                 var delta = Qt.point(mouse.x-clickPos.x, mouse.y-clickPos.y)
                 //if mainwindow inherit QWidget, use setPos
-                eo_askDialog.setX(eo_askDialog.x+delta.x)
-                eo_askDialog.setY(eo_askDialog.y+delta.y)
+                base.setX(base.x+delta.x)
+                base.setY(base.y+delta.y)
             }
         }
-
         //close button
         Button{
             id: closeButton
@@ -77,8 +87,7 @@ Window {
             implicitWidth: 30
             anchors.right: parent.right
             onClicked: {
-                eo_askDialog.visible = false;
-                //eo_askDialog.close();
+                base.visible = false;
 				dialogClosed()
             }
             contentItem: Item
@@ -92,27 +101,11 @@ Window {
                     source:  closeIcon
                 }
             }
-
             background: Rectangle
             {
                 anchors.fill: parent
                 color: closeButton.hovered? "#E81123" : "transparent"
             }
         }    
-    }
-
-    Rectangle
-    {
-    	id: mainLayout
-        anchors.fill: parent
-		color: "white"
-        opacity: 1      
-    }
-    DropShadow {
-        anchors.fill: mainLayout
-        radius: 8
-        samples: 17
-        source: mainLayout
-        color:  "#42BDD8"
     }
 }

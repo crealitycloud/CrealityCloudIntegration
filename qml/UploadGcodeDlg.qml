@@ -46,7 +46,7 @@ BasicDialog {
     }
 
     function showMessage(text) {
-        msgDialog.text = text;
+        msgDialog.myContent = text;
         msgDialog.visible = true
     }
     
@@ -77,63 +77,27 @@ BasicDialog {
         id: rootRect
         anchors.fill: parent
         anchors.topMargin:titleHeight
-
-        visible: false;
-        Rectangle {
-            id: logoBg           
-            width: parent.width
-            height: 73
-            color: "white"
-            z: 2
-
-            BorderImage {
-                id: logo
-                anchors.centerIn: parent
-                anchors.horizontalCenterOffset: -width
-                width: 36
-                height: 34
-                transformOrigin: Item.Center
-                source: "../res/logo.png"
-            }
-
-            Text {
-                id: logoText
-                anchors.left: logo.right
-                anchors.leftMargin: 8
-                anchors.verticalCenter: parent.verticalCenter
-                color: "#333333"
-                text: catalog.i18nc("@title:window", "Creality Cloud")
-                font.family: "Source Han Sans CN Normal"
-                font.pixelSize: 20
-                font.weight: Font.Bold
-            }
-           
+        anchors.leftMargin: 1
+        anchors.rightMargin: 1
+        anchors.bottomMargin: 1
+        color: "transparent"
+        CusHeadItem{
+            id: headLogo
+            anchors.fill: parent
         }
-
-        Item {
-            id: idSeparator
-            anchors.top: logoBg.bottom;
-            width:parent.width
-            height: 1
-            Rectangle
-            {
-                anchors.fill: parent
-                color: "#42BDD8"
-                opacity: 0.5
-            }
-        }
-
         Item {
             id: bodyLoader
             anchors.fill: parent
-            anchors.topMargin: 74
+            anchors.topMargin: 74          
             TextField {
                 id: fileNameField
                 x: 205
                 y: 39
                 width: 274
                 height: 23
+                selectByMouse: true
                 text: CloudUtils.defaultFileName()
+                font: UM.Theme.getFont("default")
             }
 
             Text {
@@ -143,6 +107,7 @@ BasicDialog {
                 text: catalog.i18nc("@label", "File Name")
                 font.family: "Tahoma"
                 font.pixelSize: 12
+                color: UM.Theme.getColor("text")
             }
 
             Button {
@@ -178,8 +143,8 @@ BasicDialog {
                         return
                     }
                     // File name cannot have special symbols
-                    if (fileName.indexOf(":") !== -1 || fileName.indexOf('"') !== -1  || fileName.indexOf("|") !== -1 || fileName.indexOf("*") !== -1) {
-                        showMessage(catalog.i18nc("@error", "File name can't contain \*, \"\", | , : symbols"))
+                    if (fileName.indexOf(":") !== -1 || fileName.indexOf('\"') !== -1  || fileName.indexOf("|") !== -1 || fileName.indexOf("*") !== -1) {
+                        showMessage(catalog.i18nc("@error", "File name can't contain *, | , \", : symbols"))
                         return
                     }
                     CloudUtils.saveUploadFile(fileName)
@@ -234,12 +199,10 @@ BasicDialog {
                 visible: false
             }
 
-            MessageDialog {
+            BasicMessageDialog{
                 id: msgDialog
-                title: "Error"
-                icon: StandardIcon.Warning
-                modality: Qt.ApplicationModal
-                onAccepted: {
+                mytitle: catalog.i18nc("@Tip:title", "Error")
+                onAccept: {
                     msgDialog.visible = false
                 }
             }
@@ -247,7 +210,6 @@ BasicDialog {
     }
 
     Component.onCompleted: {
-        rootRect.visible = true;
         fileNameField.text = CloudUtils.defaultFileName()
         //CloudUtils.qmlLog("defaultFileName: " + fileNameField.text)
     }

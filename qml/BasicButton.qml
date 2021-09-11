@@ -13,11 +13,11 @@ Item {
 
     property bool btnEnabled:true
     property bool btnSelected:false
-    property color defaultBtnBgColor: "#F5F5F5"
-    property color hoveredBtnBgColor: "#1E9BE2"
-    property color selectedBtnBgColor: "#1E9BE2"
-    property color btnTextColor:"black"
-    property var btnRadius: 14
+    property color defaultBtnBgColor: "#F3F3F3"
+    property color hoveredBtnBgColor: "#0078D7"
+    property color selectedBtnBgColor: "#0078D7"
+    property color btnTextColor: "black"
+    property var btnRadius: 3
     property var btnBorderW: 1
     property var pixSize: 14
     property var fontWeight: Font.Normal
@@ -29,9 +29,8 @@ Item {
         id : propertyButton
         width: parent.width
         height: parent.height
-        font.family: "Source Han Sans CN Normal"
-        font.weight: fontWeight
-        font.pixelSize: pixSize
+        font: UM.Theme.getFont("default")
+
         contentItem: Item {
             Text {
                   id: btnTxt
@@ -56,12 +55,16 @@ Item {
                return propertyButton.hovered ?hoveredBtnBgColor:defaultBtnBgColor
             }
             border.width: btnBorderW
-            border.color: propertyButton.hovered? hoveredBtnBgColor : "#757575"
+            border.color: propertyButton.hovered? hoveredBtnBgColor : "#ABABAB"
         }
         onClicked:
         {
             sigButtonClicked()
             sigButtonClickedWithKey(keyStr)
+        }
+        Component.onCompleted: {
+            propertyButton.font.weight = fontWeight
+            propertyButton.font.pixelSize = pixSize
         }
     }
 }

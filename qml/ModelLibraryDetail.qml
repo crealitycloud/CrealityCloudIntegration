@@ -70,16 +70,18 @@ Item{
                 width: (idDetailPage.width-10)/2
                 height: 30
                 text: modelName
-                font.family: "Source Han Sans CN Normal"
-                font.weight: Font.Medium
-                font.pixelSize: 18
-                color: "#333333"
+                font: UM.Theme.getFont("large_bold")
+                renderType: Text.NativeRendering                
+                color: UM.Theme.getColor("text")
             }
             Label{
                 id: idModelCountLabel
                 width: (idDetailPage.width-10)/2
                 height: 30
                 text: modelCount
+                font: UM.Theme.getFont("default")
+                color: UM.Theme.getColor("text")
+                renderType: Text.NativeRendering
             }
             Row{
                 spacing: 10
@@ -101,10 +103,9 @@ Item{
                     clip :true
                     wrapMode: TextEdit.WordWrap
                     elide: Text.ElideRight
-                    font.family: "Source Han Sans CN Normal"
-                    font.weight: Font.Normal
-                    font.pixelSize: 18
-                    color: "#333333"
+                    font: UM.Theme.getFont("large")
+                    renderType: Text.NativeRendering
+                    color: UM.Theme.getColor("text")
                 }
                 BasicSkinButton{
                     id: idImportAllBtn
@@ -138,10 +139,9 @@ Item{
                 height: 60
                 text: catalog.i18nc("@info:label", "Model list:")
                 verticalAlignment: Text.AlignBottom
-                font.family: "Source Han Sans CN Normal"
-                font.weight: Font.Normal
-                font.pixelSize: 16
-                color: "#333333"
+                font: UM.Theme.getFont("medium")
+                renderType: Text.NativeRendering
+                color: UM.Theme.getColor("text")
             }
             ScrollView{
                 width: (idDetailPage.width-10)/2
