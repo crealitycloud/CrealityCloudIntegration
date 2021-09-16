@@ -51,7 +51,6 @@ BasicDialog {
     }
     
     function progress(per) {
-        console.log("progress bar", per)
         if(per >= 0) {
             progressBar.value = per * 100
         }

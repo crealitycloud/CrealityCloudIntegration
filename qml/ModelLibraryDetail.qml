@@ -19,6 +19,8 @@ Item{
 
     signal sigReturn();
     signal sigDownloadAll();
+    signal sigShareLink();
+    signal sigAddModel();
     signal sigDelAll();
 
     id: idDetailPage
@@ -29,7 +31,9 @@ Item{
             width: 20; height: 22
             imgW:width; imgH:height;
             tipText: catalog.i18nc("@Tip:Button", "Return")
-            btnImgUrl: "../res/btn_back.png"
+            btnImgNormal: "../res/btn_back.png"
+            btnImgHovered: "../res/btn_back_h.png"
+            btnImgPressed: "../res/btn_back_h.png"
             anchors.verticalCenter: parent.verticalCenter
             onClicked:{
                 sigReturn();                
@@ -120,13 +124,39 @@ Item{
                     }
                 }
                 BasicSkinButton{
+                    id: idSharedBtn
+                    width: 20; height: 22
+                    imgW:width; imgH:height;
+                    tipText: catalog.i18nc("@Tip:Button", "Share link")
+                    btnImgNormal: "../res/btn_share.png"
+                    btnImgHovered: "../res/btn_share_h.png"
+                    btnImgPressed: "../res/btn_share_h.png"
+                    visible: detailSelCategory == 2 ? false : true;
+                    onClicked:{
+                        sigShareLink();
+                    }
+                }
+                BasicSkinButton{
+                    id: idAddBtn
+                    width: 20; height: 22
+                    imgW:width; imgH:height;
+                    tipText: catalog.i18nc("@Tip:Button", "Upload models")
+                    btnImgNormal: "../res/btn_add.png"
+                    btnImgHovered: "../res/btn_add_h.png"
+                    btnImgPressed: "../res/btn_add_h.png"
+                    visible: detailSelCategory == 2 ? true : false;
+                    onClicked:{
+                        sigAddModel();
+                    }
+                }
+                BasicSkinButton{
                     id: idDelAllBtn
                     width: 20; height: 22
                     imgW:width; imgH:height;
                     tipText: catalog.i18nc("@Tip:Button", "Delete all")
                     btnImgNormal: "../res/btn_del.png"
-                    btnImgHovered: "../res/btn_del.png"
-                    btnImgPressed: "../res/btn_del.png"
+                    btnImgHovered: "../res/btn_del_h.png"
+                    btnImgPressed: "../res/btn_del_h.png"
                     visible: detailSelCategory == 2 ? true : false;
                     onClicked:{
                         sigDelAll();

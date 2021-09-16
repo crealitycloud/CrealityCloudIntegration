@@ -71,7 +71,7 @@ BasicDialog{
             idGroupTypeModel.append({"key": objResult[key].id, "modelData": objResult[key].name})
         }
     }
-    Column{
+    Item{
         id: idLogoImageColumn
         x: 1
         y: titleHeight

@@ -292,7 +292,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         strjson = self._utils.getModelGDeleteRes(modelGid)
         response = json.loads(strjson)
         if (response["code"] == 0):
-            self._modelBrowserDialog.flushMyModelLibrary(modelGid)
+            self._modelBrowserDialog.flushMyMLibAfterDelGroup(modelGid)
         else:
             self._modelBrowserDialog.showMessage(response["msg"])
 
@@ -368,6 +368,25 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             self._modelUploadDlg.uploadModelSuccess()
         else:
             self._modelUploadDlg.uploadModelFail(response["msg"])
+
+    @pyqtSlot("QStringList")
+    def addModels(self, strlist: List[str]) -> None:
+        self._utils.addModelsStarted.connect(self._modelGroupAdd)
+        self._utils.getOssAuth()#used only once
+        for filename in strlist:
+            if os.path.exists(filename):
+                self._utils.uploadOss(3, filename)
+    
+    def _modelGroupAdd(self) -> None:
+        self._utils.addModelsStarted.disconnect(self._modelGroupAdd)
+        strjson = self._utils.getModelGroupAddRes(self._modelBrowserDialog.property("curSelModelGroupID"))
+        response = json.loads(strjson)
+        self._modelBrowserDialog.hideBusy()
+        if (response["code"] == 0):
+            self._modelBrowserDialog.showMessage(i18n_catalog.i18nc("@title:Label", "Uploaded Successfully!"))
+            self._modelBrowserDialog.flushMyModelAfterAdd()
+        else:
+            self._modelBrowserDialog.showMessage(i18n_catalog.i18nc("@title:Label", "Upload failed!") + ' ' +response["msg"])
 
 class STLOutputDevice(OutputDevice):
     def __init__(self, saveWay: int):

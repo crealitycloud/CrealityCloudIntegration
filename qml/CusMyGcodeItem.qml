@@ -119,7 +119,6 @@ Item{
                         btnImgHovered: "../res/btn_download_h.png"
                         btnImgPressed: "../res/btn_download_h.png"
                         onClicked:{
-                            console.log("export to platform")
                             sigBtnDownClicked(model.gcodeDownLink, model.gcodeFilename);
                         }
                     }
@@ -133,7 +132,6 @@ Item{
                         btnImgHovered: "../res/btn_print_h.png"
                         btnImgPressed: "../res/btn_print_h.png"
                         onClicked:{
-                            console.log("print")
                             //sigBtnPrtClicked(model.gcodeDownLink);
                         }
                     }
@@ -147,7 +145,6 @@ Item{
                         btnImgHovered: "../res/btn_del_h.png"
                         btnImgPressed: "../res/btn_del_h.png"
                         onClicked:{
-                            console.log("delete")
                             sigBtnDelClicked(model.gcodeID);
                         }
                     }

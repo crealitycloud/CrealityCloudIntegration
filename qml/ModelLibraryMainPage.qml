@@ -70,7 +70,6 @@ Window{
         }
         currentModelLibraryPage = 1;
         isDetailPage = false
-        console.log("current page: %1".arg(currentModelLibraryPage))
     }
 
     function setModelLibraryList(strjson, appendFlag)
@@ -95,14 +94,14 @@ Window{
                     if(selCategory == 2)
                         obj.btnDelVis = true;
                     obj.sigButtonDownClicked.connect(onSigButtonDownClicked) 
-                    obj.sigButtonClicked.connect(onSigButtonClicked)
+                    obj.sigButtonClicked.connect(onBrowseDetails)
                     obj.sigBtnDelClicked.connect(slotBtnDelClicked)
                     modelGroupMap[objResult[key].id] = obj
                 }
             }           
         }
         else{
-            console.log("create CusModelLibraryItem fail!")
+            CloudUtils.qmlLog("create CusModelLibraryItem fail!")
         }
     }
     function setMyGcodeList(strjson, appendFlag)
@@ -124,14 +123,12 @@ Window{
     function flushMyGcodeList(gcodeid)
     {
         var n = gcode_model.count; 
-        //console.log("before gcode_model:",n)
         for(var i = 0; i < n; i++){
             if(gcodeid == gcode_model.get(i).gcodeID){
                 gcode_model.remove(i);
                 break;
             }           
         }
-        //console.log("after gcode_model:", gcode_model.count)
     }
 
     function setModelDetailInfo(strjson)
@@ -175,7 +172,7 @@ Window{
             }                        
         }
         else{
-            console.log("create BasicImageButton fail!")
+            CloudUtils.qmlLog("create BasicImageButton fail!")
         }
     }
 
@@ -207,7 +204,7 @@ Window{
         }
     }
 
-    function onSigButtonClicked(id, name, count, author, avtar)//view details
+    function onBrowseDetails(id, name, count, author, avtar)//view details
     {
         idMyGcodeContent.visible = false;
         isDetailPage = true;
@@ -235,11 +232,18 @@ Window{
         deleteDialog.modelGOrGcodeid = id;
         deleteDialog.visible = true;
     }
-    function flushMyModelLibrary(modelGid)
+
+    function shareLink(modelGid)
+    {
+        let link = CloudUtils.getWebUrl() + "/model-detail/" + modelGid
+        CloudUtils.addToClipboard(link);
+        showMessage(catalog.i18nc("@Tip:content", "Link copied to clipboard!"));
+    }
+
+    function flushMyMLibAfterDelGroup(modelGid)
     {
         if(isDetailPage)
         {
-            //console.log("after delete, flush detail")
             deleteCompent("imageMap");
             deleteCompent("modelMap");           
             //back
@@ -251,7 +255,6 @@ Window{
             idSearch.enabled = true
         }
 
-        //console.log("after delete, flush model page")
         var strModelGid = "-%1-".arg(modelGid)
 
         for(var key in modelGroupMap){
@@ -263,6 +266,31 @@ Window{
             }			
         }
     }
+    function flushMyModelAfterAdd()
+    {
+        ManageModelBrowser.loadPageMyModelList(1, false)
+
+        let t_id = "-%1-".arg(curSelModelGroupID);
+        let obj;
+        let count = 0;
+        for(var key in modelGroupMap){
+            var strkey = "-%1-".arg(key)           		
+            if(strkey == t_id){
+                obj = modelGroupMap[key]                
+                break;
+            }			
+        }
+
+        if(obj){
+            count = obj.modelCount
+            idModelLibraryDetail.modelName = obj.btnNameText
+            idModelLibraryDetail.modelCount = count
+            idModelLibraryDetail.modelAImg = obj.btnAvtarImage
+            idModelLibraryDetail.modelAName = obj.btnAuthorText
+        }
+        ManageModelBrowser.loadModelGroupDetailInfo(curSelModelGroupID, count);
+    }
+
     function downloadModels()//detailPage：download model group
     {
         var urlList = []; var fileList = []
@@ -287,11 +315,9 @@ Window{
 
     function flushModelLLByScroll()//Scroll to refresh
     {
-        console.log("totalPage---%1".arg(totalPage));
         if (currentModelLibraryPage+1 <= totalPage)
         {
             currentModelLibraryPage++;
-            console.log("current page--%1".arg(currentModelLibraryPage))
             if(selCategory == 1){
                 if(sourceType == 1)//model 
                     ManageModelBrowser.loadPageModelLibraryList(currentModelLibraryPage, curModelCategoryId, true)
@@ -307,11 +333,9 @@ Window{
 
     function flushMyGcodeByScroll()//scroll to refresh
     {
-        console.log("totalPageMyGcode:",totalPageMyGcode);
         if(curMyGcodePage+1 <= totalPageMyGcode)
         {
             curMyGcodePage++;
-            console.log("current gocde page--%1".arg(curMyGcodePage))
             if(selCategory == 3)
             {
                 ManageModelBrowser.loadPageMyGcodeList(curMyGcodePage, pageSize[1], true);
@@ -374,7 +398,6 @@ Window{
 
     function slotloginSuccess(img, name, userid)
     {
-        console.log("login success in Model Page.")
         idLoginBtn.visible = false;
         spaceRect.visible = true;
         userImg.visible = true;
@@ -491,7 +514,15 @@ Window{
         userImg.visible = false;
         userName.visible = false;
     }
- 
+    function showBusy() {
+        busyLayer.visible = true
+        idMainPage.enabled = false;
+    }
+
+    function hideBusy() {
+        busyLayer.visible = false
+        idMainPage.enabled = true
+    }
 //--------------------------------------main page----------------------------------------------
     id: idModelLibraryDlg
     width: 1042
@@ -525,7 +556,9 @@ Window{
                 width: 20; height: 22
                 imgW:width; imgH:height;
                 tipText: catalog.i18nc("@Tip:Button", "Return to the home page")
-                btnImgUrl: "../res/btn_back.png"
+                btnImgNormal: "../res/btn_back.png"
+                btnImgHovered: "../res/btn_back_h.png"
+                btnImgPressed: "../res/btn_back_h.png"
                 anchors.verticalCenter: parent.verticalCenter
                 onClicked:{
                     ManageModelBrowser.loadCategoryListResult(2)
@@ -596,23 +629,7 @@ Window{
                     id: idModelTypeComboBox_model                   
                 }
                 textRole: "modelCategoryName"
-                currentIndex : -1
-                /*popup: Popup {
-                    y: idModelTypeComboBox.height - 1
-                    background: Rectangle {
-                        border.width: 1
-                        border.color: "#BDBDBD"
-                    }
-                    width: idModelTypeComboBox.width
-                    implicitHeight: 310
-                    contentItem: ListView {
-                        clip: true
-                        implicitHeight: contentHeight
-                        model: idModelTypeComboBox.popup.visible ? idModelTypeComboBox.delegateModel : null
-                        currentIndex: idModelTypeComboBox.highlightedIndex
-                        ScrollBar.vertical: ScrollBar { }
-                    }
-                }*/
+                currentIndex : -1            
                 onActivated: {
                     if(curModelCategoryId != idModelTypeComboBox_model.get(currentIndex).modelCategoryId)
                     {
@@ -622,7 +639,6 @@ Window{
                         modelScrollvPos = 0;
                         ManageModelBrowser.loadPageModelLibraryList(1, curModelCategoryId, false)
                         totalPage = ManageModelBrowser.getTotalPage(selCategory, curModelCategoryId, pageSize[0])
-                        console.log("current page: %1".arg(currentModelLibraryPage))
                     }
                 }
             }
@@ -857,6 +873,12 @@ Window{
             onSigDownloadAll:{
                 downloadModels();
             }
+            onSigShareLink:{
+                shareLink(curSelModelGroupID);
+            }
+            onSigAddModel:{               
+                idAddModelDlg.visible = true
+            }
             onSigDelAll:{
                 slotBtnDelClicked(curSelModelGroupID);
             }
@@ -927,16 +949,24 @@ Window{
                         }
                     }
                 }
-                onVPositionChanged:{
+                onVPositionChanged: {
                     if((vSize + vPosition) === 1){
                         if(refreshFlag){
-                            console.log("scroll to refresh gcode...");
                             flushMyGcodeByScroll();
                         }
                         refreshFlag = true;
                     }
                 }              
             }
+        }
+    }
+//-------------------------------------add model-------------------------------------------
+    AddModelDlg{
+        id: idAddModelDlg
+        visible: false
+        onSigUploadModel: {
+            showBusy();
+            ManageModelBrowser.addModels(fileList);
         }
     }
 //-------------------------------------messagebox-------------------------------------------
@@ -980,7 +1010,24 @@ Window{
             } 
         }
         source: "../res/loading.gif"
-    } 
+    }
+    Rectangle {
+        id: busyLayer
+        anchors.fill: parent
+        color: "black"
+        opacity: 0.5
+        visible: false
+        z: 100
+        BusyIndicator {
+            anchors.centerIn: parent
+            width: Math.min(parent.width, parent.height) * 0.25
+            height: Math.min(parent.width, parent.height) * 0.25
+            running: parent.visible
+        }
+        MouseArea {
+            anchors.fill: parent
+        }
+    }
     onClosing:{
         if(idLoadingImg.visible)
             close.accepted = false

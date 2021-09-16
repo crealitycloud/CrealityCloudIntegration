@@ -1,4 +1,6 @@
 from typing import Dict, List
+
+from requests.models import Response
 from UM.Logger import Logger
 from UM.i18n import i18nCatalog
 import os, sys
@@ -39,7 +41,7 @@ from UM.OutputDevice import OutputDeviceError
 catalog = i18nCatalog("uranium")
 from cura.CuraApplication import CuraApplication
 from UM.Resources import Resources
-
+from PyQt5.QtWidgets import QApplication
 
 class CrealityCloudUtils(QObject):
 
@@ -102,6 +104,7 @@ class CrealityCloudUtils(QObject):
 
     saveStlEnd = pyqtSignal(list)
     createModelsStarted = pyqtSignal()
+    addModelsStarted = pyqtSignal()
 
     loginSuccess = pyqtSignal(int, str, str, str)
 
@@ -341,7 +344,7 @@ class CrealityCloudUtils(QObject):
             obj_file = self._gzipFilePath
             self._ossKey = self._bucketInfo["prefixPath"] + "/" + \
                 self.getFileMd5(obj_file) + ".gcode.gz"          
-        elif type == 2:
+        elif type == 2 or type == 3:
             obj_file = filename           
             self.setOssKey(self.getFileKey(self.getFileMd5(obj_file), 0))
             self._uploadFileList.append(obj_file)
@@ -368,6 +371,11 @@ class CrealityCloudUtils(QObject):
             self._uploadFileCounts += 1
             if self._uploadFileCounts ==  len(self._uploadFileList):
                 self.createModelsStarted.emit()
+                self._uploadFileCounts = 0
+        elif job.getType() == 3:
+            self._uploadFileCounts += 1
+            if self._uploadFileCounts ==  len(self._uploadFileList):
+                self.addModelsStarted.emit()
                 self._uploadFileCounts = 0
 
     def _onUploadFileJobProgress(self, job: Job, progress: float) -> None:
@@ -570,6 +578,15 @@ class CrealityCloudUtils(QObject):
         else:
             raise Exception("get filekey error: "+json.dumps(response))
 
+    @pyqtSlot(str, result=int)
+    def getFileSize(self, file: str) -> int:
+        size = os.path.getsize(file)       
+        return size
+
+    @pyqtSlot(str, result=str)
+    def getFileName(self, filepath: str) -> str:
+        return os.path.basename(filepath)
+
     def getModelGroupCreateRes(self, categoryId:int, groupName:str, groupDesc:str, bShare:bool, modelType:int, license:str, bIsOriginal:bool) -> str:
         url = self._cloudUrl + "/api/cxy/model/modelGroupCreate"      
         modelList = []
@@ -590,6 +607,33 @@ class CrealityCloudUtils(QObject):
         self._uploadFileList.clear()
         return response
 
+    def getModelGroupAddRes(self, groupId: str) -> str:
+        url = self._cloudUrl + "/api/cxy/model/modelGroupEdit"
+        modelList = []
+        length = len(self._filekeyList)
+        for i in range(length):
+            itemDict = {
+                "fileKey":self._filekeyList[i], "fileName":os.path.basename(self._uploadFileList[i]), "fileSize":os.path.getsize(self._uploadFileList[i])
+            }
+            modelList.append(itemDict)
+
+        contentDict = {
+            "hasGroup": False,
+            "groupItem": {"id": groupId},
+            "hasModel": True,
+            "modelList": modelList,
+            "isClearCovers": False
+        }
+        response = requests.post(url, data=json.dumps(contentDict), headers=self.getCommonHeaders()).text
+
+        self._filekeyList.clear()
+        self._uploadFileList.clear()
+        return response
+
+    @pyqtSlot(str)
+    def addToClipboard(self, content: str) -> None:
+        cb = QApplication.clipboard()   
+        cb.setText(content)
 
 class DownloadJob(Job):
     def __init__(self, urls: List[str], filepaths: List[str]):

@@ -59,7 +59,8 @@ BasicDialog
             width: parent.width/2
             spacing: 5
             Rectangle {
-                width: parent.width - (okbtn.width*btnCount+5*btnCount)
+                width: btnCount == 2 ? parent.width - (okbtn.width+cancelbtn.width+5*btnCount) :
+                        parent.width - (okbtn.width+5*btnCount)
                 height: 1
                 color: "transparent"
             }

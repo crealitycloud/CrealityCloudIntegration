@@ -9,7 +9,7 @@ Window {
     width: 300
     height: 200
     property string title: ""
-    property var titleBackground:  UM.Theme.getColor("main_window_header_background")
+    property var titleBackground:  UM.Theme.getColor("viewport_overlay")
     property var contentBackground: "transparent"
     property var borderColor: UM.Theme.getColor("border")
     property var titleIcon: ""
