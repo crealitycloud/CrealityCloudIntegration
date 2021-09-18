@@ -200,11 +200,14 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         else:
             self._modelBrowserDialog.showMessage(response["msg"])
     
-    @pyqtSlot("QStringList", "QStringList")
-    def importModel(self, urls: List[str], filenames: List[str]) -> None:
-        dir = self._utils.modelGcodeDir
-        if not os.path.exists(dir):
-            os.makedirs(dir, exist_ok=True)
+    @pyqtSlot("QStringList", "QStringList", int)
+    def importModel(self, urls: List[str], filenames: List[str], category: int) -> None:
+        dir = self._utils.getModelDir()
+        if category == 2:
+            dir = self._utils.getMymodelDir()
+        elif category == 3:
+            dir = self._utils.getMygcodeDir()
+
         count = len(filenames)
 
         for index in range(count):
@@ -215,8 +218,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             filenames[index] = filepath
         self._utils.downloadModel(self._modelBrowserDialog.property("selCategory"), urls, filenames)
     
-    @pyqtSlot(str, int)
-    def importModelGroup(self, modelGroupId: str, count: int) -> None:
+    @pyqtSlot(str, int, int)
+    def importModelGroup(self, modelGroupId: str, count: int, category: int) -> None:
         strjson = self._utils.getModelGroupDetailInfo(1, count, modelGroupId)
         response = json.loads(strjson)
         modelUrls = []
@@ -229,17 +232,22 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
                     modelUrls.append(url)
                     modelNames.append(name)
             if modelUrls and modelNames:
-                self.importModel(modelUrls, modelNames)
+                self.importModel(modelUrls, modelNames, category)
         except Exception as e:
             Logger.log("e", e)
 
     def _clearTmpfiles(self) -> None:
-        dir = self._utils.modelGcodeDir
-        if not os.path.exists(dir):
+        self._delfiles(self._utils.getModelDir())
+        self._delfiles(self._utils.getMymodelDir())
+        self._delfiles(self._utils.getMygcodeDir())
+        self._delfiles(self._utils.getUploadfileDir())
+
+    def _delfiles(self, dirpath: str) -> None:
+        if not os.path.exists(dirpath):
             return
         filename = ""
         try:
-            for root, dirs, files in os.walk(dir):
+            for root, dirs, files in os.walk(dirpath):
                 for name in files:
                     filename = os.path.join(root, name)
                     os.remove(filename)
@@ -419,7 +427,7 @@ class STLOutputDevice(OutputDevice):
         else:
             file_writer = CuraApplication.getInstance().getMeshFileHandler().getWriter('STLWriter')
         try:
-            dir = CrealityCloudUtils.getInstance().modelGcodeDir
+            dir = CrealityCloudUtils.getInstance().getUploadfileDir()
             if not os.path.exists(dir):
                 os.makedirs(dir, exist_ok=True)
             filename = ''

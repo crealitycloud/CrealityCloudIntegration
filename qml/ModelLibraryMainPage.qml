@@ -224,7 +224,7 @@ Window{
 
     function onSigButtonDownClicked(modelGid, count)//mainPage：download model group
     {       
-        ManageModelBrowser.importModelGroup(modelGid, count);
+        ManageModelBrowser.importModelGroup(modelGid, count, selCategory);
     }
 
     function slotBtnDelClicked(id)//1 mainPage and detail: delete my model group;  2 delete mygcode
@@ -302,7 +302,7 @@ Window{
             urlList.push(url);
             fileList.push("%1.stl".arg(filename));
         }
-        ManageModelBrowser.importModel(urlList, fileList)
+        ManageModelBrowser.importModel(urlList, fileList, selCategory)
     }
 
     function onDownloadModel(name, url)//detailPage：download a single model
@@ -310,7 +310,7 @@ Window{
         var urlList = []; var fileList = []
         urlList.push(url);
         fileList.push("%1.stl".arg(name));
-        ManageModelBrowser.importModel(urlList, fileList)
+        ManageModelBrowser.importModel(urlList, fileList, selCategory)
     }
 
     function flushModelLLByScroll()//Scroll to refresh
@@ -939,7 +939,7 @@ Window{
                             }
                             
                             fileList.push("%1.gz".arg(name));
-                            ManageModelBrowser.importModel(urlList, fileList)
+                            ManageModelBrowser.importModel(urlList, fileList, selCategory)
                         }
                         /*onSigBtnPrtClicked():{//url
 

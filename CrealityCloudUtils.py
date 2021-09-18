@@ -80,11 +80,15 @@ class CrealityCloudUtils(QObject):
         self._tokenFile = os.path.join(self._appDataFolder, "token")
         self._urlFile = os.path.join(self._appDataFolder, "cloudurl")
         self._defaultFileName = ""
-        self._fileName = ""# gcode file name
+        self._fileName = ""# gcode file name "No suffix"
 
         self._isLogin = False
         self._loginDlg = None
-        self.modelGcodeDir = os.path.join(self._appDataFolder, "model_gcode")
+        self._modelsDir = os.path.join(self._appDataFolder, "models")
+        self._mymodelDir = os.path.join(self._appDataFolder, "mymodels")
+        self._mygcodesDir = os.path.join(self._appDataFolder, "mygcodes")
+        self._uploadfilesDir = os.path.join(self._appDataFolder, "uploadfiles")
+
         self._downloadType = 0 # 1 and 2: stl, 3: gcode
         self._isDownloading = False
         self._downfileCount = 0
@@ -140,6 +144,22 @@ class CrealityCloudUtils(QObject):
         #         break
         # return macAddress
         return str(uuid.uuid1())[-12:]
+
+    def getModelDir(self) -> str:
+        os.makedirs(self._modelsDir, exist_ok=True)
+        return self._modelsDir
+    
+    def getMymodelDir(self) -> str:
+        os.makedirs(self._mymodelDir, exist_ok=True)
+        return self._mymodelDir
+
+    def getMygcodeDir(self) -> str:
+        os.makedirs(self._mygcodesDir, exist_ok=True)
+        return self._mygcodesDir
+
+    def getUploadfileDir(self) -> str:
+        os.makedirs(self._uploadfilesDir, exist_ok=True)
+        return self._uploadfilesDir
 
     @pyqtSlot(str, str, str, str)
     def saveToken(self, token: str, userId: str, userImg: str, userName: str) -> None:
@@ -224,7 +244,7 @@ class CrealityCloudUtils(QObject):
     @pyqtSlot(str)
     def saveUploadFile(self, fileName: str) -> None:
         self._fileName = fileName + ".gcode"
-        self._filePath = os.path.join(self._appDataFolder, self._fileName)
+        self._filePath = os.path.join(self.getUploadfileDir(), self._fileName)
         self.saveGCodeStarted.emit(self._filePath)
 
     @pyqtSlot(result=str)
@@ -367,7 +387,7 @@ class CrealityCloudUtils(QObject):
     def _onUploadFileJobFinished(self, job: Job) -> None:
         if job.getType() == 1:
             self.commitFile()
-        elif job.getType() == 2:
+        elif job.getType() == 2:            
             self._uploadFileCounts += 1
             if self._uploadFileCounts ==  len(self._uploadFileList):
                 self.createModelsStarted.emit()
@@ -579,13 +599,14 @@ class CrealityCloudUtils(QObject):
             raise Exception("get filekey error: "+json.dumps(response))
 
     @pyqtSlot(str, result=int)
-    def getFileSize(self, file: str) -> int:
+    def getFileSize(self, file: str) -> int: #The unit is B
         size = os.path.getsize(file)       
         return size
 
     @pyqtSlot(str, result=str)
-    def getFileName(self, filepath: str) -> str:
-        return os.path.basename(filepath)
+    def getFileName(self, filepath: str) -> str: #"No suffix"
+        name = os.path.basename(filepath)
+        return os.path.splitext(name)[0]
 
     def getModelGroupCreateRes(self, categoryId:int, groupName:str, groupDesc:str, bShare:bool, modelType:int, license:str, bIsOriginal:bool) -> str:
         url = self._cloudUrl + "/api/cxy/model/modelGroupCreate"      
@@ -593,7 +614,7 @@ class CrealityCloudUtils(QObject):
         length = len(self._filekeyList)
         for i in range(length):
             itemDict = {
-                "fileKey":self._filekeyList[i], "fileName":os.path.basename(self._uploadFileList[i]), "fileSize":os.path.getsize(self._uploadFileList[i])
+                "fileKey":self._filekeyList[i], "fileName":self.getFileName(self._uploadFileList[i]), "fileSize":os.path.getsize(self._uploadFileList[i])
             }
             modelList.append(itemDict)
 
@@ -604,6 +625,8 @@ class CrealityCloudUtils(QObject):
 
         response = requests.post(url, data=json.dumps(contentDict), headers=self.getCommonHeaders()).text
         self._filekeyList.clear()
+        for tmpfile in self._uploadFileList:
+            os.remove(tmpfile)
         self._uploadFileList.clear()
         return response
 
@@ -613,7 +636,7 @@ class CrealityCloudUtils(QObject):
         length = len(self._filekeyList)
         for i in range(length):
             itemDict = {
-                "fileKey":self._filekeyList[i], "fileName":os.path.basename(self._uploadFileList[i]), "fileSize":os.path.getsize(self._uploadFileList[i])
+                "fileKey":self._filekeyList[i], "fileName":self.getFileName(self._uploadFileList[i]), "fileSize":os.path.getsize(self._uploadFileList[i])
             }
             modelList.append(itemDict)
 
