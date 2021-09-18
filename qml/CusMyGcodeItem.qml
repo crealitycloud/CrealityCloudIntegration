@@ -29,7 +29,7 @@ Item{
         contentItem: Rectangle{
             anchors.fill: parent
             color: isSelected ? "#F1F1F1" : 
-                    (idBtn.hovered ? "#F1F1F1" : UM.Theme.getColor("main_background"))
+                    (idBtn.hovered ? Qt.lighter(UM.Theme.getColor("main_background")) : UM.Theme.getColor("main_background"))
             Row{
                 x: 40; y: 5;
                 height: parent.height-10;
@@ -72,7 +72,7 @@ Item{
                         verticalAlignment: Qt.AlignVCenter
                         text: model.gcodeFilename
                         elide: Text.ElideRight
-                        color: "black"
+                        color: isSelected ? "black" : UM.Theme.getColor("text")
                         font.family: "Source Han Sans CN Normal"
                         font.pixelSize: 12
                         font.weight: Font.Normal
@@ -104,7 +104,7 @@ Item{
                                 return model.gcodeFileSize+"B"
                             }
                         }
-                        color: "#333333"
+                        color: isSelected ? "#333333" : UM.Theme.getColor("text")
                         font.family: "Source Han Sans CN Normal"
                         font.pixelSize: 12
                         font.weight: Font.ExtraLight

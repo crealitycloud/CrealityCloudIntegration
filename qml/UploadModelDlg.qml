@@ -2,6 +2,7 @@ import QtQuick 2.10
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.0
 import QtQuick.Dialogs 1.1
+import QtGraphicalEffects 1.0
 import UM 1.1 as UM
 import Cura 1.1 as Cura
 
@@ -289,36 +290,15 @@ BasicDialog{
                     ListElement{text : "CC0 1.0";}
                 }
                 textRole: "text"
-            }   
-            Button {
+            }
+            BasicCircularButton {
                 id : idLicenseExplain
-                width: 16
-                height: 16
                 anchors{                       
                     verticalCenter: parent.verticalCenter
                 }
-                Rectangle {
-                    width: parent.width
-                    height: parent.height
-                    Image{
-                        width: parent.width
-                        height: parent.height  
-                        mipmap: true
-                        smooth: true
-                        cache: false
-                        asynchronous: true
-                        fillMode: Image.PreserveAspectFit
-                        source: idLicenseExplain.hovered ? "../res/model_license_h.png" : 
-                                    "../res/model_license.png"
-                    }                  
-                }
-                background: Rectangle {
-                    implicitWidth: parent.width
-                    implicitHeight: parent.height
-                    radius: parent.width/2
-                    color: "transparent"
-                }
-                onClicked:{
+                btnImgN: "../res/model_license.png"
+                btnImgH: "../res/model_license_h.png"
+                onClicked: {
                     idLicenseDesDlg.visible = true
                 }
             }
@@ -408,7 +388,7 @@ BasicDialog{
             background: Rectangle {   
                 implicitWidth: progressBar.width
                 implicitHeight: progressBar.height
-                color: "#303030"
+                color: Qt.lighter(UM.Theme.getColor("text"))//"#303030"
             }
 
             contentItem: Item {  

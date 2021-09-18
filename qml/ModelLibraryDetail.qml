@@ -28,7 +28,7 @@ Item{
 
     Row{
         BasicSkinButton{
-            width: 20; height: 22
+            width: 22; height: 32
             imgW:width; imgH:height;
             tipText: catalog.i18nc("@Tip:Button", "Return")
             btnImgNormal: "../res/btn_back.png"
@@ -47,7 +47,7 @@ Item{
             Image{
                 id: idDetailImage
                 width: idDetailPage.width/2
-                height: idDetailPage.width/2
+                height: Math.min(idDetailPage.height/2, idDetailPage.width/2)
                 asynchronous: true
                 mipmap: true
                 smooth: true
@@ -57,14 +57,56 @@ Item{
             }
             ScrollView{
                 width: (idDetailPage.width-10)/2
-                height: 50
-                ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+                height: 70
+                ScrollBar.horizontal.policy: ScrollBar.AsNeeded
                 clip : true
                 Row
                 {
                     id: idModelDetailListImage
                     spacing: 5
                 }
+            }
+            Rectangle {
+                width: idDetailPage.width/2
+                height: idDetailPage.height/2 -70-32-10
+                color: "transparent"
+                Column {
+                    spacing: 5
+                    Row {
+                        spacing: 5
+                        Label {
+                            id: idLicenseLabel
+                            width: Math.ceil(contentWidth)
+                            height: 30
+                            text: catalog.i18nc("@title:Label", "Creative Commons License")
+                            verticalAlignment: Text.AlignVCenter
+                            font: UM.Theme.getFont("medium_bold")
+                            renderType: Text.NativeRendering                
+                            color: UM.Theme.getColor("text")
+                        }
+
+                        BasicCircularButton {
+                            id : idLicenseExplain
+                            anchors{                       
+                                verticalCenter: parent.verticalCenter
+                            }
+                            btnImgN: "../res/model_license.png"
+                            btnImgH: "../res/model_license_h.png"
+                            onClicked: {
+                                idLicenseDesDlg.visible = true
+                            }
+                        }
+                    }
+                    Label {
+                        id: idLicenseDesLabel
+                        width: 325
+                        height: 15
+                        text: catalog.i18nc("@title:Label", "Please check the copyright information in the description.")
+                        font: UM.Theme.getFont("default")
+                        renderType: Text.NativeRendering                
+                        color: UM.Theme.getColor("text")
+                    }
+                }   
             }
         }                    
         Column{
@@ -183,5 +225,9 @@ Item{
                 }
             }
         }
+    }
+    LicenseDescriptionDlg{
+        id:idLicenseDesDlg
+        visible:false
     }
 }

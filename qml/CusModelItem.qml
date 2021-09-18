@@ -29,10 +29,10 @@ Item{
             btnRadius: 0
             btnBorderW: 0
             pixSize: 12
-            btnTextColor: btnIsSelected? "white" : "#666666"
+            btnTextColor: btnIsSelected? "white" : UM.Theme.getColor("text")//"#999999"
             btnText.width: width-10
             defaultBtnBgColor: "transparent"
-            hoveredBtnBgColor: "#E1E1E1"
+            hoveredBtnBgColor: Qt.lighter(UM.Theme.getColor("main_background"))//"#E1E1E1"
             selectedBtnBgColor: "#1E9BE2"
             btnSelected: btnIsSelected
             text: modelname

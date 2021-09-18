@@ -616,7 +616,6 @@ BasicDialog {
                         anchors.topMargin: 40
                         enabled: false
                         hoveredBtnBgColor: defaultBtnBgColor
-                        btnTextColor: "#0078D7"
                         onSigButtonClicked: {
                             var phone = phoneSelectModel.get(phoneSelect.currentIndex).phone + phoneField.text
                             CloudAPI.getVerCode(phone, function(data) {

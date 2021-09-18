@@ -148,8 +148,8 @@ Window{
                 for( var key in objResult){
                     var imageNumber = Number(key) +1
                     var obj = componentButton.createObject(idModelLibraryDetail.modelDetailImgList, {
-                                                                        "width": 30,
-                                                                        "height": 30,
+                                                                        "width": 60,
+                                                                        "height": 60,
                                                                         "keystr": imageNumber,
                                                                         "modelid": objResult[key].id,
                                                                         "btnImgUrl": objResult[key].coverUrl})  
@@ -553,7 +553,7 @@ Window{
             BasicSkinButton{
                 id: idBackMainPage
                 visible: false;
-                width: 20; height: 22
+                width: 22; height: 32
                 imgW:width; imgH:height;
                 tipText: catalog.i18nc("@Tip:Button", "Return to the home page")
                 btnImgNormal: "../res/btn_back.png"
