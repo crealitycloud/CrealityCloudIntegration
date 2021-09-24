@@ -910,6 +910,7 @@ Window{
                     hoverEnabled: true
                     z: 1
                 }
+                ScrollBar.horizontal: ScrollBar {}
                 ListView{
                     id: idMyGcodeListV
                     anchors.fill: parent
@@ -921,6 +922,7 @@ Window{
                     delegate: CusMyGcodeItem
                     {
                         width: parent.width;
+                        height: 46
                         onSigBtnDownClicked:{//url name
                             var urlList = []; var fileList = []
                             urlList.push(url);
@@ -941,9 +943,8 @@ Window{
                             fileList.push("%1.gz".arg(name));
                             ManageModelBrowser.importModel(urlList, fileList, selCategory)
                         }
-                        /*onSigBtnPrtClicked():{//url
-
-                        }*/
+                        //onSigBtnPrtClicked():{//url
+                        //}
                         onSigBtnDelClicked:{
                             slotBtnDelClicked(gcodeId)
                         }
@@ -958,7 +959,7 @@ Window{
                     }
                 }              
             }
-        }
+        }       
     }
 //-------------------------------------add model-------------------------------------------
     AddModelDlg{
@@ -997,6 +998,7 @@ Window{
     AnimatedImage {
         id: idLoadingImg
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenterOffset: -50
         anchors.top: parent.top;
         anchors.topMargin: 12;
         visible: {

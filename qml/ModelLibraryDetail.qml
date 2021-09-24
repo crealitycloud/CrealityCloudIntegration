@@ -180,8 +180,8 @@ Item{
                 }
                 BasicSkinButton{
                     id: idAddBtn
-                    width: 20; height: 22
-                    imgW:width; imgH:height;
+                    width: 22; height: 22
+                    imgW:width; imgH:18;
                     tipText: catalog.i18nc("@Tip:Button", "Upload models")
                     btnImgNormal: "../res/btn_add.png"
                     btnImgHovered: "../res/btn_add_h.png"

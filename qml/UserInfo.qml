@@ -25,21 +25,19 @@ BasicDialog {
         userId = tuserId
         dialog.show();
     }
-    Column{
+    Item{
         anchors.fill: parent
         anchors.topMargin: titleHeight
         anchors.bottomMargin: 1
         anchors.leftMargin: 1
         anchors.rightMargin: 1
-        spacing: 10
-        Rectangle{
-            width: 1
-            height: 5
-        }
+        
         BasicCircularImage{
             id: iduserImg
             width: 70; height: 70
             img_src: userImg
+            anchors.top: parent.top
+            anchors.topMargin: 20
             anchors.horizontalCenter: parent.horizontalCenter
         }
         Label{
@@ -48,7 +46,10 @@ BasicDialog {
             text: userName
             color: UM.Theme.getColor("text")
             font: UM.Theme.getFont("default")
+            anchors.top: iduserImg.bottom
+            anchors.topMargin: 10
             anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: Text.AlignHCenter
         }
         Label{
             id: id_userid
@@ -56,19 +57,23 @@ BasicDialog {
             text: userId
             color: UM.Theme.getColor("text")
             font: UM.Theme.getFont("default")
+            anchors.top: iduserName.bottom
+            anchors.topMargin: 5
             anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment: Text.AlignHCenter
         }
         BasicButton{
             id: idLoginBtn
             width: 140; height: 36
             text: catalog.i18nc("@text:btn", "Log out")
             hoveredBtnBgColor: defaultBtnBgColor
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 24
             anchors.horizontalCenter: parent.horizontalCenter
             onSigButtonClicked: {
                 close();
                 sigLogout();
             }
-        }
+        }       
     }
-    
 }

@@ -760,9 +760,15 @@ class UploadFileJob(Job):
         bucket = oss2.Bucket(
             auth, self._bucketInfo["endpoint"], self._bucketInfo["bucket"])
 
+        headers = dict()
+        filename = os.path.basename(self._uploadFilePath)
+        filename = filename.encode('utf-8').decode('unicode_escape')
+        headers['Content-Disposition'] = 'attachment;filename=' + filename
+        headers['mime'] = 'application/x-www-form-urlencoded'
+
         totalSize = os.path.getsize(self._uploadFilePath)
         partSize = determine_part_size(totalSize, preferred_size=100 * 1024)
-        uploadId = bucket.init_multipart_upload(self._ossKey).upload_id
+        uploadId = bucket.init_multipart_upload(self._ossKey, headers=headers).upload_id
         parts = []
         with open(self._uploadFilePath, 'rb') as fileobj:
             part_number = 1
@@ -776,7 +782,7 @@ class UploadFileJob(Job):
                 offset += num_to_upload
                 part_number += 1
                 self.progress.emit(Job, offset/totalSize)
-        bucket.complete_multipart_upload(self._ossKey, uploadId, parts)
+        bucket.complete_multipart_upload(self._ossKey, uploadId, parts, headers=headers)
 
         # Check integrity
         # with open(self._uploadFilePath, 'rb') as fileobj:
