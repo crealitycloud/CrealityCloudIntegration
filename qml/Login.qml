@@ -59,7 +59,7 @@ BasicDialog {
 
     function showMessage(text) {
         msgDialog.myContent = text;
-        msgDialog.visible = true
+        msgDialog.show()
     }
 
     function saveToken(token, userId, userImg, userName) {
@@ -192,18 +192,19 @@ BasicDialog {
     }
 
     function loginScuess(token, userId) {
-        
+        showBusy()
         CloudUtils.setLogin(true);
-        CloudAPI.getUserInfo(token, userId, function(data) {              
+        CloudAPI.getUserInfo(token, userId, function(data) {
+            hideBusy()
             if (data["code"] === 0) {
                 userImg = data["result"]["userInfo"]["base"]["avatar"]
                 userName = data["result"]["userInfo"]["base"]["nickName"]
                 //var userid = data["result"]["userInfo"]["base"]["userId"]                
-                pluginRootWindow.hide()
                 pluginRootWindow.saveToken(token, userId, userImg, userName)
 
                 sigLoginSuccess(nextPage, userImg, userName, userId);
-                sigLoginRes(userImg, userName, userId)                      
+                sigLoginRes(userImg, userName, userId) 
+                pluginRootWindow.close();                     
             }
         })
 
@@ -213,7 +214,7 @@ BasicDialog {
         id: msgDialog
         mytitle: catalog.i18nc("@Tip:title", "Error")     
         onAccept: {
-            msgDialog.visible = false
+            msgDialog.close()
         }
     }
        
@@ -1044,13 +1045,13 @@ BasicDialog {
                 hideBusy()
                 if (data["code"] === 0) {
                     CloudUtils.setLogin(true);
-                    pluginRootWindow.hide()
+                    
                     userImg = data["result"]["userInfo"]["base"]["avatar"]
                     userName = data["result"]["userInfo"]["base"]["nickName"]
                     //var userid = data["result"]["userInfo"]["base"]["userId"]
-
                     sigLoginSuccess(nextPage, userImg, userName, userId);
                     sigLoginRes(userImg, userName, userId)
+                    pluginRootWindow.close();
                 }else {                   
                     CloudUtils.setLogin(false);
                 }

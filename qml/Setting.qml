@@ -73,7 +73,7 @@ BasicDialog
 
             CloudUtils.saveUrl(env)
             CloudUtils.autoSetUrl()
-            close();
+            settingWindow.close();
         }
     }
 

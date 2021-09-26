@@ -71,7 +71,7 @@ BasicDialog {
             anchors.bottomMargin: 24
             anchors.horizontalCenter: parent.horizontalCenter
             onSigButtonClicked: {
-                close();
+                dialog.close();
                 sigLogout();
             }
         }       

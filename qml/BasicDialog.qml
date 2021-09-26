@@ -86,9 +86,9 @@ Window {
             height: parent.height
             implicitWidth: 30
             anchors.right: parent.right
-            onClicked: {
-                base.visible = false;
+            onClicked: {            
 				dialogClosed()
+                base.close();
             }
             contentItem: Item
             {

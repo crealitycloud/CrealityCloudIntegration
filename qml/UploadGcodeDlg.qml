@@ -47,7 +47,7 @@ BasicDialog {
 
     function showMessage(text) {
         msgDialog.myContent = text;
-        msgDialog.visible = true
+        msgDialog.show()
     }
     
     function progress(per) {
@@ -120,7 +120,7 @@ BasicDialog {
                     CloudUtils.clearToken()
 
                     CloudUtils.setLogin(false);
-                    close();
+                    sendViewRoot.close();
                 }
             }
 
@@ -202,7 +202,7 @@ BasicDialog {
                 id: msgDialog
                 mytitle: catalog.i18nc("@Tip:title", "Error")
                 onAccept: {
-                    msgDialog.visible = false
+                    msgDialog.close()
                 }
             }
         }

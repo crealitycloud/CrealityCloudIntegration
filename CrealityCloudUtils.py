@@ -320,7 +320,7 @@ class CrealityCloudUtils(QObject):
         headers = {
             "Content-Type": "application/json; charset=UTF-8",
             "__CXY_APP_ID_": "creality_model",
-            "__CXY_OS_LANG_": "0",
+            "__CXY_OS_LANG_": self.getLangCode(),
             "__CXY_DUID_": self._duid,
             "__CXY_OS_VER_": self._osVersion,
             "__CXY_PLATFORM_": "6",

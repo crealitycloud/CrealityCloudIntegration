@@ -230,7 +230,7 @@ Window{
     function slotBtnDelClicked(id)//1 mainPage and detail: delete my model group;  2 delete mygcode
     {
         deleteDialog.modelGOrGcodeid = id;
-        deleteDialog.visible = true;
+        deleteDialog.show()
     }
 
     function shareLink(modelGid)
@@ -376,7 +376,7 @@ Window{
 
     function showMessage(text) {
         msgDialog.myContent = text;
-        msgDialog.visible = true
+        msgDialog.show()
     }
 
     function showNofoundTip(isShow)
@@ -504,8 +504,8 @@ Window{
         idModelTypeComboBox.visible = false;
         idSearch.visible = false;
         idSearchLabel.visible = false;
-        var isLogin = CloudUtils.getLogin();
-        idLoginBtn.visible = !isLogin;
+        //var isLogin = CloudUtils.getLogin();
+        idLoginBtn.visible = false//!isLogin;
 
         idBackMainPage.visible = true
         idSearch.visible = true
@@ -803,6 +803,7 @@ Window{
                     width: parent.width
                     height: 50
                     horizontalAlignment: Text.AlignHCenter
+                    z: 1
                     visible: false;
                     font: UM.Theme.getFont("medium")
                     renderType: Text.NativeRendering
@@ -975,7 +976,7 @@ Window{
         id: msgDialog
         mytitle: catalog.i18nc("@Tip:title", "Tip")
         onAccept: {
-            msgDialog.visible = false
+            msgDialog.close()
         }
     }
     BasicMessageDialog{
@@ -985,14 +986,14 @@ Window{
         myContent: catalog.i18nc("@Tip:content", "Are you sure to delete?")       
         property var modelGOrGcodeid: ""
         onAccept:{
-            deleteDialog.visible = false
+            deleteDialog.close()
             if(selCategory == 2)
                 ManageModelBrowser.deleteModelGroup(modelGOrGcodeid)
             else if(selCategory ==3)
                 ManageModelBrowser.deleteGcode(modelGOrGcodeid)
         }
         onCancel:{
-            deleteDialog.visible = false
+            deleteDialog.close()
         }
     }
     AnimatedImage {

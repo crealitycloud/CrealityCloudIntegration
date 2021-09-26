@@ -18,7 +18,7 @@ BasicDialog{
 
     function showMessage(text) {
         msgDialog.myContent = text;
-        msgDialog.visible = true
+        msgDialog.show()
     }
 
     function clearUI() {
@@ -280,7 +280,7 @@ BasicDialog{
         id: msgDialog
         mytitle: catalog.i18nc("@Tip:title", "Tip")
         onAccept: {
-            msgDialog.visible = false
+            msgDialog.close()
         }
     }
 }

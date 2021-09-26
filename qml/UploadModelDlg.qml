@@ -5,6 +5,7 @@ import QtQuick.Dialogs 1.1
 import QtGraphicalEffects 1.0
 import UM 1.1 as UM
 import Cura 1.1 as Cura
+import "../js/Validator.js" as Validator
 
 BasicDialog{
     id: idDialog
@@ -71,6 +72,26 @@ BasicDialog{
         for ( var key in objResult ) {
             idGroupTypeModel.append({"key": objResult[key].id, "modelData": objResult[key].name})
         }
+    }
+    function showMessage(text) {
+        msgDialog.myContent = text;
+        msgDialog.show()
+    }
+    function checkFilename(name){console.log("str:--",name,"--")
+        var v = new Validator.Validator();
+        var fileName = name;
+        // File name cannot be empty
+        if (!v.required(fileName) || fileName.indexOf(' ') !== -1) {
+            showMessage(catalog.i18nc("@error", "File name cannot be empty"))
+            return false
+        }
+        // File name cannot have special symbols
+        if (fileName.indexOf(":") !== -1 || fileName.indexOf('\"') !== -1  || fileName.indexOf("|") !== -1 || fileName.indexOf("*") !== -1) {
+            showMessage(catalog.i18nc("@error", "File name can't contain *, | , \", : symbols"))
+            return false
+        }
+
+        return true
     }
     Item{
         id: idLogoImageColumn
@@ -318,9 +339,15 @@ BasicDialog{
             hoveredBtnBgColor: defaultBtnBgColor
             text: catalog.i18nc("@text:btn", "Upload")
             fontWeight: Font.Bold
-            enabled: (idModelGroupInput.text != "")&&(idDescText.text != "")
+            enabled: (idModelGroupInput.text != "")&&(idDescText.text != "")           
             onSigButtonClicked:
             {
+                if(!checkFilename(idModelGroupInput.text))
+                    return;
+
+                if(!checkFilename(idDescText.text))
+                    return;
+                
                 idLogoImageColumn.visible = false
                 grid_wrapper.visible = false
                 idBtnGroup.visible = false
@@ -433,7 +460,13 @@ BasicDialog{
             }
         }
     }
-
+    BasicMessageDialog{
+        id: msgDialog
+        mytitle: catalog.i18nc("@Tip:title", "Error")
+        onAccept: {
+            msgDialog.close()
+        }
+    }
     LicenseDescriptionDlg{
         id:idLicenseDesDlg
         visible:false
