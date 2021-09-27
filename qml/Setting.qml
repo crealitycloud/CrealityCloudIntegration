@@ -32,13 +32,10 @@ BasicDialog
 
             Text {
                 id: set1
-<<<<<<< HEAD:Setting.qml
                 text: qsTr("Server")
                 font.family: "Verdana"
-=======
                 text: catalog.i18nc("@title:Label", "Server")
                 font.family: "Tahoma"
->>>>>>> origin/feature/modelBrowse:qml/Setting.qml
                 verticalAlignment: Text.AlignVCenter
                 height: parent.height
                 font.pixelSize: 15

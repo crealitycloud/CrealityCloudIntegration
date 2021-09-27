@@ -197,14 +197,13 @@ BasicDialog {
         CloudAPI.getUserInfo(token, userId, function(data) {
             hideBusy()
             if (data["code"] === 0) {
+                pluginRootWindow.close();
                 userImg = data["result"]["userInfo"]["base"]["avatar"]
                 userName = data["result"]["userInfo"]["base"]["nickName"]
                 //var userid = data["result"]["userInfo"]["base"]["userId"]                
                 pluginRootWindow.saveToken(token, userId, userImg, userName)
-
                 sigLoginSuccess(nextPage, userImg, userName, userId);
-                sigLoginRes(userImg, userName, userId) 
-                pluginRootWindow.close();                     
+                sigLoginRes(userImg, userName, userId)               
             }
         })
 
@@ -1045,13 +1044,12 @@ BasicDialog {
                 hideBusy()
                 if (data["code"] === 0) {
                     CloudUtils.setLogin(true);
-                    
+                    pluginRootWindow.close();
                     userImg = data["result"]["userInfo"]["base"]["avatar"]
                     userName = data["result"]["userInfo"]["base"]["nickName"]
                     //var userid = data["result"]["userInfo"]["base"]["userId"]
                     sigLoginSuccess(nextPage, userImg, userName, userId);
                     sigLoginRes(userImg, userName, userId)
-                    pluginRootWindow.close();
                 }else {                   
                     CloudUtils.setLogin(false);
                 }
