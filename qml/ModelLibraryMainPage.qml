@@ -251,7 +251,7 @@ Window{
             isDetailPage = false;
             idModelLibraryDetail.visible = false
             idModelLibraryContent.visible = true
-
+            idTopInfoArea.visible = true;
             idSearch.enabled = true
         }
 
