@@ -4,7 +4,6 @@ from PyQt5.QtCore import QObject
 from PyQt5.QtGui import *
 from PyQt5.QtNetwork import *
 from PyQt5.QtQml import *
-# from PyQt5.QtQuick import (QQuickView)
 
 from UM.Application import Application
 from UM.Logger import Logger
@@ -28,13 +27,14 @@ class CrealityCloudOutputDevice(OutputDevice):
         self.setDescription(catalog.i18nc(
             "@action:button Preceded by 'Ready to'.", "Upload to Creality Cloud"))
         self.setIconName("upload_gcode")
-        self.utils = CrealityCloudUtils()
+        self.utils = CrealityCloudUtils.getInstance()
         self.utils.saveGCodeStarted.connect(self.saveGCode)
-
+        self.utils.loginSuccess.connect(self.slotshowUploadGcodeDlg)
         self.plugin_window = None
         self._writing = False
         self._nodes = None
         self._stream = None
+        self._loginDlg = None
 
     def requestWrite(self, nodes, file_name = None, limit_mimetypes = None, file_handler = None, **kwargs) -> None:
         if self._writing:
@@ -48,17 +48,30 @@ class CrealityCloudOutputDevice(OutputDevice):
             self.plugin_window = None
         self.writeStarted.emit(self)
 
-        self.plugin_window = self._createDialogue()
-        self.plugin_window.show()
+        if self.utils.getLogin():
+            self.plugin_window = self._createDialogue()
+            self.plugin_window.show()
+        else:           
+            self._showLoginDlg()           
 
     def _createDialogue(self) -> QObject:
-        Application.getInstance()._qml_engine.rootContext().setContextProperty("CloudUtils", self.utils)
-        # Application.getInstance()._qml_engine.rootContext(
-        # ).setContextProperty("catalog", catalog)
-        qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), "PluginMain.qml")
+        qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), "qml/UploadGcodeDlg.qml")
         component = Application.getInstance().createQmlComponent(qml_file)
-        
         return component
+
+    def slotshowUploadGcodeDlg(self, type: int) -> None:
+        if type == 4:
+            if self.plugin_window is None:
+                self.plugin_window = self._createDialogue()
+            self.plugin_window.show()
+
+
+    def _showLoginDlg(self) -> None:
+        if not self._loginDlg:
+            self._loginDlg = self.utils.getLoginDlg()
+        if self._loginDlg:
+            self._loginDlg.setProperty("nextPage", 4)
+            self._loginDlg.show()
 
     def saveGCode(self, file_name: str) -> None:
         file_writer = Application.getInstance().getMeshFileHandler().getWriter("GCodeWriter")
@@ -96,11 +109,9 @@ class CrealityCloudOutputDevice(OutputDevice):
         if job.getResult():
             self.writeSuccess.emit(self)
             job.getStream().close()
-            self.utils.gzipFile()
-            
+            self.utils.gzipFile()           
         else:
             message = Message(catalog.i18nc("@info:status Don't translate the XML tags <filename> or <message>!", "Could not save to <filename>{0}</filename>: <message>{1}</message>").format(job.getFileName(), str(job.getError())), lifetime = 0, title = catalog.i18nc("@info:title", "Warning"))
             message.show()
             self.writeError.emit(self)
             job.getStream().close()
-

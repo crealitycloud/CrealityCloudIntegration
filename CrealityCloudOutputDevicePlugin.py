@@ -1,4 +1,3 @@
-from UM.Application import Application
 from UM.OutputDevice.OutputDevicePlugin import OutputDevicePlugin
 from .CrealityCloudOutputDevice import CrealityCloudOutputDevice
 
