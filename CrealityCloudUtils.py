@@ -76,7 +76,7 @@ class CrealityCloudUtils(QObject):
                             "secretAccessKey": "", "sessionToken": "", "lifeTime": "",
                             "expiredTime": ""}  # type: Dict[str, str]
         self._ossKey = ""
-        self._appDataFolder = Resources.getStoragePath(Resources.Resources, "CrealityCloud")
+        self._appDataFolder = os.path.join(Resources.getStoragePathForType(Resources.Cache), "CrealityCloud")
         self._tokenFile = os.path.join(self._appDataFolder, "token")
         self._urlFile = os.path.join(self._appDataFolder, "cloudurl")
         self._defaultFileName = ""
@@ -174,7 +174,6 @@ class CrealityCloudUtils(QObject):
 
     @pyqtSlot(str)
     def saveUrl(self, env: str) -> None:
-        #os.remove(self._urlFile)
         os.makedirs(self._appDataFolder, exist_ok=True)
         file = open(os.path.join(self._appDataFolder, "cloudurl"), "w")
         file.write(env)
@@ -315,7 +314,7 @@ class CrealityCloudUtils(QObject):
             self.updateProgress.emit(1)
             Logger.log("d", "upload success")
             self.updateStatus.emit("good")
-            # self.clearUploadFile()
+            self.clearUploadFile()
         else:
             self.updateStatus.emit("bad")
             Logger.log("e", "oss commit api: %s", json.dumps(response))
