@@ -118,9 +118,8 @@ BasicDialog {
                 text: catalog.i18nc("@action:button", "Logout")
                 onClicked: {
                     CloudUtils.clearToken()
-
-                    CloudUtils.setLogin(false);
-                    sendViewRoot.close();
+                    CloudUtils.setLogin(false)
+                    sendViewRoot.close()
                 }
             }
 

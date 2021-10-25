@@ -73,6 +73,8 @@ BasicDialog
 
             CloudUtils.saveUrl(env)
             CloudUtils.autoSetUrl()
+            CloudUtils.clearToken()
+            CloudUtils.setLogin(false)
             settingWindow.close();
         }
     }
