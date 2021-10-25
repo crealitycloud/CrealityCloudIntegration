@@ -32,9 +32,7 @@ BasicDialog
 
             Text {
                 id: set1
-                text: qsTr("Server")
-                font.family: "Verdana"
-                text: catalog.i18nc("@title:Label", "Server")
+                text: catalog.i18nc("@title:Label", "Server")            
                 font.family: "Tahoma"
                 verticalAlignment: Text.AlignVCenter
                 height: parent.height
