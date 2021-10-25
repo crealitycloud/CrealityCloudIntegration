@@ -102,27 +102,27 @@ BasicDialog{
                     onAccepted:
                     {
                         var fCount = fileUrls.length;
-                        //Remove the prefix
-                        var fList = [];
-                        var filepath = ""
-                        var prefix = "file:///"
-                        for(var index=0; index < fCount; index++)
-                        {
-                            filepath = fileUrls[index]
-                            filepath = filepath.substr(prefix.length)
-                            fList.push(filepath)
-                        }
-
+                        var countTotal = fCount + file_model.count;
                         //The number of uploaded files is less than 10
-                        if(fCount > 10)
+                        if(countTotal > 10)
                         {
                             var info = catalog.i18nc("@Tip:content", "A maximum of 10 models can be uploaded at one time.");
                             showMessage(info)
                         }
                         else
                         {
-                            file_model.clear();
-                            var fileCount = 0;
+                            //Remove the prefix
+                            var fList = [];
+                            var filepath = ""
+                            var prefix = "file:///"
+                            for(var index=0; index < fCount; index++)
+                            {
+                                filepath = fileUrls[index]
+                                filepath = filepath.substr(prefix.length)
+                                fList.push(filepath)
+                            }
+
+                            var fileCount = file_model.count;
                             //Remove files larger than 500 M
                             for(var index=0; index < fCount; index++)
                             {                         

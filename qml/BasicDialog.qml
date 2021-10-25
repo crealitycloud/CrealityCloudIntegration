@@ -13,7 +13,9 @@ Window {
     property var contentBackground: "transparent"
     property var borderColor: UM.Theme.getColor("border")
     property var titleIcon: ""
-    property var closeIcon: "../res/btn_close_n.png"
+    property var closeIconLight: "../res/btn_close_n.png"
+    property var closeIconDark: "../res/btn_close_n2.png"
+
     property var titleHeight: 30
     property alias btnEnabled: closeButton.enabled
 
@@ -98,7 +100,13 @@ Window {
                     anchors.centerIn: parent
                     width: 10
                     height: 10
-                    source:  closeIcon
+                    source:  {
+                        var code = UM.Preferences.getValue("general/theme");
+                        if(code.indexOf("dark") != -1){
+                            return closeIconDark
+                        }
+                        return closeIconLight
+                    }
                 }
             }
             background: Rectangle

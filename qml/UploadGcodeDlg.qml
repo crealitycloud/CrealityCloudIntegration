@@ -97,6 +97,7 @@ BasicDialog {
                 selectByMouse: true
                 text: CloudUtils.defaultFileName()
                 font: UM.Theme.getFont("default")
+                validator: RegExpValidator { regExp: /^\S{100}$/ }
             }
 
             Text {
@@ -181,11 +182,11 @@ BasicDialog {
                 y: 220
                 width: 297
                 height: 25
-                visible: false
-                font.bold: false
+                visible: false              
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
-                font.pixelSize: 15
+                font: UM.Theme.getFont("default")
+                color: UM.Theme.getColor("text")
             }
 
             AnimatedImage {

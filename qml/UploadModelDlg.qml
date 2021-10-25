@@ -77,11 +77,12 @@ BasicDialog{
         msgDialog.myContent = text;
         msgDialog.show()
     }
-    function checkFilename(name){console.log("str:--",name,"--")
+    function checkFilename(name){
+        //console.log("str:--",name,"--")
         var v = new Validator.Validator();
         var fileName = name;
         // File name cannot be empty
-        if (!v.required(fileName) || fileName.indexOf(' ') !== -1) {
+        if (!v.required(fileName)) {
             showMessage(catalog.i18nc("@error", "File name cannot be empty"))
             return false
         }
@@ -133,6 +134,7 @@ BasicDialog{
                 width: grid_wrapper.width-idGroupNameLabel.width-110
                 height : 28
                 text: ""
+                validator: RegExpValidator { regExp: /^\S{100}$/ }
             }
         }
         Row{
@@ -345,8 +347,8 @@ BasicDialog{
                 if(!checkFilename(idModelGroupInput.text))
                     return;
 
-                if(!checkFilename(idDescText.text))
-                    return;
+                //if(!checkFilename(idDescText.text))
+                //    return;
                 
                 idLogoImageColumn.visible = false
                 grid_wrapper.visible = false
