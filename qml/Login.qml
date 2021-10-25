@@ -8,12 +8,13 @@ import "../js/Validator.js" as Validator
 import UM 1.1 as UM
 import Cura 1.1 as Cura
 
+
 BasicDialog {
     id: pluginRootWindow
     UM.I18nCatalog { id: catalog; name: "uranium"}
     visible: false
     width: 600
-    height: 443  
+    height: 500  
     titleHeight: 30
     title: catalog.i18nc("@title:window", "Login")
 
@@ -46,7 +47,7 @@ BasicDialog {
         passwordField.anchors.topMargin = 10;
         resetLink.anchors.topMargin = 6;
         loginButton.anchors.bottomMargin = 73;
-        serverSetting.anchors.bottomMargin = 35;
+        //.anchors.bottomMargin = 35;
         signUpTip1.anchors.bottomMargin = 45;
     }
     function showBusy() {
@@ -88,7 +89,7 @@ BasicDialog {
         passwordField.anchors.topMargin = 40;
         resetLink.anchors.topMargin = 10;
         loginButton.anchors.bottomMargin = 43;
-        serverSetting.anchors.bottomMargin = 5;
+        //serverSetting.anchors.bottomMargin = 5;
         signUpTip1.anchors.bottomMargin = 15;
     }
     function switchPhoneLogin() {
@@ -105,7 +106,7 @@ BasicDialog {
         passwordField.anchors.topMargin = 40;
         resetLink.anchors.topMargin = 10;
         loginButton.anchors.bottomMargin = 43;
-        serverSetting.anchors.bottomMargin = 5;
+        //serverSetting.anchors.bottomMargin = 5;
         signUpTip1.anchors.bottomMargin = 15;
     }
     function mobilePhoneLogin() {
@@ -128,7 +129,7 @@ BasicDialog {
         let email = emailField.text
         switch (loginType) {
             case "quick":
-                if (v.required(countryCode) && v.required(mobile) && v.isInternationphone(mobile)) {
+                if (idUserPolicy.checked && v.required(countryCode) && v.required(mobile) && v.isInternationphone(mobile)) {
                     verButton.enabled = true
                     if(v.required(code)) {
                         loginButton.enabled = true
@@ -141,14 +142,14 @@ BasicDialog {
                 }
                 break
             case "mobile":
-                if (v.required(countryCode) && v.required(mobile) && v.required(password) && v.isInternationphone(mobile)) {
+                if (idUserPolicy.checked && v.required(countryCode) && v.required(mobile) && v.required(password) && v.isInternationphone(mobile)) {
                     loginButton.enabled = true
                 }else {
                     loginButton.enabled = false
                 }
                 break
             case "email":
-                if (v.required(email) && v.required(password)) {
+                if (idUserPolicy.checked && v.required(email) && v.required(password)) {
                     loginButton.enabled = true
                 }else {
                     loginButton.enabled = false
@@ -335,7 +336,7 @@ BasicDialog {
 
                 Item {
                     id: element1
-                    height: 243
+                    height: 250
                     anchors.top: parent.top
                     anchors.topMargin: 95
                     anchors.right: parent.right
@@ -431,7 +432,7 @@ BasicDialog {
                         Component.onCompleted: {
                             var dict = CountryCode.dict.allCountries
                             for (var i in dict) {
-                                if(dict[i].phone_number != ""){
+                                if(dict[i].phone_number !== ""){
                                     model.append({"nameCn": dict[i].name_CN, "nameEn": dict[i].name_EN, "phone": dict[i].phone_number})
                                 }
                             }
@@ -619,7 +620,7 @@ BasicDialog {
                         onSigButtonClicked: {
                             var phone = phoneSelectModel.get(phoneSelect.currentIndex).phone + phoneField.text
                             CloudAPI.getVerCode(phone, function(data) {
-                                if (data["code"] == 0) {
+                                if (data["code"] === 0) {
                                     verCodeTimer.start()
                                 }else {
                                     pluginRootWindow.showMessage("Error: " + JSON.stringify(data))
@@ -653,6 +654,54 @@ BasicDialog {
                         Component.onCompleted: font.pixelSize = 12
                     }
 
+                    // Text {
+                    //     id: serverSetting
+                    //     color: UM.Theme.getColor("text")
+                    //     font: UM.Theme.getFont("default")
+                    //     text: catalog.i18nc("@title:Label", "Server")
+                    //     width: 100; height: 30
+                    //     clip: true
+                    //     elide: Text.ElideRight
+                    //     anchors.top: verCode.bottom
+                    //     anchors.topMargin: 40
+                    //     anchors.left: parent.left
+                    //     anchors.leftMargin: 0
+                    //     horizontalAlignment: Text.AlignHCenter
+                    //     verticalAlignment: Text.AlignVCenter
+                    // }
+
+                    Cura.ComboBox {
+                        id: idServer
+                        width:100; height: 20
+                        anchors.top: idUserPolicy.top
+                        anchors.topMargin: 0
+                        anchors.right: parent.right
+                        anchors.rightMargin: 0
+                        anchors.left: policyTip.right
+                        anchors.leftMargin: 20
+
+                        model: ListModel{
+                            id: idServerModel
+                        }
+                        textRole: "name"
+                        currentIndex : -1
+                        onActivated: {
+                            var env = ""
+                            if (textAt(currentIndex) === idServerModel.get(0).name){
+                                env = "release_oversea"
+                            }else {
+                                env = "release_local"
+                            }
+                            CloudUtils.saveUrl(env)
+                            CloudUtils.autoSetUrl()
+                            CloudAPI.api_url = CloudUtils.getCloudUrl()
+                        }
+                        Component.onCompleted: {
+                            idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "International Server")})
+                            idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "China Server")})
+                        }
+                    }
+
                     BasicButton
                     {
                         id: loginButton
@@ -679,7 +728,7 @@ BasicDialog {
                             switch(loginType) {
                                 case "quick":
                                     CloudAPI.quickLogin(countryCode+mobile, countryCode, mobileVerCode, function(data) {
-                                        if (data["code"] == 0) {
+                                        if (data["code"] === 0) {
                                             loginScuess(data["result"]["token"], data["result"]["userId"])                                           
                                         }else {
                                             pluginRootWindow.showMessage("Error: " + data["msg"])
@@ -688,7 +737,7 @@ BasicDialog {
                                 break
                                 case "mobile":
                                     CloudAPI.accountLogin(1, countryCode+mobile, password, function(data) {
-                                        if (data["code"] == 0) {
+                                        if (data["code"] === 0) {
                                             loginScuess(data["result"]["token"], data["result"]["userId"])
                                         }else {
                                             pluginRootWindow.showMessage("Error: " + data["msg"])
@@ -697,7 +746,7 @@ BasicDialog {
                                 break
                                 case "email":
                                     CloudAPI.accountLogin(2, email, password, function(data) {
-                                        if (data["code"] == 0) {
+                                        if (data["code"] === 0) {
                                             loginScuess(data["result"]["token"], data["result"]["userId"])
                                         }else {
                                             pluginRootWindow.showMessage("Error: " + data["msg"])
@@ -707,47 +756,40 @@ BasicDialog {
                         }                       
                     }
 
-                    Text {
-                        id: serverSetting
-                        color: UM.Theme.getColor("text")
+                    CheckBox {
+                        id: idUserPolicy
+                        height: 12
                         font: UM.Theme.getFont("default")
-                        text: catalog.i18nc("@title:Label", "Server")
-                        width: 50; height: 30
-                        clip: true;
-                        elide: Text.ElideRight
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 5//35
+                        text: qsTr("I have read and agreed")
+                        indicator.width: 16
+                        indicator.height: 16
+                        anchors.top: loginButton.bottom
+                        anchors.topMargin: 20
                         anchors.left: parent.left
-                        anchors.leftMargin: 0                       
-                        verticalAlignment: Text.AlignVCenter
+                        anchors.leftMargin: 0
+                        onCheckedChanged: fieldValidator()
                     }
-                    Cura.ComboBox {
-                        id: idServer
-                        width:130; height: 30
-                        anchors.bottom: serverSetting.bottom
-                        anchors.bottomMargin: 0
-                        anchors.left: serverSetting.right
-                        anchors.leftMargin: 3
-                        model: ListModel{
-                            id: idServerModel
+
+                    Text {
+                        id: policyTip
+                        color: "#0078D7"
+                        font: UM.Theme.getFont("default")
+                        text: catalog.i18nc("@title:Label", "Privacy Policy")
+                        verticalAlignment: Text.AlignVCenter
+                        height: 12
+                        anchors.top: idUserPolicy.top
+                        anchors.topMargin: 0
+                        anchors.left: idUserPolicy.right
+                        anchors.leftMargin: 0                         
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
+                            onClicked: Qt.openUrlExternally("https://www.crealitycloud.com/policy?type=policy")
+                            onEntered: parent.font.underline = true
+                            onExited: parent.font.underline = false
                         }
-                        textRole: "name"
-                        currentIndex : -1
-                        onActivated: {
-                            var env = ""
-                            if (textAt(currentIndex) === idServerModel.get(0).name){
-                                env = "release_oversea"
-                            }else {
-                                env = "release_local"
-                            }
-                            CloudUtils.saveUrl(env)
-                            CloudUtils.autoSetUrl()
-                            CloudAPI.api_url = CloudUtils.getCloudUrl()
-                        }
-                        Component.onCompleted: {                           
-                            idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "International")})
-                            idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "China")})
-                        }
+                        Component.onCompleted: font.pixelSize = 12
                     }
 
                     Text {
@@ -755,10 +797,10 @@ BasicDialog {
                         color: UM.Theme.getColor("text")                     
                         font: UM.Theme.getFont("small")
                         text: catalog.i18nc("@title:Label", "No account? Please click ")
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 15//45
-                        anchors.right: parent.right
-                        anchors.rightMargin: signUpTip2.width
+                        anchors.top: signUpTip2.top
+                        anchors.topMargin: 0
+                        anchors.right: signUpTip2.left
+                        anchors.rightMargin: 0
                         Component.onCompleted: font.pixelSize = 12
                     }
 
@@ -768,11 +810,10 @@ BasicDialog {
                         font: UM.Theme.getFont("small")
                         text: catalog.i18nc("@title:Label", "Sign Up")
                         height: 12
-                        width: 50
-                        anchors.top: signUpTip1.top
-                        anchors.topMargin: 0
-                        anchors.left: signUpTip1.right
-                        anchors.leftMargin: 0                         
+                        anchors.top: idUserPolicy.bottom
+                        anchors.topMargin: 20
+                        anchors.right: parent.right
+                        anchors.rightMargin: 0                         
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
@@ -1020,7 +1061,7 @@ BasicDialog {
 
     onVisibleChanged:{
         var env = CloudUtils.getEnv();
-        if (env == "release_local"){
+        if (env === "release_local"){
             idServer.currentIndex = 1
         }else{
             idServer.currentIndex = 0
