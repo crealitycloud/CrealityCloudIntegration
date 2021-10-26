@@ -15,29 +15,34 @@ Item{
         height: 73
         color: UM.Theme.getColor("main_background")
         z: 2
-        BorderImage {
-            id: logo
-            anchors.centerIn: parent
-            anchors.horizontalCenterOffset: -width
-            width: 36
-            height: 34
-            transformOrigin: Item.Center
-            source: "../res/logo.png"
-        }
-
-        Text {
-            id: logoText
-            anchors.left: logo.right
-            anchors.leftMargin: 8
-            anchors.verticalCenter: parent.verticalCenter
-            text: catalog.i18nc("@title:window", "Creality Cloud")
-            color: UM.Theme.getColor("text")
-            font: UM.Theme.getFont("huge")
-            renderType: Text.NativeRendering            
-            Component.onCompleted: {
-                font.bold = true
+        Rectangle{
+            width: logo.width+8+logoText.contentWidth
+            height: 73
+            color: "transparent"
+            anchors.horizontalCenter: parent.horizontalCenter
+            BorderImage {
+                id: logo
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                width: 36
+                height: 34
+                transformOrigin: Item.Center
+                source: "../res/logo.png"
             }
-        }
+            Text {
+                id: logoText
+                anchors.left: logo.right
+                anchors.leftMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
+                text: catalog.i18nc("@title:window", "Creality Cloud")
+                color: UM.Theme.getColor("text")
+                font: UM.Theme.getFont("huge")
+                renderType: Text.NativeRendering            
+                Component.onCompleted: {
+                    font.bold = true
+                }
+            }
+        }       
     }
     //Separator
     Item {
