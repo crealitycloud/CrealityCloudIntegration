@@ -756,11 +756,11 @@ BasicDialog {
                         }                       
                     }
 
-                    CheckBox {
+                    Cura.CheckBox {
                         id: idUserPolicy
                         height: 12
                         font: UM.Theme.getFont("default")
-                        text: qsTr("I have read and agreed")
+                        text: catalog.i18nc("@title:Checkbox","I have read and agreed")
                         indicator.width: 16
                         indicator.height: 16
                         anchors.top: loginButton.bottom
@@ -774,7 +774,7 @@ BasicDialog {
                         id: policyTip
                         color: "#0078D7"
                         font: UM.Theme.getFont("default")
-                        text: catalog.i18nc("@title:Label", "Privacy Policy")
+                        text: catalog.i18nc("@title:Text", "Privacy Policy")
                         verticalAlignment: Text.AlignVCenter
                         height: 12
                         anchors.top: idUserPolicy.top
