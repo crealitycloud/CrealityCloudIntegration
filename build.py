@@ -18,7 +18,7 @@ def package():
     # if not isExists:
     #     os.makedirs(path)
     copytree("./", path+"/",
-             ignore=ignore_patterns('*.jsc', '*.qmlc', '*.gitignore', '*.git', "build.py"))
+             ignore=ignore_patterns('*.github', '*.txt', '*.jsc', '*.qmlc', '*.gitignore', '*.git', "build.py"))
     
 
 if __name__ == "__main__":
