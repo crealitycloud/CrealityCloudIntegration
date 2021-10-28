@@ -229,7 +229,8 @@ class CrealityCloudUtils(QObject):
 
     @pyqtSlot()
     def clearToken(self) -> None:
-        os.remove(self._tokenFile)
+        if os.path.exists(self._tokenFile):
+            os.remove(self._tokenFile)
         self._userInfo["token"] = ""
         self._userInfo["userId"] = ""
         self._userInfo["userImg"] = ""
