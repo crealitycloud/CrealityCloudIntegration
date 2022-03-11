@@ -13,13 +13,14 @@ Window{
     property alias categoryCurIndex: idSelCategory.currentIndex
     property string searchText: ""
 
-    property var modelGroupMap: {0:0}
-    property var imageMap: {0:0}
-    property var modelMap: {0:0}
+    property var modelGroupMap: ({})
+    property var imageMap: ({})
+    property var modelMap: ({})
 
-    property var curModelCategoryId: 0
-    property var currentModelLibraryPage: 1
-    property var totalPage: 0
+    property var curModelCategoryId: -1
+    property var nextCursor: ""//model , my model
+    property var currentModelLibraryPage: 1//search page
+    property var totalPage: 0//search page
     property var pageSize: [28, 18]//0 the count of per model page, 1 count of my gcode page.
     
     property var isDetailPage: false//true: model detail page, false: other page
@@ -65,10 +66,11 @@ Window{
         sourceType = 1
 
         if(selCategory == 1){
-            ManageModelBrowser.loadPageModelLibraryList(1, curModelCategoryId, false)
-            totalPage = ManageModelBrowser.getTotalPage(selCategory, curModelCategoryId, pageSize[0])
+            nextCursor = ""
+            ManageModelBrowser.loadPageModelLibraryList("", curModelCategoryId, false)          
         }
-        currentModelLibraryPage = 1;
+        //currentModelLibraryPage = 1;
+        
         isDetailPage = false
     }
 
@@ -77,16 +79,22 @@ Window{
         var componentButton = Qt.createComponent("CusModelLibraryItem.qml")
         if (componentButton.status === Component.Ready )
         {
-            if(!appendFlag)//not append
-                deleteCompent("modelGroupMap")
+            printMap("before delete");
+            if(!appendFlag){//not append
+                deleteModelGroupMap();
+                console.log("after delete !");
+            }else{
+                printMap("not delete");
+            }
             
+            var count = 0;
             var objectArray = JSON.parse(strjson);
             if(objectArray.code === 0)
             {
                 var objResult = objectArray.result.list;
                 for( var key in objResult){
                     var obj = componentButton.createObject(idModelLibraryList, {"btnNameText": catalog.i18nc("@action:Label", objResult[key].groupName), 
-                                                                        "btnModelImage": objResult[key].coversUrl[0], 
+                                                                        "btnModelImage": objResult[key].covers[0].url, 
                                                                         "modelGroupId": objResult[key].id,
                                                                         "btnAuthorText": catalog.i18nc("@action:Label", objResult[key].userInfo.nickName), 
                                                                         "btnAvtarImage": objResult[key].userInfo.avatar,
@@ -96,8 +104,12 @@ Window{
                     obj.sigButtonDownClicked.connect(onSigButtonDownClicked) 
                     obj.sigButtonClicked.connect(onBrowseDetails)
                     obj.sigBtnDelClicked.connect(slotBtnDelClicked)
-                    modelGroupMap[objResult[key].id] = obj
+                    modelGroupMap[objResult[key].id] = obj;
+                    //console.log("key:",key,",objResult[key].id---：",objResult[key].id,",obj---:",obj);
+                    count += 1;
                 }
+                //console.log("modelGroupMap count:",count);
+                printMap("current");
             }           
         }
         else{
@@ -136,10 +148,9 @@ Window{
         var componentButton = Qt.createComponent("BasicImageButton.qml")
         var componentModelItem = Qt.createComponent("CusModelItem.qml")
         if (componentButton.status === Component.Ready )
-        {
-            
-            deleteCompent("imageMap")
-            deleteCompent("modelMap")
+        {           
+            deleteImageMap();
+            deleteModelMap();
             
             var objectArray = JSON.parse(strjson);
             if(objectArray.code === 0)
@@ -159,8 +170,8 @@ Window{
                     var obj1 = componentModelItem.createObject(idModelLibraryDetail.modelDetailItemList, {"modelname": catalog.i18nc("@action:Button", objResult[key].fileName), 
                                                                         "modeSize": objResult[key].fileSize,
                                                                         "modelid": objResult[key].id,
-                                                                        "keystr": imageNumber,
-                                                                        "modellink": objResult[key].downloadUrl})
+                                                                        "keystr": imageNumber//,
+                                                                        /*"modellink": objResult[key].downloadUrl*/})
                     obj1.sigBtnDetailClicked.connect(onSigBtnDetailItemClicked)
                     obj1.sigDownModel.connect(onDownloadModel)
                     modelMap[objResult[key].id] = obj1
@@ -224,7 +235,11 @@ Window{
 
     function onSigButtonDownClicked(modelGid, count)//mainPage：download model group
     {       
-        ManageModelBrowser.importModelGroup(modelGid, count, selCategory);
+        if(CloudUtils.getLogin()){
+            ManageModelBrowser.importModelGroup(modelGid, count, selCategory);
+        }else{
+            showMessage(catalog.i18nc("@Tip:content", "please log in first!"));
+        }
     }
 
     function slotBtnDelClicked(id)//1 mainPage and detail: delete my model group;  2 delete mygcode
@@ -244,8 +259,8 @@ Window{
     {
         if(isDetailPage)
         {
-            deleteCompent("imageMap");
-            deleteCompent("modelMap");           
+            deleteImageMap();
+            deleteModelMap();
             //back
             curSelModelGroupID = "";
             isDetailPage = false;
@@ -257,18 +272,11 @@ Window{
 
         var strModelGid = "-%1-".arg(modelGid)
 
-        for(var key in modelGroupMap){
-            var strkey = "-%1-".arg(key)           		
-            if(strkey == strModelGid){
-                modelGroupMap[key].destroy()
-                delete modelGroupMap[key]
-                break;
-            }			
-        }
+        deleteModelGroupMap();
     }
     function flushMyModelAfterAdd()
     {
-        ManageModelBrowser.loadPageMyModelList(1, false)
+        ManageModelBrowser.loadPageMyModelList("", false)
 
         let t_id = "-%1-".arg(curSelModelGroupID);
         let obj;
@@ -297,7 +305,7 @@ Window{
         var url = ""; var filename = ""       
         for(var key in modelMap)
         {
-            url = modelMap[key].modellink
+            url = CloudUtils.modelDownloadUrl(modelMap[key].modelid)//modelMap[key].modellink
             filename = modelMap[key].modelname
             urlList.push(url);
             fileList.push("%1.stl".arg(filename));
@@ -305,9 +313,16 @@ Window{
         ManageModelBrowser.importModel(urlList, fileList, selCategory)
     }
 
-    function onDownloadModel(name, url)//detailPage：download a single model
+    function onDownloadModel(name, id)//detailPage：download a single model
     {
+        if(!CloudUtils.getLogin()){
+            showMessage(catalog.i18nc("@Tip:content", "please log in first!"));
+            return;
+        }
+        
         var urlList = []; var fileList = []
+        var url = ""
+        url =  CloudUtils.modelDownloadUrl(id); console.log("url:",url)
         urlList.push(url);
         fileList.push("%1.stl".arg(name));
         ManageModelBrowser.importModel(urlList, fileList, selCategory)
@@ -315,18 +330,22 @@ Window{
 
     function flushModelLLByScroll()//Scroll to refresh
     {
-        if (currentModelLibraryPage+1 <= totalPage)
-        {
-            currentModelLibraryPage++;
-            if(selCategory == 1){
-                if(sourceType == 1)//model 
-                    ManageModelBrowser.loadPageModelLibraryList(currentModelLibraryPage, curModelCategoryId, true)
-                else if(sourceType == 2)//search result
-                    if(searchText != "")
-                        ManageModelBrowser.loadModelSearchResult(searchText, currentModelLibraryPage, pageSize[0], true)
+        if(selCategory == 1){//model
+            if(sourceType == 1){//model library
+                if(nextCursor != ""){console.log("nextCursor:",nextCursor)
+                    ManageModelBrowser.loadPageModelLibraryList(nextCursor, curModelCategoryId, true)
+                }
             }
-            else if(selCategory == 2){//my model
-                ManageModelBrowser.loadPageMyModelList(currentModelLibraryPage, curModelCategoryId, true)
+            else if(sourceType == 2){//search result
+                if ((searchText != "") && (currentModelLibraryPage+1 <= totalPage)){
+                    currentModelLibraryPage++;
+                    ManageModelBrowser.loadModelSearchResult(searchText, currentModelLibraryPage, pageSize[0], true)
+                }
+            }
+        }
+        else if(sourceType == 2){//my model
+            if(nextCursor != ""){console.log("nextCursor:",nextCursor)
+                ManageModelBrowser.loadPageMyModelList(nextCursor, curModelCategoryId, true)
             }
         }
     }
@@ -343,35 +362,40 @@ Window{
         }
     }
 
-    function deleteCompent(compentMap)
+    function deleteModelGroupMap()
+    {        
+        for(var key in modelGroupMap)
+        {			
+            modelGroupMap[key].destroy()
+        }
+        modelGroupMap = ({})
+    }
+    function deleteImageMap()
     {
-        var tMap = {}
+        for(var key in imageMap)
+        {			
+            imageMap[key].destroy()
+        }
+        imageMap = ({})
+    }
+    function deleteModelMap()
+    {
+       for(var key in modelMap)
+        {			
+            modelMap[key].destroy()
+        }
+        modelMap = ({})
+    }
 
-        if(compentMap === "modelGroupMap")
-        {
-            tMap = modelGroupMap;
-        }
-        else if(compentMap === "imageMap")
-        {
-            tMap = imageMap;
-        }
-        else if(compentMap === "modelMap")
-        {
-            tMap = modelMap;
-        }
-
-        for(var key in tMap)
+    function printMap(info)
+    {
+        console.log(info, " ----------print map");
+        var count = 0;
+        for(var key in modelGroupMap)        
 		{
-			var strkey = "-%1-".arg(key)
-			if(strkey != "-0-")
-			{
-				tMap[key].destroy()
-				delete tMap[key]
-			}
-            else{
-                delete tMap[key]
-            }
+            count += 1; console.log("map key:",key,",    map value:",modelGroupMap[key]);
 		}
+        console.log(info," map count:  ",count, "----------")
     }
 
     function showMessage(text) {
@@ -410,7 +434,7 @@ Window{
                 break;
             case 1:
                 initUI();
-                ManageModelBrowser.loadPageMyModelList(1,false)
+                ManageModelBrowser.loadPageMyModelList("",false)
                 break;
             case 2:
                 initUI();
@@ -597,7 +621,7 @@ Window{
                                     break;
                                 case 1:
                                     initUI();
-                                    ManageModelBrowser.loadPageMyModelList(1,false)
+                                    ManageModelBrowser.loadPageMyModelList("",false)
                                     break;
                                 case 2:
                                     initUI();
@@ -634,11 +658,11 @@ Window{
                     if(curModelCategoryId != idModelTypeComboBox_model.get(currentIndex).modelCategoryId)
                     {
                         curModelCategoryId = idModelTypeComboBox_model.get(currentIndex).modelCategoryId;
-
-                        currentModelLibraryPage = 1;
+                        console.log("-----------init222:",curModelCategoryId);
+                        //currentModelLibraryPage = 1;
+                        nextCursor = "";
                         modelScrollvPos = 0;
-                        ManageModelBrowser.loadPageModelLibraryList(1, curModelCategoryId, false)
-                        totalPage = ManageModelBrowser.getTotalPage(selCategory, curModelCategoryId, pageSize[0])
+                        ManageModelBrowser.loadPageModelLibraryList("", curModelCategoryId, false)
                     }
                 }
             }
@@ -872,7 +896,11 @@ Window{
                 idTopInfoArea.visible = true;
             }
             onSigDownloadAll:{
-                downloadModels();
+                if(CloudUtils.getLogin()){
+                    downloadModels();
+                }else{
+                    showMessage(catalog.i18nc("@Tip:content", "please log in first!"));
+                }
             }
             onSigShareLink:{
                 shareLink(curSelModelGroupID);

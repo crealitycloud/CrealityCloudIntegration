@@ -334,15 +334,22 @@ class CrealityCloudUtils(QObject):
         }
         return headers
 
-    def getOssAuth(self) -> None:
-        url = self._cloudUrl + "/api/cxy/common/getOssInfo"
+    def getOssAuth(self, type: int) -> None:
+        '''
+        type:1 gcode, 2 model
+        '''
+        url = self._cloudUrl + "/api/cxy/v2/common/getOssInfo"#"/api/cxy/common/getOssInfo"
         url2 = self._cloudUrl + "/api/account/getAliyunInfo"
         response = requests.post(url, data="{}", headers=self.getCommonHeaders()).text
         response = json.loads(response)
         if (response["code"] == 0):
             self._bucketInfo["endpoint"] = response["result"]["info"]["endpoint"]
-            self._bucketInfo["bucket"] = response["result"]["info"]["file"]["bucket"]
-            self._bucketInfo["prefixPath"] = response["result"]["info"]["file"]["prefixPath"]
+            if type == 1:
+                self._bucketInfo["bucket"] = response["result"]["info"]["file"]["bucket"]
+                self._bucketInfo["prefixPath"] = response["result"]["info"]["file"]["prefixPath"]
+            elif type == 2:
+                self._bucketInfo["bucket"] = response["result"]["info"]["internal"]["bucket"]
+                self._bucketInfo["prefixPath"] = response["result"]["info"]["internal"]["prefixPath"]
         else:
             raise Exception("oss bucket api error: "+json.dumps(response))
         response = requests.post(
@@ -364,7 +371,7 @@ class CrealityCloudUtils(QObject):
         obj_file = ''
         if type == 1:
             self.updatedProgressTextSlot(catalog.i18nc("@info:status", "3/4 Uploading file..."))
-            self.getOssAuth()
+            self.getOssAuth(1)
             obj_file = self._gzipFilePath
             self._ossKey = self._bucketInfo["prefixPath"] + "/" + \
                 self.getFileMd5(obj_file) + ".gcode.gz"          
@@ -499,12 +506,23 @@ class CrealityCloudUtils(QObject):
         response = requests.post(url, data=json.dumps({"type": type}), headers=self.getModelHeaders()).text
         return response
     
-    def getModelGroupDetailInfo(self, page: int, pageSize: int, groupId: str) -> str:
-        url = self._cloudUrl + "/api/cxy/v2/model/modelList"
+    def getModelGroupDetailInfo(self, cursor: str, pageSize: int, groupId: str) -> str:
+        url = self._cloudUrl + "/api/cxy/v3/model/fileList"#"/api/cxy/v2/model/modelList"
         response = requests.post(url, 
-                    data=json.dumps({"page": page, "pageSize": pageSize, "groupId": groupId}), 
+                    data=json.dumps({"cursor": "", "limit": pageSize, "modelId": groupId}), 
                     headers=self.getModelHeaders()).text
         return response
+    
+    @pyqtSlot(str, result=str)
+    def modelDownloadUrl(self, modelId: str) -> str:
+        url = self._cloudUrl + "/api/cxy/v3/model/fileDownload"
+        response = requests.post(url, data=json.dumps({"id":modelId}),
+                    headers=self.getCommonHeaders()).text
+        response = json.loads(response)
+        if (response["code"] == 0):
+            return response["result"]["signUrl"]
+        else:
+            return ""
 
     def downloadModel(self, downType: int, urls: List[str], filepaths: List[str]) -> bool:
         self._downloadType = downType
@@ -551,27 +569,26 @@ class CrealityCloudUtils(QObject):
         return self._isDownloading
 
     def getModelSearchResult(self, page: int, pageSize: int, keyword: str) -> str:
-        url = self._cloudUrl + "/api/cxy/search/modelSearch"
+        url = self._cloudUrl + "/api/cxy/search/model"#"/api/cxy/search/modelSearch"
         response = requests.post(url, 
                     data=json.dumps({"page": page, "pageSize": pageSize, "keyword": keyword}), 
                     headers=self.getModelHeaders()).text
         return response
 
-    def getPageModelLibraryList(self, page: int, pageSize: int, listType: int, categoryId: int) -> str:
-        url = self._cloudUrl + "/api/cxy/model/modelGroupList"
-        response = ""
-        if listType == 2:
-            response = requests.post(url, 
-                        data=json.dumps({"page": page, "pageSize": pageSize, "listType": listType, "categoryId": categoryId}), 
-                        headers=self.getModelHeaders()).text
-        elif listType == 7:
+    def getPageModelLibraryList(self, cursor: str, pageSize: int, categoryId: str) -> str:
+        url = self._cloudUrl + "/api/cxy/v3/model/listCategory"#"/api/cxy/model/modelGroupList"
+        response = requests.post(url, 
+                    data=json.dumps({"cursor": "", "limit": pageSize, "categoryId": categoryId}),
+                    headers=self.getModelHeaders()).text
+        '''elif listType == 7:
             response = requests.post(url, 
                         data=json.dumps({"page": page, "pageSize": pageSize, "listType": listType}), 
                         headers=self.getCommonHeaders()).text
+        '''
         return response
 
     def getModelGDeleteRes(self, modelGid: str) -> str:
-        url = self._cloudUrl + "/api/cxy/model/modelGroupDelete"
+        url = self._cloudUrl + "/api/cxy/v3/model/modelGroupDelete"#"/api/cxy/model/modelGroupDelete"
         response = requests.post(url, 
                     data=json.dumps({"id": modelGid}), 
                     headers=self.getCommonHeaders()).text
@@ -612,18 +629,20 @@ class CrealityCloudUtils(QObject):
         name = os.path.basename(filepath)
         return os.path.splitext(name)[0]
 
-    def getModelGroupCreateRes(self, categoryId:int, groupName:str, groupDesc:str, bShare:bool, modelType:int, license:str, bIsOriginal:bool) -> str:
-        url = self._cloudUrl + "/api/cxy/model/modelGroupCreate"      
+    def getModelGroupCreateRes(self, categoryId:int, groupName:str, groupDesc:str, bShare:bool, license:str, bIsOriginal:bool) -> str:
+        url = self._cloudUrl + "/api/cxy/v3/model/modelGroupCreate"#"/api/cxy/model/modelGroupCreate"      
         modelList = []
         length = len(self._filekeyList)
         for i in range(length):
             itemDict = {
-                "fileKey":self._filekeyList[i], "fileName":self.getFileName(self._uploadFileList[i]), "fileSize":os.path.getsize(self._uploadFileList[i])
+                "fileKey":self._filekeyList[i], "fileName":self.getFileName(self._uploadFileList[i]), 
+                "fileSize":os.path.getsize(self._uploadFileList[i])
             }
             modelList.append(itemDict)
 
         contentDict = {
-            "groupItem":{"categoryId":categoryId, "groupName":groupName, "groupDesc":groupDesc, "share":bShare, "type":modelType, "license":license, "isOriginal":bIsOriginal},
+            "groupItem":{"modelColor": 0,"categoryId":categoryId, "groupName":groupName, "groupDesc":groupDesc,
+                 "covers":[], "isOriginal":bIsOriginal, "license":license, "isShared":bShare},
             "modelList": modelList
         }
 
@@ -635,7 +654,7 @@ class CrealityCloudUtils(QObject):
         return response
 
     def getModelGroupAddRes(self, groupId: str) -> str:
-        url = self._cloudUrl + "/api/cxy/model/modelGroupEdit"
+        url = self._cloudUrl + "/api/cxy/v3/model/fileAdd"#"/api/cxy/model/modelGroupEdit"
         modelList = []
         length = len(self._filekeyList)
         for i in range(length):
@@ -645,16 +664,20 @@ class CrealityCloudUtils(QObject):
             modelList.append(itemDict)
 
         contentDict = {
-            "hasGroup": False,
-            "groupItem": {"id": groupId},
-            "hasModel": True,
             "modelList": modelList,
-            "isClearCovers": False
+            "modelId": groupId
         }
         response = requests.post(url, data=json.dumps(contentDict), headers=self.getCommonHeaders()).text
 
         self._filekeyList.clear()
         self._uploadFileList.clear()
+        return response
+
+    def getListUploadModel(self, cursor: str, pageSize: int) -> str:
+        url = self._cloudUrl + "/api/cxy/v3/model/listUpload"#"/api/cxy/model/modelGroupList"
+        response = requests.post(url, 
+                    data=json.dumps({"cursor": "", "limit": pageSize}),
+                    headers=self.getCommonHeaders()).text       
         return response
 
     @pyqtSlot(str)

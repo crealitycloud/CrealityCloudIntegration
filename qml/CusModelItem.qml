@@ -9,12 +9,12 @@ Item{
     property var modelid: ""
     property var keystr: 0// number starts with 1
     property var modelcount: 0
-    property var modellink: ""
+    //property var modellink: ""
     property var modeSize: ""
     property var btnIsSelected: false
 
     signal sigBtnDetailClicked(var key)
-    signal sigDownModel(var name, var url)
+    signal sigDownModel(var name, var id)//var url
 
     implicitWidth: 280
     implicitHeight: 36
@@ -78,7 +78,7 @@ Item{
             btnImgPressed: "../res/btn_download_h.png"
             onClicked:
             {
-                sigDownModel(modelname, modellink)
+                sigDownModel(modelname, modelid)//modellink
             }
         }
     }
