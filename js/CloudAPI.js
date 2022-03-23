@@ -6,12 +6,12 @@ var duid = ""
 var identical = ""
 
 function qrLogin(callback) {
-    var getQrUrl = api_url + "/api/account/qrLogin"
+    var getQrUrl = api_url + "/api/cxy/account/v2/qrLogin"
     sendForm(getQrUrl, "{}", callback)
 }
 
 function qrQuery(callback) {
-    var getUrl = api_url + "/api/account/qrQuery"
+    var getUrl = api_url + "/api/cxy/account/v2/qrQuery"
     sendForm(getUrl, JSON.stringify({"identical": identical}), callback)
 }
 
