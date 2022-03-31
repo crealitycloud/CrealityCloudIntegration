@@ -97,7 +97,7 @@ Item {
                             tipText: catalog.i18nc("@Tip:Button", "Import all")
                             btnImgUrl: "../res/btn_download.png"
                             onClicked:
-                            {
+                            {	
                                 sigButtonDownClicked(modelGroupId, modelCount)
                             }
                         }

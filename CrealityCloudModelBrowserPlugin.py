@@ -4,7 +4,7 @@ from UM.Logger import Logger
 from UM.Extension import Extension
 from UM.i18n import i18nCatalog
 from . CrealityCloudUtils import CrealityCloudUtils
-from typing import List, Any, Dict
+from typing import List
 from PyQt5.QtCore import QObject, pyqtSlot
 import json
 
@@ -34,7 +34,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
 
         self._utils = CrealityCloudUtils.getInstance()
         self._modelBrowserDialog = None
-        self._category = [1, 2, 3]#model lib, my model, my gcode
+        self._category = [1, 2, 3]#model lib, my model, my gocde
         self._pageSize = 28
         self._listType = [2, 7]#model lib, my upload model
         self._modelUploadDlg = None
@@ -68,7 +68,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
                 self._modelBrowserDialog.setProperty("selCategory", self._category[1])
                 self._modelBrowserDialog.show()
                 self._modelBrowserDialog.initUI()
-                self.loadPageMyModelList("",False)          
+                self.loadPageMyModelList(1,False)          
         else:
             self._showLoginDlg(1)
             
@@ -163,19 +163,37 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             self._modelBrowserDialog.showMessage(response["msg"])
     
     @pyqtSlot(int, int, bool)
-    def loadPageModelLibraryList(self, cursor: str, id: int, additionFlag: bool) -> None:
-        strjson = self._utils.getPageModelLibraryList(cursor, self._pageSize, str(id))
+    def loadPageModelLibraryList(self, page: int, id: int, additionFlag: bool) -> None:
+        strjson = self._utils.getPageModelLibraryList(page, self._pageSize, self._listType[0], id)
         response = json.loads(strjson)
         if (response["code"] == 0):
-            nextCursor = response["result"]["nextCursor"]
-            self._modelBrowserDialog.setProperty("nextCursor", nextCursor)
             self._modelBrowserDialog.setModelLibraryList(strjson, additionFlag)
         else:
             self._modelBrowserDialog.showMessage(response["msg"])    
 
+    @pyqtSlot(int, int, int, result=int)
+    def getTotalPage(self, selCategory:int, id: int, pageCount: int) -> int:
+        """get count of total page
+        :param pageCount: The count of components per page.
+        """
+        strjson = ""
+        if selCategory == 1:
+            strjson = self._utils.getPageModelLibraryList(1, self._pageSize, self._listType[0], id)
+        elif selCategory == 2:
+            strjson = self._utils.getPageModelLibraryList(1, self._pageSize, self._listType[1], -1)
+        response = json.loads(strjson)
+        totalPage = 0
+        if (response["code"] == 0):
+            totalCount = int(response["result"]["count"])
+            totalPage = int(totalCount / pageCount)
+            if totalCount % pageCount != 0:
+                totalPage += 1
+
+        return totalPage
+
     @pyqtSlot(str, int)
     def loadModelGroupDetailInfo(self, modelGroupId: str, count: int) -> None:
-        strjson = self._utils.getModelGroupDetailInfo("", count, modelGroupId)
+        strjson = self._utils.getModelGroupDetailInfo(1, count, modelGroupId)
         response = json.loads(strjson)
         if (response["code"] == 0):
             self._modelBrowserDialog.setModelDetailInfo(strjson)
@@ -201,16 +219,16 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         self._utils.downloadModel(self._modelBrowserDialog.property("selCategory"), urls, filenames)
     
     @pyqtSlot(str, int, int)
-    def importModelGroup(self, modelGroupId: str, count: int, category: int) -> None:       
-        strjson = self._utils.getModelGroupDetailInfo("", count, modelGroupId)
+    def importModelGroup(self, modelGroupId: str, count: int, category: int) -> None:
+        strjson = self._utils.getModelGroupDetailInfo(1, count, modelGroupId)
         response = json.loads(strjson)
         modelUrls = []
         modelNames = []
         try:
             if (response["code"] == 0):           
                 for index in range(count):
-                    url = self._utils.modelDownloadUrl(response["result"]["list"][index]["id"])#url = response["result"]["list"][index]["downloadUrl"]
-                    name = response["result"]["list"][index]["fileName"]+".stl"                   
+                    url = response["result"]["list"][index]["downloadUrl"]
+                    name = response["result"]["list"][index]["fileName"]+".stl"
                     modelUrls.append(url)
                     modelNames.append(name)
             if modelUrls and modelNames:
@@ -263,16 +281,19 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             self._modelBrowserDialog.showMessage(response["msg"])
 
     @pyqtSlot(int, bool)
-    def loadPageMyModelList(self, cursor: str, additionFlag: bool) -> None:
-        strjson = self._utils.getListUploadModel(cursor, self._pageSize)
+    def loadPageMyModelList(self, page: int, additionFlag: bool) -> None:
+        strjson = self._utils.getPageModelLibraryList(page, self._pageSize, self._listType[1], -1)
         response = json.loads(strjson)
-        if (response["code"] == 0):          
-            nextCursor = response["result"]["nextCursor"]
-            self._modelBrowserDialog.setProperty("nextCursor", nextCursor)
+        if (response["code"] == 0):
+            if page == 1:
+                totalPage = 1
+                totalPage = self.getTotalPage(2, -1, self._pageSize)
+                self._modelBrowserDialog.setProperty("currentModelLibraryPage", page)
+                self._modelBrowserDialog.setProperty("totalPage", totalPage)
+
             self._modelBrowserDialog.setModelLibraryList(strjson, additionFlag)
         else:
             self._modelBrowserDialog.showMessage("mymodel:"+response["msg"])
-        
         
     @pyqtSlot(str)
     def deleteModelGroup(self, modelGid: str) -> None:
@@ -332,7 +353,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         CuraApplication.getInstance().getOutputDeviceManager().removeOutputDevice("crealityTmpStlFile")
         self._utils.saveStlEnd.disconnect(self._uploadServer)
         self._utils.createModelsStarted.connect(self._modelGroupCreate)
-        self._utils.getOssAuth(2)#used only once 
+        self._utils.getOssAuth()#used only once 
 
         for filename in filenames:
             if os.path.exists(filename):
@@ -345,7 +366,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         strjson = self._utils.getModelGroupCreateRes(self._modelUploadDlg.property("categoryId"),
             self._modelUploadDlg.property("groupName"),
             self._modelUploadDlg.property("groupDesc"),
-            self._modelUploadDlg.property("bShare"),           
+            self._modelUploadDlg.property("bShare"),
+            self._modelUploadDlg.property("modelType"),
             self._modelUploadDlg.property("license"),
             self._modelUploadDlg.property("bIsOriginal"))
         response = json.loads(strjson)
@@ -358,7 +380,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     @pyqtSlot("QStringList")
     def addModels(self, strlist: List[str]) -> None:
         self._utils.addModelsStarted.connect(self._modelGroupAdd)
-        self._utils.getOssAuth(2)#used only once
+        self._utils.getOssAuth()#used only once
         for filename in strlist:
             if os.path.exists(filename):
                 self._utils.uploadOss(3, filename)
@@ -373,7 +395,6 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             self._modelBrowserDialog.flushMyModelAfterAdd()
         else:
             self._modelBrowserDialog.showMessage(i18n_catalog.i18nc("@title:Label", "Upload failed!") + ' ' +response["msg"])
-
 
 class STLOutputDevice(OutputDevice):
     def __init__(self, saveWay: int):
