@@ -137,7 +137,7 @@ BasicDialog {
                     connectSlot()
                     var fileName = fileNameField.text
                     // File name cannot be empty
-                    if (!v.required(fileName) || fileName.indexOf(' ') !== -1) {
+                    if (!v.required(fileName)) {
                         showMessage(catalog.i18nc("@error", "File name cannot be empty"))
                         return
                     }
