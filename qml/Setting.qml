@@ -52,6 +52,12 @@ BasicDialog
             }
 
         }
+		Text
+		{
+			anchors.centerIn : parent
+			text:catalog.i18nc("@title:Label", "Warning:\n The switch takes effect only\n after the software is restarted")   
+			
+		}
 
     }
 
@@ -72,9 +78,9 @@ BasicDialog
             }
 
             CloudUtils.saveUrl(env)
-            CloudUtils.autoSetUrl()
-            CloudUtils.clearToken()
-            CloudUtils.setLogin(false)
+            //CloudUtils.autoSetUrl()
+            //CloudUtils.clearToken()
+            //CloudUtils.setLogin(false)
             settingWindow.close();
         }
     }
