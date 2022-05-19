@@ -49,7 +49,7 @@ function sendForm(url, params, callback, header) {
     http.setRequestHeader("__CXY_OS_LANG_", "0")
     http.setRequestHeader("__CXY_DUID_", duid)
     http.setRequestHeader("__CXY_OS_VER_", os_version)
-    http.setRequestHeader("__CXY_PLATFORM_", "6")
+    http.setRequestHeader("__CXY_PLATFORM_", "14")
     if (header !== undefined) {
         header(http)
     }

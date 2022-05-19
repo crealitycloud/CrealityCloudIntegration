@@ -327,7 +327,7 @@ class CrealityCloudUtils(QObject):
             "__CXY_OS_LANG_": self.getLangCode(),
             "__CXY_DUID_": self._duid,
             "__CXY_OS_VER_": self._osVersion,
-            "__CXY_PLATFORM_": "6",
+            "__CXY_PLATFORM_": "14",
             "__CXY_REQUESTID_": str(uuid.uuid1()),
             "__CXY_UID_": self._userInfo["userId"],
             "__CXY_TOKEN_": self._userInfo["token"]
@@ -489,7 +489,7 @@ class CrealityCloudUtils(QObject):
             "__CXY_OS_LANG_": self.getLangCode(),
             "__CXY_DUID_": self._duid,
             "__CXY_OS_VER_": self._osVersion,
-            "__CXY_PLATFORM_": "6",
+            "__CXY_PLATFORM_": "14",
             "__CXY_REQUESTID_": str(uuid.uuid1())
         }
         return headers
