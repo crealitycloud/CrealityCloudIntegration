@@ -21,7 +21,7 @@ BasicDialog{
     property var groupName:""
     property var groupDesc:""
     property var bShare:false
-    property int modelType:1
+    //property int modelType:1
     property var license:"";
     property var bIsOriginal:false;
     property var progressValue: 0.0
@@ -219,7 +219,7 @@ BasicDialog{
                 textRole: "modelData"
             }
         }
-        Row{
+        /*Row{
             Label {
                 id: idModelType
                 width:100
@@ -245,7 +245,7 @@ BasicDialog{
                     idModelTypeModel.append({key: 2, modelData: catalog.i18nc("@title:Label", "3D Photo Model")})
                 }
             }
-        }
+        }*/
         Row{
             Label {
                 width:100
@@ -357,8 +357,7 @@ BasicDialog{
                 idprogressBar.visible = true
                 idUploadSuccess.visible = false
 
-                var license = "";
-                if(idLicenseRow.visible){
+                if(!idOriginalCheckBox.checked){
                     license = ""
                 }
                 else{
@@ -373,8 +372,8 @@ BasicDialog{
                 groupName=idModelGroupInput.text
                 groupDesc=idDescText.text
                 bShare=idShareCheckBox.checked;
-                modelType=idModelTypeModel.get(idModelTypeCombobox.currentIndex).key
-                license=license
+                //modelType=idModelTypeModel.get(idModelTypeCombobox.currentIndex).key
+
                 bIsOriginal=idOriginalCheckBox.checked;
 
                 ManageUploadModel.uploadModel();
