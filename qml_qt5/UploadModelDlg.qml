@@ -1,9 +1,9 @@
 import QtQuick 2.10
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.0
-import QtQuick.Dialogs
-// import Qt5Compat.GraphicalEffects
-import UM 1.5 as UM
+import QtQuick.Dialogs 1.1
+import QtGraphicalEffects 1.0
+import UM 1.1 as UM
 import Cura 1.1 as Cura
 import "../js/Validator.js" as Validator
 
@@ -134,7 +134,7 @@ BasicDialog{
                 width: grid_wrapper.width-idGroupNameLabel.width-110
                 height : 28
                 text: ""
-                // validator: RegularExpressionValidator { regularExpression: /^\S{100}$/ }
+                validator: RegExpValidator { regExp: /^\S{100}$/ }
             }
         }
         Row{
@@ -252,7 +252,7 @@ BasicDialog{
                 height:28
                 color: "transparent"
             }
-            UM.CheckBox
+            Cura.CheckBox
             {
                 id :idOriginalCheckBox
                 width: 100
@@ -272,7 +272,7 @@ BasicDialog{
                     }
                 }
             }
-            UM.CheckBox
+            Cura.CheckBox
             {
                 id :idShareCheckBox
                 anchors.verticalCenter: parent.verticalCenter

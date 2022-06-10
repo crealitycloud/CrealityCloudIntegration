@@ -47,7 +47,7 @@ BasicDialog{
                         text: qsTr("CC BY")
                         font.family: fontFamily
                         font.pixelSize:18
-                        font.weight: Font.Bold
+                        font.weight: "Bold"
                     }
                     Label{
                         width: parent.width
@@ -85,7 +85,7 @@ BasicDialog{
                         font.family: fontFamily
                         text: qsTr("CC BY-SA")
                         font.pixelSize:18
-                        font.weight:Font.Bold
+                        font.weight: "Bold"
                     }
                     Label{
                         width: parent.width
@@ -123,7 +123,7 @@ BasicDialog{
                         font.family: fontFamily
                         text: qsTr("CC BY-NC")
                         font.pixelSize:18
-                        font.weight:Font.Bold
+                        font.weight: "Bold"
                     }
                     Label{
                         width: parent.width
@@ -161,7 +161,7 @@ BasicDialog{
                         font.family: fontFamily
                         text: qsTr("CC BY-NC-SA")
                         font.pixelSize:18
-                        font.weight:Font.Bold
+                        font.weight: "Bold"
                     }
                     Label{
                         width: parent.width
@@ -199,7 +199,7 @@ BasicDialog{
                         font.family: fontFamily
                         text: qsTr("CC BY-ND")
                         font.pixelSize:18
-                        font.weight:Font.Bold
+                        font.weight: "Bold"
                     }
                     Label{
                         width: parent.width
@@ -237,7 +237,7 @@ BasicDialog{
                         font.family: fontFamily
                         text: qsTr("CC BY-NC-ND")
                         font.pixelSize:18
-                        font.weight:Font.Bold
+                        font.weight: "Bold"
                     }
                     Label{
                         width: parent.width
@@ -275,7 +275,7 @@ BasicDialog{
                         font.family: fontFamily
                         text: qsTr("CC0")
                         font.pixelSize:18
-                        font.weight:Font.Bold
+                        font.weight: "Bold"
                     }
                     Label{
                         width: parent.width

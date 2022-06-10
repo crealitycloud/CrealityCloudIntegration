@@ -1,9 +1,17 @@
+USE_QT5 = False
 import os
 from . CrealityCloudUtils import CrealityCloudUtils
-from PyQt5.QtCore import QObject
-from PyQt5.QtGui import *
-from PyQt5.QtNetwork import *
-from PyQt5.QtQml import *
+try:
+    from PyQt6.QtCore import QObject
+    from PyQt6.QtGui import *
+    from PyQt6.QtNetwork import *
+    from PyQt6.QtQml import *
+except ImportError:
+    from PyQt5.QtCore import QObject
+    from PyQt5.QtGui import *
+    from PyQt5.QtNetwork import *
+    from PyQt5.QtQml import *
+    USE_QT5 = True
 
 from UM.Application import Application
 from UM.Logger import Logger
@@ -35,6 +43,7 @@ class CrealityCloudOutputDevice(OutputDevice):
         self._nodes = None
         self._stream = None
         self._loginDlg = None
+        self._qml_folder = "qml" if not USE_QT5 else "qml_qt5"
 
     def requestWrite(self, nodes, file_name = None, limit_mimetypes = None, file_handler = None, **kwargs) -> None:
         if self._writing:
@@ -55,7 +64,7 @@ class CrealityCloudOutputDevice(OutputDevice):
             self._showLoginDlg()           
 
     def _createDialogue(self) -> QObject:
-        qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), "qml/UploadGcodeDlg.qml")
+        qml_file = os.path.join(PluginRegistry.getInstance().getPluginPath(self._pluginId), self._qml_folder, "UploadGcodeDlg.qml")
         component = Application.getInstance().createQmlComponent(qml_file)
         return component
 

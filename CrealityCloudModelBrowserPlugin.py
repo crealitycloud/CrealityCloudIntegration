@@ -1,11 +1,15 @@
 # Uranium is released under the terms of the LGPLv3 or higher.
-
+USE_QT5 = False
 from UM.Logger import Logger
 from UM.Extension import Extension
 from UM.i18n import i18nCatalog
 from . CrealityCloudUtils import CrealityCloudUtils
 from typing import List, Any, Dict
-from PyQt5.QtCore import QObject, pyqtSlot
+try:
+    from PyQt6.QtCore import QObject, pyqtSlot
+except ImportError:
+    from PyQt5.QtCore import QObject, pyqtSlot
+    USE_QT5 = True
 import json
 
 i18n_catalog = i18nCatalog("uranium")
@@ -40,13 +44,14 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         self._modelUploadDlg = None
         self._settingDlg = None
         self._loginDlg = None
+        self._qml_folder = "qml" if not USE_QT5 else "qml_qt5"
         CuraApplication.getInstance().applicationShuttingDown.connect(self._clearTmpfiles)
         self._utils.loginSuccess.connect(self.loginRes)
     
     def _createModelDialog(self) -> None:
         if not self._modelBrowserDialog:
             plugin_dir_path = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
-            path = os.path.join(plugin_dir_path, "qml/ModelLibraryMainPage.qml")
+            path = os.path.join(plugin_dir_path, self._qml_folder, "ModelLibraryMainPage.qml")
             self._modelBrowserDialog = CuraApplication.getInstance().createQmlComponent(path, {"ManageModelBrowser": self})
     
     def _showModelLibrary(self) -> None:
@@ -106,7 +111,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         if self._utils.getLogin():
             if not self._modelUploadDlg:
                 plugin_dir_path = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
-                path = os.path.join(plugin_dir_path, "qml/UploadModelDlg.qml")
+                path = os.path.join(plugin_dir_path, self._qml_folder, "UploadModelDlg.qml")
                 self._modelUploadDlg = CuraApplication.getInstance().createQmlComponent(path, {"ManageUploadModel": self})
             if self._modelUploadDlg:
                 self._modelUploadDlg.show()
@@ -123,7 +128,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     def _showSettingDlg(self) -> None:
         if not self._settingDlg:
             plugin_dir_path = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
-            path = os.path.join(plugin_dir_path, "qml/Setting.qml")
+            path = os.path.join(plugin_dir_path, self._qml_folder, "Setting.qml")
             self._settingDlg = CuraApplication.getInstance().createQmlComponent(path)
         if self._settingDlg:
             self._settingDlg.show()

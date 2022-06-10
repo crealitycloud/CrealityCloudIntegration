@@ -1,5 +1,5 @@
 import QtQuick 2.2
-import QtQuick.Controls 2.3
+import QtQuick.Controls 1.4
 import UM 1.1 as UM
 import Cura 1.1 as Cura
 

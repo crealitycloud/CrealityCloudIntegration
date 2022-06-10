@@ -1,3 +1,4 @@
+USE_QT5 = False
 from typing import Dict, List
 
 from requests.models import Response
@@ -10,6 +11,11 @@ import gzip
 import uuid
 import requests
 import importlib
+try:
+    from PyQt6.QtCore import QObject, pyqtSlot
+except ImportError:
+    from PyQt5.QtCore import QObject, pyqtSlot
+    USE_QT5 = True
 #Import package into sys.modules so that the library can reference itself with absolute imports.
 this_plugin_path = os.path.dirname(__file__)
 def importExtLib(libName, dirName=""):
@@ -33,15 +39,19 @@ importExtLib("oss2")
 from oss2 import SizedFileAdapter, determine_part_size, headers
 from oss2.models import PartInfo
 import oss2
-from PyQt5.QtCore import (QSysInfo, pyqtSignal, pyqtSlot, pyqtProperty, QObject, QUrl)
-from PyQt5.QtNetwork import (QNetworkAccessManager)
-
+try:
+    from PyQt6.QtCore import (QSysInfo, pyqtSignal, pyqtSlot, pyqtProperty, QObject, QUrl)
+    from PyQt6.QtNetwork import (QNetworkAccessManager)
+    from PyQt6.QtWidgets import QApplication
+except ImportError:    
+    from PyQt5.QtCore import (QSysInfo, pyqtSignal, pyqtSlot, pyqtProperty, QObject, QUrl)
+    from PyQt5.QtNetwork import (QNetworkAccessManager)
+    from PyQt5.QtWidgets import QApplication
 from UM.Job import Job
 from UM.OutputDevice import OutputDeviceError
 catalog = i18nCatalog("uranium")
 from cura.CuraApplication import CuraApplication
 from UM.Resources import Resources
-from PyQt5.QtWidgets import QApplication
 
 class CrealityCloudUtils(QObject):
 
@@ -96,6 +106,7 @@ class CrealityCloudUtils(QObject):
         self._uploadFileList = []
         self._uploadFileCounts = 0
         self._filekeyList = []
+        self._qml_folder = "qml" if not USE_QT5 else "qml_qt5" 
 
         self.autoSetUrl()
 
@@ -210,7 +221,7 @@ class CrealityCloudUtils(QObject):
     def getLoginDlg(self) -> QObject:
         if not self._loginDlg:
             plugin_dir_path = os.path.abspath(os.path.expanduser(os.path.dirname(__file__)))
-            path = os.path.join(plugin_dir_path, "qml/Login.qml")
+            path = os.path.join(plugin_dir_path, self._qml_folder, "Login.qml")
             self._loginDlg = CuraApplication.getInstance().createQmlComponent(path)
 
         return self._loginDlg
@@ -578,7 +589,7 @@ class CrealityCloudUtils(QObject):
     def getPageModelLibraryList(self, cursor: str, pageSize: int, categoryId: str) -> str:
         url = self._cloudUrl + "/api/cxy/v3/model/listCategory"#"/api/cxy/model/modelGroupList"
         response = requests.post(url, 
-                    data=json.dumps({"cursor": "", "limit": pageSize, "categoryId": categoryId}),
+                    data=json.dumps({"cursor": "", "limit": pageSize, "categoryId": categoryId, "filterType":2, "isPay":2}),
                     headers=self.getModelHeaders()).text
         '''elif listType == 7:
             response = requests.post(url, 

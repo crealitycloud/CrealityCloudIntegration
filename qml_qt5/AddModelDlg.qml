@@ -1,7 +1,7 @@
 import QtQuick 2.10
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.0
-import QtQuick.Dialogs
+import QtQuick.Dialogs 1.1
 import UM 1.1 as UM
 import Cura 1.1 as Cura
 
@@ -96,9 +96,9 @@ BasicDialog{
                     id: openfileDialog
                     title: catalog.i18nc("@title:window","Open file(s)")
                     modality: Qt.WindowModal
-                    // selectMultiple: true
+                    selectMultiple: true
                     nameFilters: [catalog.i18nc("@text:fileDialog", "stl files ")+"(*.stl *.STL)"]
-                    // folder: shortcuts.documents
+                    folder: shortcuts.documents
                     onAccepted:
                     {
                         var fCount = fileUrls.length;

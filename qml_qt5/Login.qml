@@ -1,11 +1,11 @@
 import QtQuick 2.10
 import QtQuick.Controls 2.3
-import QtQuick.Dialogs
-// import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.1
+import QtQuick.Controls.Styles 1.4
 import "../js/CloudAPI.js" as CloudAPI
 import "../js/CountryCode.js" as CountryCode
 import "../js/Validator.js" as Validator
-import UM 1.5 as UM
+import UM 1.1 as UM
 import Cura 1.1 as Cura
 
 
@@ -32,6 +32,11 @@ BasicDialog {
 
     signal sigLoginSuccess(var retPageType, var userImg, var userName, var userId);
     signal sigLoginRes(var userImg, var userName, var userId);
+
+    function showDialog(tuserImg, tuserName, tuserId)
+    {
+        pluginRootWindow.show();
+    }
 
     function switchEmailLogin() {
         loginType = "email"
@@ -164,7 +169,7 @@ BasicDialog {
     function refreshItemHiden() {
         refreshItem.visible = false
         refreshMask.opacity = 0
-    } 
+    }
     function requestQrCode() {
         pluginRootWindow.showBusy()
         CloudAPI.qrLogin(function(data) {
@@ -485,7 +490,6 @@ BasicDialog {
                         }
                         placeholderText: catalog.i18nc("@tip:textfield", "Please enter your email address")
                         onTextChanged: fieldValidator()
-                        // validator: RegularExpressionValidator { regularExpression: /^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,30})$/ }
                     }
 
                     TextField {
@@ -757,7 +761,7 @@ BasicDialog {
                         }                       
                     }
 
-                    UM.CheckBox {
+                    Cura.CheckBox {
                         id: idUserPolicy
                         height: 12
                         font: UM.Theme.getFont("default")

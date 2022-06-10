@@ -1,7 +1,7 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
-import QtQuick.Dialogs
+import QtQuick.Dialogs 1.1
 import UM 1.1 as UM
 
 import "../js/CloudAPI.js" as CloudAPI
