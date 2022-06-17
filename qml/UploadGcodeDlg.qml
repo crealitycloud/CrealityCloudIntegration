@@ -1,6 +1,6 @@
 import QtQuick 2.2
-import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 2.3
+// import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs
 import UM 1.1 as UM
 
@@ -97,7 +97,7 @@ BasicDialog {
                 selectByMouse: true
                 text: CloudUtils.defaultFileName()
                 font: UM.Theme.getFont("default")
-                validator: RegExpValidator { regExp: /^\S{100}$/ }
+                // validator: RegExpValidator { regExp: /^\S{100}$/ }
             }
 
             Text {
@@ -152,25 +152,29 @@ BasicDialog {
 
             ProgressBar {
                 id: progressBar
+                value: 0.5
+                padding: 2
                 x: 139
                 y: 251
                 width: 340
                 height: 15
-                minimumValue: 0
-                maximumValue: 100
                 visible: false
-                style: ProgressBarStyle {
-                    background: Rectangle {
-                        radius: 2
-                        color: "white"
-                        border.color: "gray"
-                        border.width: 1
-                    }
+                background: Rectangle {
+                    implicitWidth: 340
+                    implicitHeight: 15
+                    color: "#e6e6e6"
+                    radius: 3
+                }
 
-                    progress: Rectangle {
-                        color: "#0f2d79"
-                        border.color: "gray"
-                        border.width: 1
+                contentItem: Item {
+                    implicitWidth: 340
+                    implicitHeight: 12
+
+                    Rectangle {
+                        width: progressBar.visualPosition * parent.width
+                        height: parent.height
+                        radius: 2
+                        color: "#17a81a"
                     }
                 }
             }

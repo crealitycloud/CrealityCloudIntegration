@@ -33,6 +33,11 @@ BasicDialog {
     signal sigLoginSuccess(var retPageType, var userImg, var userName, var userId);
     signal sigLoginRes(var userImg, var userName, var userId);
 
+    function showDialog(tuserImg, tuserName, tuserId)
+    {
+        pluginRootWindow.show();
+    }
+    
     function switchEmailLogin() {
         loginType = "email"
         phoneSelect.visible = false

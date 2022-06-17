@@ -273,6 +273,7 @@ Window{
         var strModelGid = "-%1-".arg(modelGid)
 
         deleteModelGroupMap();
+        initModelLibrary();
     }
     function flushMyModelAfterAdd()
     {
@@ -428,7 +429,11 @@ Window{
         spaceRect.visible = true;
         userImg.visible = true;
         userName.visible = true;
-      
+        initModelLibrary()
+    }
+    
+    function initModelLibrary()
+    {
         switch (idSelCategory.currentIndex){
             case 0:
                 initUI();
@@ -443,8 +448,8 @@ Window{
                 ManageModelBrowser.loadPageMyGcodeList(1, pageSize[1], false)
                 break;
         }
-
     }
+
     function logout()
     {
         idLoginBtn.visible = true;
@@ -1034,12 +1039,7 @@ Window{
         property var modelGOrGcodeid: ""
         onAccept:{
             loginMessage.close()
-            var componentUser = Qt.createComponent("Login.qml")
-            if (componentUser.status === Component.Ready )
-            {
-                var obj = componentUser.createObject(idModelLibraryDlg)
-                obj.showDialog()
-            }
+            showLoginDlg()
         }
         onCancel:{
             loginMessage.close()
