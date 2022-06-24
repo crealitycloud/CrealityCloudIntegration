@@ -389,7 +389,9 @@ class CrealityCloudUtils(QObject):
                 self.getFileMd5(obj_file) + ".gcode.gz"          
         elif type == 2 or type == 3:
             obj_file = filename           
-            self.setOssKey(self.getFileKey(self.getFileMd5(obj_file), 0))
+            # self.setOssKey(self.getFileKey(self.getFileMd5(obj_file), 0))
+            self._ossKey = self._bucketInfo["prefixPath"] + "/" + \
+                self.getFileMd5(obj_file) + ".stl"    
             self._uploadFileList.append(obj_file)
             self._filekeyList.append(self._ossKey)
         Logger.log("d", self._ossKey)
@@ -654,7 +656,7 @@ class CrealityCloudUtils(QObject):
             modelList.append(itemDict)
 
         contentDict = {
-            "groupItem":{"modelColor": 0,"categoryId":categoryId, "groupName":groupName, "groupDesc":groupDesc,
+            "groupItem":{"modelColor": 0,"categoryId":int(categoryId), "groupName":groupName, "groupDesc":groupDesc,
                  "covers":[], "isOriginal":bIsOriginal, "license":license, "isShared":bShare},
             "modelList": modelList
         }
