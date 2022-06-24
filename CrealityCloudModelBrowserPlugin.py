@@ -116,7 +116,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             if self._modelUploadDlg:
                 self._modelUploadDlg.show()
 
-                strjson = self._utils.getCategoryListResult(self._listType[0])
+                strjson = self._utils.getCategoryListResult(self._listType[1])
                 response = json.loads(strjson)
                 if (response["code"] == 0):
                     self._modelUploadDlg.insertListModeData(strjson)
@@ -169,7 +169,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     
     @pyqtSlot(int, int, bool)
     def loadPageModelLibraryList(self, cursor: str, id: int, additionFlag: bool) -> None:
-        strjson = self._utils.getPageModelLibraryList(cursor, self._pageSize, str(id))
+        strjson = self._utils.getPageModelLibraryList(str(cursor), self._pageSize, str(id))
         response = json.loads(strjson)
         if (response["code"] == 0):
             nextCursor = response["result"]["nextCursor"]

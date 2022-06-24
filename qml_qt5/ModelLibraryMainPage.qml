@@ -105,7 +105,7 @@ Window{
                     obj.sigButtonClicked.connect(onBrowseDetails)
                     obj.sigBtnDelClicked.connect(slotBtnDelClicked)
                     modelGroupMap[objResult[key].id] = obj;
-                    //console.log("key:",key,",objResult[key].id---：",objResult[key].id,",obj---:",obj);
+                    console.log("key:",key,",objResult[key].id---：",objResult[key].id);
                     count += 1;
                 }
                 //console.log("modelGroupMap count:",count);
@@ -238,7 +238,7 @@ Window{
         if(CloudUtils.getLogin()){
             ManageModelBrowser.importModelGroup(modelGid, count, selCategory);
         }else{
-            showMessage(catalog.i18nc("@Tip:content", "please log in to creality cloud first!"));
+            showLoginMessage(catalog.i18nc("@Tip:content", "please log in to creality cloud first!"));
         }
     }
 
@@ -317,7 +317,7 @@ Window{
     function onDownloadModel(name, id)//detailPage：download a single model
     {
         if(!CloudUtils.getLogin()){
-            showMessage(catalog.i18nc("@Tip:content", "please log in to creality cloud first!"));
+            showLoginMessage(catalog.i18nc("@Tip:content", "please log in to creality cloud first!"));
             return;
         }
         
@@ -394,14 +394,18 @@ Window{
         var count = 0;
         for(var key in modelGroupMap)        
 		{
-            count += 1; console.log("map key:",key,",    map value:",modelGroupMap[key]);
+            count += 1; 
+            // console.log("map key:",key,",    map value:",modelGroupMap[key]);
 		}
         console.log(info," map count:  ",count, "----------")
     }
 
+    function showLoginMessage(text) {
+        loginMessage.needLogin = true;
+        showMessage(text)
+    }
+
     function showMessage(text) {
-        // msgDialog.myContent = text;
-        // msgDialog.show()
         loginMessage.myContent = text;
         loginMessage.show()
     }
@@ -906,7 +910,7 @@ Window{
                 if(CloudUtils.getLogin()){
                     downloadModels();
                 }else{
-                    showMessage(catalog.i18nc("@Tip:content", "please log in to creality cloud first!"));
+                    showLoginMessage(catalog.i18nc("@Tip:content", "please log in to creality cloud first!"));
                 }
             }
             onSigShareLink:{
@@ -1037,9 +1041,11 @@ Window{
         mytitle: catalog.i18nc("@Tip:title", "Tip")
         btnCount: 2
         property var modelGOrGcodeid: ""
+        property bool needLogin:false
         onAccept:{
             loginMessage.close()
-            showLoginDlg()
+            if(needLogin)
+                showLoginDlg()
         }
         onCancel:{
             loginMessage.close()
