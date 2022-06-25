@@ -344,7 +344,7 @@ Window{
                 }
             }
         }
-        else if(sourceType == 2){//my model
+        else if(sourceType == 1){//my model
             if(nextCursor != ""){console.log("nextCursor:",nextCursor)
                 ManageModelBrowser.loadPageMyModelList(nextCursor, curModelCategoryId, true)
             }

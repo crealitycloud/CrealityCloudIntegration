@@ -45,6 +45,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         self._settingDlg = None
         self._loginDlg = None
         self._qml_folder = "qml" if not USE_QT5 else "qml_qt5"
+        self._myModelCursor = ''
         CuraApplication.getInstance().applicationShuttingDown.connect(self._clearTmpfiles)
         self._utils.loginSuccess.connect(self.loginRes)
     
@@ -269,11 +270,17 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
 
     @pyqtSlot(int, bool)
     def loadPageMyModelList(self, cursor: str, additionFlag: bool) -> None:
-        strjson = self._utils.getListUploadModel(cursor, self._pageSize)
+        #  chenbiwei 2022.06.25
+        #  qml传入的字符串被转换成整型了，服务器返回的cursor到这里值就不对了，改为python端保存
+        
+        if(additionFlag == False):
+            self._myModelCursor = ''
+        strjson = self._utils.getListUploadModel(self._myModelCursor, self._pageSize)
         response = json.loads(strjson)
         if (response["code"] == 0):          
             nextCursor = response["result"]["nextCursor"]
             self._modelBrowserDialog.setProperty("nextCursor", nextCursor)
+            self._myModelCursor = nextCursor
             self._modelBrowserDialog.setModelLibraryList(strjson, additionFlag)
         else:
             self._modelBrowserDialog.showMessage("mymodel:"+response["msg"])

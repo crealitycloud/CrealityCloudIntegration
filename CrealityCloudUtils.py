@@ -691,7 +691,7 @@ class CrealityCloudUtils(QObject):
     def getListUploadModel(self, cursor: str, pageSize: int) -> str:
         url = self._cloudUrl + "/api/cxy/v3/model/listUpload"#"/api/cxy/model/modelGroupList"
         response = requests.post(url, 
-                    data=json.dumps({"cursor": "", "limit": pageSize}),
+                    data=json.dumps({"cursor": cursor, "limit": pageSize}),
                     headers=self.getCommonHeaders()).text       
         return response
 
