@@ -263,7 +263,7 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             if totalCount != 0:
                 self._modelBrowserDialog.setModelLibraryList(strjson, additionFlag)
             else:
-                self._modelBrowserDialog.deleteCompent("modelGroupMap")
+                # self._modelBrowserDialog.deleteCompent("modelGroupMap")
                 self._modelBrowserDialog.showNofoundTip(True)
         else:
             self._modelBrowserDialog.showMessage(response["msg"])

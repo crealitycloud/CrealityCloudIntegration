@@ -1,5 +1,4 @@
 USE_QT5 = False
-from asyncio.log import logger
 from typing import Dict, List
 
 from requests.models import Response
@@ -591,7 +590,6 @@ class CrealityCloudUtils(QObject):
 
     def getPageModelLibraryList(self, cursor: str, pageSize: int, categoryId: str) -> str:
         url = self._cloudUrl + "/api/cxy/v3/model/listCategory"#"/api/cxy/model/modelGroupList"
-        logger.error(json.dumps({"cursor": cursor, "limit": pageSize, "categoryId": categoryId, "filterType":2, "isPay":2}))
         response = requests.post(url, 
                     data=json.dumps({"cursor": cursor, "limit": pageSize, "categoryId": categoryId, "filterType":2, "isPay":2}),
                     headers=self.getModelHeaders()).text
