@@ -1,4 +1,6 @@
 USE_QT5 = False
+from asyncio.log import logger
+from logging import exception
 from typing import Dict, List
 
 from requests.models import Response
@@ -318,18 +320,22 @@ class CrealityCloudUtils(QObject):
         self.updatedProgressTextSlot(catalog.i18nc("@info:status", "4/4 Committing file..."))
         self.updateProgress.emit(0)
         url = self._cloudUrl + "/api/cxy/v2/gcode/uploadGcode"
-        response = requests.post(
-            url, data=json.dumps({"list": [{"name": self._fileName, "filekey": self._ossKey}]}), 
-            headers=self.getCommonHeaders()).text
-        response = json.loads(response)
-        if (response["code"] == 0):
-            self.updateProgress.emit(1)
-            Logger.log("d", "upload success")
-            self.updateStatus.emit("good")
-            self.clearUploadFile()
-        else:
-            self.updateStatus.emit("bad")
-            Logger.log("e", "oss commit api: %s", json.dumps(response))
+        try:
+            response = requests.post(
+                url, data=json.dumps({"list": [{"name": self._fileName, "filekey": self._ossKey}]}), 
+                headers=self.getCommonHeaders()).text
+            response = json.loads(response)
+            if (response["code"] == 0):
+                self.updateProgress.emit(1)
+                Logger.log("d", "upload success")
+                self.updateStatus.emit("good")
+                self.clearUploadFile()
+            else:
+                self.updateStatus.emit("bad")
+                Logger.log("e", "oss commit api: %s", json.dumps(response))
+        except Exception as e:
+            self.updateStatus.emit("bad")            
+            Logger.log("e", e)
 
     def getCommonHeaders(self) -> Dict[str, str]:
         headers = {
@@ -351,29 +357,32 @@ class CrealityCloudUtils(QObject):
         '''
         url = self._cloudUrl + "/api/cxy/v2/common/getOssInfo"  #"/api/cxy/common/getOssInfo"
         url2 = self._cloudUrl + "/api/cxy/account/v2/getAliyunInfo"  #"/api/account/getAliyunInfo"
-        response = requests.post(url, data="{}", headers=self.getCommonHeaders()).text
-        response = json.loads(response)
-        if (response["code"] == 0):
-            self._bucketInfo["endpoint"] = response["result"]["info"]["endpoint"]
-            if type == 1:
-                self._bucketInfo["bucket"] = response["result"]["info"]["file"]["bucket"]
-                self._bucketInfo["prefixPath"] = response["result"]["info"]["file"]["prefixPath"]
-            elif type == 2:
-                self._bucketInfo["bucket"] = response["result"]["info"]["internal"]["bucket"]
-                self._bucketInfo["prefixPath"] = response["result"]["info"]["internal"]["prefixPath"]
-        else:
-            raise Exception("oss bucket api error: "+json.dumps(response))
-        response = requests.post(
-            url2, data="{}", headers=self.getCommonHeaders()).text
-        response = json.loads(response)
-        if (response["code"] == 0):
-            self._bucketInfo["accessKeyId"] = response["result"]["aliyunInfo"]["accessKeyId"]
-            self._bucketInfo["secretAccessKey"] = response["result"]["aliyunInfo"]["secretAccessKey"]
-            self._bucketInfo["sessionToken"] = response["result"]["aliyunInfo"]["sessionToken"]
-            self._bucketInfo["lifeTime"] = response["result"]["aliyunInfo"]["lifeTime"]
-            self._bucketInfo["expiredTime"] = response["result"]["aliyunInfo"]["expiredTime"]
-        else:
-            raise Exception("oss auth api error: "+json.dumps(response))
+        try:
+            response = requests.post(url, data="{}", headers=self.getCommonHeaders()).text
+            response = json.loads(response)
+            if (response["code"] == 0):
+                self._bucketInfo["endpoint"] = response["result"]["info"]["endpoint"]
+                if type == 1:
+                    self._bucketInfo["bucket"] = response["result"]["info"]["file"]["bucket"]
+                    self._bucketInfo["prefixPath"] = response["result"]["info"]["file"]["prefixPath"]
+                elif type == 2:
+                    self._bucketInfo["bucket"] = response["result"]["info"]["internal"]["bucket"]
+                    self._bucketInfo["prefixPath"] = response["result"]["info"]["internal"]["prefixPath"]
+            else:
+                raise Exception("oss bucket api error: "+json.dumps(response))
+            response = requests.post(
+                url2, data="{}", headers=self.getCommonHeaders()).text
+            response = json.loads(response)
+            if (response["code"] == 0):
+                self._bucketInfo["accessKeyId"] = response["result"]["aliyunInfo"]["accessKeyId"]
+                self._bucketInfo["secretAccessKey"] = response["result"]["aliyunInfo"]["secretAccessKey"]
+                self._bucketInfo["sessionToken"] = response["result"]["aliyunInfo"]["sessionToken"]
+                self._bucketInfo["lifeTime"] = response["result"]["aliyunInfo"]["lifeTime"]
+                self._bucketInfo["expiredTime"] = response["result"]["aliyunInfo"]["expiredTime"]
+            else:
+                raise Exception("oss auth api error: "+json.dumps(response))
+        except Exception as e:
+            Logger.log("e", e)
     
     def setOssKey(self, key: str) -> None:
         self._ossKey = key
@@ -516,26 +525,42 @@ class CrealityCloudUtils(QObject):
     
     def getCategoryListResult(self, type: int) -> str:
         url = self._cloudUrl + "/api/cxy/v2/common/categoryList"  #"/api/cxy/category/categoryList"
-        response = requests.post(url, data=json.dumps({"type": type}), headers=self.getModelHeaders()).text
-        return response
+        try:
+            response = requests.post(url, data=json.dumps({"type": type}), headers=self.getModelHeaders()).text
+            return response
+        except Exception as e:
+            Logger.log("e", e)
+        return ""
     
     def getModelGroupDetailInfo(self, cursor: str, pageSize: int, groupId: str) -> str:
         url = self._cloudUrl + "/api/cxy/v3/model/fileList"#"/api/cxy/v2/model/modelList"
-        response = requests.post(url, 
-                    data=json.dumps({"cursor": "", "limit": pageSize, "modelId": groupId}), 
-                    headers=self.getModelHeaders()).text
-        return response
+        try:
+            response = requests.post(url, 
+                        data=json.dumps({"cursor": "", "limit": pageSize, "modelId": groupId}), 
+                        headers=self.getModelHeaders()).text
+            return response
+        except Exception as e:
+            Logger.log("e", e)
+        return ""
     
     @pyqtSlot(str, result=str)
     def modelDownloadUrl(self, modelId: str) -> str:
+        url = self.modelUrl(modelId)[0]
+        return url
+    
+    def modelUrl(self, modelId: str):
         url = self._cloudUrl + "/api/cxy/v3/model/fileDownload"
-        response = requests.post(url, data=json.dumps({"id":modelId}),
-                    headers=self.getCommonHeaders()).text
-        response = json.loads(response)
-        if (response["code"] == 0):
-            return response["result"]["signUrl"]
-        else:
-            return ""
+        try:
+            response = requests.post(url, data=json.dumps({"id":modelId}),
+                        headers=self.getCommonHeaders()).text
+            response = json.loads(response)
+            if (response["code"] == 0):
+                return response["result"]["signUrl"],""
+            else:
+                return "",response["msg"]
+        except Exception as e:
+            Logger.log("e", e)
+        return "",""
 
     def downloadModel(self, downType: int, urls: List[str], filepaths: List[str]) -> bool:
         self._downloadType = downType
@@ -583,43 +608,63 @@ class CrealityCloudUtils(QObject):
 
     def getModelSearchResult(self, page: int, pageSize: int, keyword: str) -> str:
         url = self._cloudUrl + "/api/cxy/search/model"#"/api/cxy/search/modelSearch"
-        response = requests.post(url, 
-                    data=json.dumps({"page": page, "pageSize": pageSize, "keyword": keyword}), 
-                    headers=self.getModelHeaders()).text
-        return response
+        try:
+            response = requests.post(url, 
+                        data=json.dumps({"page": page, "pageSize": pageSize, "keyword": keyword}), 
+                        headers=self.getModelHeaders()).text
+            return response
+        except Exception as e:
+            Logger.log("e", e)
+        return ""
 
     def getPageModelLibraryList(self, cursor: str, pageSize: int, categoryId: str) -> str:
         url = self._cloudUrl + "/api/cxy/v3/model/listCategory"#"/api/cxy/model/modelGroupList"
-        response = requests.post(url, 
-                    data=json.dumps({"cursor": cursor, "limit": pageSize, "categoryId": categoryId, "filterType":2, "isPay":2}),
-                    headers=self.getModelHeaders()).text
-        '''elif listType == 7:
+        try:
             response = requests.post(url, 
-                        data=json.dumps({"page": page, "pageSize": pageSize, "listType": listType}), 
-                        headers=self.getCommonHeaders()).text
-        '''
-        return response
+                        data=json.dumps({"cursor": cursor, "limit": pageSize, "categoryId": categoryId, "filterType":2, "isPay":2}),
+                        headers=self.getModelHeaders()).text
+            '''elif listType == 7:
+                response = requests.post(url, 
+                            data=json.dumps({"page": page, "pageSize": pageSize, "listType": listType}), 
+                            headers=self.getCommonHeaders()).text
+            '''
+            return response
+        except Exception as e:
+            Logger.log("e", e)
+        return ""
 
     def getModelGDeleteRes(self, modelGid: str) -> str:
         url = self._cloudUrl + "/api/cxy/v3/model/modelGroupDelete"#"/api/cxy/model/modelGroupDelete"
-        response = requests.post(url, 
-                    data=json.dumps({"id": modelGid}), 
-                    headers=self.getCommonHeaders()).text
-        return response
+        try:
+            response = requests.post(url, 
+                        data=json.dumps({"id": modelGid}), 
+                        headers=self.getCommonHeaders()).text
+            return response
+        except Exception as e:
+            Logger.log("e", e)
+        return ""
 
     def getGcodeListRes(self, page: int, pageSize: int) -> str:
         url = self._cloudUrl + "/api/cxy/v2/gcode/ownerList"
-        response = requests.post(url, 
-                    data=json.dumps({"page": page, "pageSize": pageSize, "isUpload": True}),
-                    headers=self.getCommonHeaders()).text
-        return response
+        try:
+            response = requests.post(url, 
+                        data=json.dumps({"page": page, "pageSize": pageSize, "isUpload": True}),
+                        headers=self.getCommonHeaders()).text
+            return response
+        except Exception as e:
+            Logger.log("e", e)
+        return ""
     
     def getGcodeDelRes(self, id: str) -> str:
         url = self._cloudUrl + "/api/cxy/v2/gcode/deleteGcode"
-        response = requests.post(url, 
-                    data=json.dumps({"id": id}),
-                    headers=self.getCommonHeaders()).text
-        return response
+        try:
+            response = requests.post(url, 
+                        data=json.dumps({"id": id}),
+                        headers=self.getCommonHeaders()).text
+            return response
+        except Exception as e:
+            Logger.log("e", e)
+        return ""
 
     def getFileKey(self, md5: str, fileType: int) -> str:
         url = self._cloudUrl + "/api/cxy/common/filePreUpload"
@@ -659,12 +704,16 @@ class CrealityCloudUtils(QObject):
             "modelList": modelList
         }
 
-        response = requests.post(url, data=json.dumps(contentDict), headers=self.getCommonHeaders()).text
-        self._filekeyList.clear()
-        for tmpfile in self._uploadFileList:
-            os.remove(tmpfile)
-        self._uploadFileList.clear()
-        return response
+        try:
+            response = requests.post(url, data=json.dumps(contentDict), headers=self.getCommonHeaders()).text
+            self._filekeyList.clear()
+            for tmpfile in self._uploadFileList:
+                os.remove(tmpfile)
+            self._uploadFileList.clear()
+            return response
+        except exception as e:
+            Logger.log("e", e)
+        return ""
 
     def getModelGroupAddRes(self, groupId: str) -> str:
         url = self._cloudUrl + "/api/cxy/v3/model/fileAdd"#"/api/cxy/model/modelGroupEdit"
@@ -680,18 +729,27 @@ class CrealityCloudUtils(QObject):
             "modelList": modelList,
             "modelId": groupId
         }
-        response = requests.post(url, data=json.dumps(contentDict), headers=self.getCommonHeaders()).text
+        try:
+            response = requests.post(url, data=json.dumps(contentDict), headers=self.getCommonHeaders()).text
 
-        self._filekeyList.clear()
-        self._uploadFileList.clear()
-        return response
+            self._filekeyList.clear()
+            self._uploadFileList.clear()
+            return response
+        except Exception as e:
+            Logger.log("e", e)
+        return ""
 
     def getListUploadModel(self, cursor: str, pageSize: int) -> str:
         url = self._cloudUrl + "/api/cxy/v3/model/listUpload"#"/api/cxy/model/modelGroupList"
-        response = requests.post(url, 
-                    data=json.dumps({"cursor": cursor, "limit": pageSize}),
-                    headers=self.getCommonHeaders()).text       
-        return response
+
+        try:
+            response = requests.post(url, 
+                        data=json.dumps({"cursor": cursor, "limit": pageSize}),
+                        headers=self.getCommonHeaders()).text       
+            return response
+        except Exception as e:            
+            Logger.log("e", e)
+        return ""
 
     @pyqtSlot(str)
     def addToClipboard(self, content: str) -> None:

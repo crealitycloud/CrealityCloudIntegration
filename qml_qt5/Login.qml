@@ -14,7 +14,7 @@ BasicDialog {
     UM.I18nCatalog { id: catalog; name: "uranium"}
     visible: false
     width: 600
-    height: 500  
+    height: 443  
     titleHeight: 30
     title: catalog.i18nc("@title:window", "Login")
 
@@ -93,7 +93,7 @@ BasicDialog {
         cleanField()
         passwordField.anchors.topMargin = 40;
         resetLink.anchors.topMargin = 10;
-        loginButton.anchors.bottomMargin = 43;
+        loginButton.anchors.bottomMargin = 50;
         //serverSetting.anchors.bottomMargin = 5;
         signUpTip1.anchors.bottomMargin = 15;
     }
@@ -110,7 +110,7 @@ BasicDialog {
         cleanField()
         passwordField.anchors.topMargin = 40;
         resetLink.anchors.topMargin = 10;
-        loginButton.anchors.bottomMargin = 43;
+        loginButton.anchors.bottomMargin = 50;
         //serverSetting.anchors.bottomMargin = 5;
         signUpTip1.anchors.bottomMargin = 15;
     }
@@ -233,8 +233,10 @@ BasicDialog {
         color: UM.Theme.getColor("main_background")
         CusHeadItem{
             id: headLogo
+            width:200
             anchors.fill: parent
         }
+        
         //login page
         Item {
             id: loginItem
@@ -275,6 +277,7 @@ BasicDialog {
                             mobilephoneLoginLabel.btnSelected = false
                             scanQrcodeLoginLabel.btnSelected = false
                             btnSelected = true;
+                            qrItem.visible = false
                         }
                     }
 
@@ -304,6 +307,7 @@ BasicDialog {
                             mobilephoneLoginLabel.btnSelected = false
                             scanQrcodeLoginLabel.btnSelected = false
                             btnSelected = true;
+                            qrItem.visible = false
                         }
                     }
 
@@ -675,38 +679,8 @@ BasicDialog {
                     //     verticalAlignment: Text.AlignVCenter
                     // }
 
-                    Cura.ComboBox {
-                        id: idServer
-                        width:100; height: 20
-                        anchors.top: idUserPolicy.top
-                        anchors.topMargin: 0
-                        anchors.right: parent.right
-                        anchors.rightMargin: 0
-                        anchors.left: policyTip.right
-                        anchors.leftMargin: 20
 
-                        model: ListModel{
-                            id: idServerModel
-                        }
-                        textRole: "name"
-                        currentIndex : -1
-                        onActivated: {
-                            var env = ""
-                            if (textAt(currentIndex) === idServerModel.get(0).name){
-                                env = "release_oversea"
-                            }else {
-                                env = "release_local"
-                            }
-                            CloudUtils.saveUrl(env)
-                            CloudUtils.autoSetUrl()
-                            CloudAPI.api_url = CloudUtils.getCloudUrl()
-                        }
-                        Component.onCompleted: {
-                            idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "International Server")})
-                            idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "China Server")})
-                        }
-                    }
-
+                    
                     BasicButton
                     {
                         id: loginButton
@@ -815,8 +789,8 @@ BasicDialog {
                         font: UM.Theme.getFont("small")
                         text: catalog.i18nc("@title:Label", "Sign Up")
                         height: 12
-                        anchors.top: idUserPolicy.bottom
-                        anchors.topMargin: 20
+                        anchors.top: idUserPolicy.top
+                        anchors.topMargin: 0
                         anchors.right: parent.right
                         anchors.rightMargin: 0                         
                         MouseArea {
@@ -829,34 +803,14 @@ BasicDialog {
                         }
                         Component.onCompleted: font.pixelSize = 12
                     }
-                }
-                
-                Timer {
-                    id: verCodeTimer
-                    interval: 1000
-                    repeat: true
-                    onTriggered: {
-                        verButton.enabled = false
-                        console.log(verCodeTime)
-                        if (verCodeTime < 0) {
-                            verButton.enabled = true
-                            verButton.text = catalog.i18nc("@text:btn", "Get Code")
-                            verCodeTimer.stop()
-                            verCodeTime = 60
-                            return
-                        }
-                        verButton.text = verCodeTime + "s"
-                        verCodeTime --
-                    }
-                }
-            }
-
+                    
             Item {
                 id: qrItem
                 anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                z: 2
+                anchors.leftMargin: 0
+                anchors.rightMargin: 0
+                anchors.bottomMargin:10
+                // z: 2
                 visible: false
 
                 property int expireTime: 0
@@ -903,6 +857,7 @@ BasicDialog {
                     anchors.leftMargin: 0
                     anchors.top: parent.top
                     anchors.topMargin: 30
+                    visible:false
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
@@ -920,6 +875,39 @@ BasicDialog {
                         }
                     }
                 }
+            
+                Text {
+                    id: signUpQrTip1
+                    color: UM.Theme.getColor("text")                     
+                    font: UM.Theme.getFont("small")
+                    text: catalog.i18nc("@title:Label", "No account? Please click ")
+                    anchors.top: qrText_2.bottom
+                    anchors.topMargin: 20
+                    anchors.left: qrText_2.left
+                    anchors.leftMargin: 0
+                    Component.onCompleted: font.pixelSize = 12
+                }
+
+                Text {
+                    id: signUpQrTip2
+                    color: "#0078D7"
+                    font: UM.Theme.getFont("small")
+                    text: catalog.i18nc("@title:Label", "Sign Up")
+                    height: 12
+                    anchors.top: signUpQrTip1.top
+                    anchors.topMargin: 0
+                    anchors.left: signUpQrTip1.right
+                    anchors.rightMargin: 0                         
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?signup=1")
+                        onEntered: parent.font.underline = true
+                        onExited: parent.font.underline = false
+                    }
+                    Component.onCompleted: font.pixelSize = 12
+                }
 
                 Text {
                     id: qrLink
@@ -928,7 +916,9 @@ BasicDialog {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 25
                     horizontalAlignment: Text.AlignHCenter
-                    anchors.horizontalCenter: parent.horizontalCenter                   
+                    // anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.left: qrText_1.left
+                    anchors.leftMargin: 20                   
                     lineHeight: 1.4
                     font: UM.Theme.getFont("default")
                     renderType: Text.NativeRendering
@@ -947,8 +937,10 @@ BasicDialog {
                     text: catalog.i18nc("@text:window", "Scan the code to log in")
                     anchors.top: parent.top
                     anchors.topMargin: 10
+                    anchors.left:qrcode.right
+                    anchors.leftMargin:50
                     horizontalAlignment: Text.AlignHCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    // anchors.horizontalCenter: parent.horizontalCenter
                     font: UM.Theme.getFont("large")
                     color: UM.Theme.getColor("text")
                     renderType: Text.NativeRendering
@@ -959,7 +951,8 @@ BasicDialog {
                     text: catalog.i18nc("@text:window", "Me section in app > Scan icon on top")
                     anchors.top: qrText_1.bottom
                     anchors.topMargin: 10
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.left:qrText_1.left
+                    // anchors.horizontalCenter: parent.horizontalCenter
                     horizontalAlignment: Text.AlignHCenter
                     font: UM.Theme.getFont("default")
                     color: UM.Theme.getColor("text")
@@ -988,11 +981,7 @@ BasicDialog {
                     id: qrcode
                     width: 170
                     height: 170
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 80
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.horizontalCenterOffset: 0
-                    Behavior on anchors.horizontalCenterOffset {PropertyAnimation {duration: 300} }
+                    anchors.left:parent.left
 
                     Rectangle {
                         id: refreshMask
@@ -1043,6 +1032,28 @@ BasicDialog {
                     }
                 }
             }
+                }
+                
+                Timer {
+                    id: verCodeTimer
+                    interval: 1000
+                    repeat: true
+                    onTriggered: {
+                        verButton.enabled = false
+                        console.log(verCodeTime)
+                        if (verCodeTime < 0) {
+                            verButton.enabled = true
+                            verButton.text = catalog.i18nc("@text:btn", "Get Code")
+                            verCodeTimer.stop()
+                            verCodeTime = 60
+                            return
+                        }
+                        verButton.text = verCodeTime + "s"
+                        verCodeTime --
+                    }
+                }
+            }
+
         }
         //busyLayer
         Rectangle {
@@ -1066,10 +1077,11 @@ BasicDialog {
 
     onVisibleChanged:{
         var env = CloudUtils.getEnv();
+        console.log("release_local:",env)
         if (env === "release_local"){
-            idServer.currentIndex = 1
+            headLogo.currentIndex = 1
         }else{
-            idServer.currentIndex = 0
+            headLogo.currentIndex = 0
         }
     }
 

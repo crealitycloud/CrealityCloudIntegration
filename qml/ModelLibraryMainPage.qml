@@ -307,6 +307,8 @@ Window{
         for(var key in modelMap)
         {
             url = CloudUtils.modelDownloadUrl(modelMap[key].modelid)//modelMap[key].modellink
+            if(url == "")
+                continue
             filename = modelMap[key].modelname
             urlList.push(url);
             fileList.push("%1.stl".arg(filename));
@@ -324,6 +326,8 @@ Window{
         var urlList = []; var fileList = []
         var url = ""
         url =  CloudUtils.modelDownloadUrl(id); console.log("url:",url)
+        if(url == "")
+            return
         urlList.push(url);
         fileList.push("%1.stl".arg(name));
         ManageModelBrowser.importModel(urlList, fileList, selCategory)
@@ -404,7 +408,8 @@ Window{
         showMessage(text)
     }
 
-    function showMessage(text) {
+    function showMessage(text) {        
+        loginMessage.needLogin = false;
         loginMessage.myContent = text;
         loginMessage.show()
     }

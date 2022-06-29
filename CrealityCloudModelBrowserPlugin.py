@@ -118,11 +118,12 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
                 self._modelUploadDlg.show()
 
                 strjson = self._utils.getCategoryListResult(self._listType[1])
-                response = json.loads(strjson)
-                if (response["code"] == 0):
-                    self._modelUploadDlg.insertListModeData(strjson)
-                else:
-                    Logger.log("e", response["msg"])
+                if(strjson != ""):
+                    response = json.loads(strjson)
+                    if (response["code"] == 0):
+                        self._modelUploadDlg.insertListModeData(strjson)
+                    else:
+                        Logger.log("e", response["msg"])
         else:
             self._showLoginDlg(3)
 
@@ -162,15 +163,18 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     @pyqtSlot(int)
     def loadCategoryListResult(self, type: int = 7) -> None:
         strjson = self._utils.getCategoryListResult(type)
-        response = json.loads(strjson)
-        if (response["code"] == 0):
-            self._modelBrowserDialog.setModelTypeComboData(strjson)
-        else:
-            self._modelBrowserDialog.showMessage(response["msg"])
+        if(strjson != ""):
+            response = json.loads(strjson)
+            if (response["code"] == 0):
+                self._modelBrowserDialog.setModelTypeComboData(strjson)
+            else:
+                self._modelBrowserDialog.showMessage(response["msg"])
     
     @pyqtSlot(int, int, bool)
     def loadPageModelLibraryList(self, cursor: str, id: int, additionFlag: bool) -> None:
-        strjson = self._utils.getPageModelLibraryList(str(cursor), self._pageSize, str(id))
+        strjson = self._utils.getPageModelLibraryList(str(cursor), self._pageSize, str(id))        
+        if(strjson == ""):
+            return
         response = json.loads(strjson)
         if (response["code"] == 0):
             nextCursor = response["result"]["nextCursor"]
@@ -182,6 +186,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     @pyqtSlot(str, int)
     def loadModelGroupDetailInfo(self, modelGroupId: str, count: int) -> None:
         strjson = self._utils.getModelGroupDetailInfo("", count, modelGroupId)
+        if(strjson == ""):
+            return
         response = json.loads(strjson)
         if (response["code"] == 0):
             self._modelBrowserDialog.setModelDetailInfo(strjson)
@@ -190,6 +196,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     
     @pyqtSlot("QStringList", "QStringList", int)
     def importModel(self, urls: List[str], filenames: List[str], category: int) -> None:
+        if(len(urls) == 0):
+            return
         dir = self._utils.getModelDir()
         if category == 2:
             dir = self._utils.getMymodelDir()
@@ -209,13 +217,19 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     @pyqtSlot(str, int, int)
     def importModelGroup(self, modelGroupId: str, count: int, category: int) -> None:       
         strjson = self._utils.getModelGroupDetailInfo("", count, modelGroupId)
+        if(strjson == ""):
+            return
         response = json.loads(strjson)
         modelUrls = []
         modelNames = []
         try:
             if (response["code"] == 0):           
                 for index in range(count):
-                    url = self._utils.modelDownloadUrl(response["result"]["list"][index]["id"])#url = response["result"]["list"][index]["downloadUrl"]
+                    url,msg = self._utils.modelUrl(response["result"]["list"][index]["id"])#url = response["result"]["list"][index]["downloadUrl"]
+                    if(url == ""):
+                        if(msg != ""):
+                            self._modelBrowserDialog.showMessage(msg)
+                        continue
                     name = response["result"]["list"][index]["fileName"]+".stl"                   
                     modelUrls.append(url)
                     modelNames.append(name)
@@ -245,6 +259,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     @pyqtSlot(str, int, int, bool)
     def loadModelSearchResult(self, keyword: str, page: int, pageSize: int, additionFlag: bool) -> None:
         strjson = self._utils.getModelSearchResult(page, pageSize, keyword)
+        if(strjson == ""):
+            return
         response = json.loads(strjson)
         if (response["code"] == 0):
             totalCount = 0
@@ -276,6 +292,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
         if(additionFlag == False):
             self._myModelCursor = ''
         strjson = self._utils.getListUploadModel(self._myModelCursor, self._pageSize)
+        if(strjson == ""):
+            return
         response = json.loads(strjson)
         if (response["code"] == 0):          
             nextCursor = response["result"]["nextCursor"]
@@ -289,6 +307,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     @pyqtSlot(str)
     def deleteModelGroup(self, modelGid: str) -> None:
         strjson = self._utils.getModelGDeleteRes(modelGid)
+        if(strjson == ""):
+            return
         response = json.loads(strjson)
         if (response["code"] == 0):
             self._modelBrowserDialog.flushMyMLibAfterDelGroup(modelGid)
@@ -298,6 +318,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     @pyqtSlot(int, int, bool)
     def loadPageMyGcodeList(self, page: int, pageSize: int, additionFlag: bool) -> None:
         strjson = self._utils.getGcodeListRes(page, pageSize)
+        if(strjson == ""):
+            return
         response = json.loads(strjson)
         if (response["code"] == 0):
             totalCount = 0
@@ -317,6 +339,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
     @pyqtSlot(str)
     def deleteGcode(self, gcodeId: str) -> None:
         strjson = self._utils.getGcodeDelRes(gcodeId)
+        if(strjson == ""):
+            return
         response = json.loads(strjson)
         if (response["code"] == 0):
             self._modelBrowserDialog.flushMyGcodeList(gcodeId)
@@ -360,6 +384,8 @@ class CrealityCloudModelBrowserPlugin(QObject, Extension):
             self._modelUploadDlg.property("bShare"),           
             self._modelUploadDlg.property("license"),
             self._modelUploadDlg.property("bIsOriginal"))
+        if(strjson == ""):
+            return
         response = json.loads(strjson)
         self._modelUploadDlg.setProperty("progressValue", 100)
         if (response["code"] == 0):
