@@ -405,7 +405,8 @@ Window{
 
     function showLoginMessage(text) {
         loginMessage.needLogin = true;
-        showMessage(text)
+        loginMessage.myContent = text;
+        loginMessage.show()
     }
 
     function showMessage(text) {        

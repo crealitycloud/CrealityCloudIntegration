@@ -53,7 +53,7 @@ Item{
                 anchors.right: idServer.left
                 anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                text: catalog.i18nc("@title:window", "Server")
+                text: catalog.i18nc("@title:Label", "Server")
                 color: UM.Theme.getColor("text")
                 font: UM.Theme.getFont("default")
                 renderType: Text.NativeRendering            
