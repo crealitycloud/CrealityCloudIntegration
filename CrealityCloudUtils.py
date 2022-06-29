@@ -1,6 +1,4 @@
 USE_QT5 = False
-from asyncio.log import logger
-from logging import exception
 from typing import Dict, List
 
 from requests.models import Response
