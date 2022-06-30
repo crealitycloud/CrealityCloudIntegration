@@ -235,6 +235,7 @@ BasicDialog {
             id: headLogo
             width:200
             anchors.fill: parent
+            bShowServer:true
         }
         
         //login page
@@ -1082,6 +1083,9 @@ BasicDialog {
             headLogo.currentIndex = 1
         }else{
             headLogo.currentIndex = 0
+        }
+        if(qrItem.visible){
+            qrItemShow()
         }
     }
 

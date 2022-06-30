@@ -79,12 +79,12 @@ Window{
         var componentButton = Qt.createComponent("CusModelLibraryItem.qml")
         if (componentButton.status === Component.Ready )
         {
-            printMap("before delete");
+            // printMap("before delete");
             if(!appendFlag){//not append
                 deleteModelGroupMap();
-                console.log("after delete !");
+                // console.log("after delete !");
             }else{
-                printMap("not delete");
+                // printMap("not delete");
             }
             
             var count = 0;
@@ -109,7 +109,7 @@ Window{
                     count += 1;
                 }
                 //console.log("modelGroupMap count:",count);
-                printMap("current");
+                // printMap("current");
             }           
         }
         else{
@@ -438,7 +438,7 @@ Window{
         spaceRect.visible = true;
         userImg.visible = true;
         userName.visible = true;
-        initModelLibrary();     
+        initModelLibrary();
     }
 
     function initModelLibrary()
@@ -482,6 +482,7 @@ Window{
     }
     function initUI()
     {
+        idTopInfoArea.visible = true
         var isLogin = CloudUtils.getLogin();
         if(isLogin){
             userImg.img_src = CloudUtils.getUserImg();

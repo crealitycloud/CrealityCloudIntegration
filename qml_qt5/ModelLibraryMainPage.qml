@@ -79,12 +79,12 @@ Window{
         var componentButton = Qt.createComponent("CusModelLibraryItem.qml")
         if (componentButton.status === Component.Ready )
         {
-            printMap("before delete");
+            // printMap("before delete");
             if(!appendFlag){//not append
                 deleteModelGroupMap();
-                console.log("after delete !");
+                // console.log("after delete !");
             }else{
-                printMap("not delete");
+                // printMap("not delete");
             }
             
             var count = 0;
@@ -105,11 +105,11 @@ Window{
                     obj.sigButtonClicked.connect(onBrowseDetails)
                     obj.sigBtnDelClicked.connect(slotBtnDelClicked)
                     modelGroupMap[objResult[key].id] = obj;
-                    console.log("key:",key,",objResult[key].id---：",objResult[key].id);
+                    // console.log("key:",key,",objResult[key].id---：",objResult[key].id);
                     count += 1;
                 }
                 //console.log("modelGroupMap count:",count);
-                printMap("current");
+                // printMap("current");
             }           
         }
         else{
@@ -483,6 +483,7 @@ Window{
     }
     function initUI()
     {
+        idTopInfoArea.visible = true
         var isLogin = CloudUtils.getLogin();
         if(isLogin){
             userImg.img_src = CloudUtils.getUserImg();

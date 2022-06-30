@@ -8,6 +8,7 @@ import "../js/Validator.js" as Validator
 
 Item{
     property alias currentIndex: idServer.currentIndex
+    property bool bShowServer:false
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
@@ -21,7 +22,7 @@ Item{
         color: UM.Theme.getColor("main_background")
         z: 2
         Rectangle{
-            width: 400
+            width: bShowServer ? 400 : logo.width+8+logoText.contentWidth
             height: 73
             color: "transparent"
             anchors.horizontalCenter: parent.horizontalCenter
@@ -50,6 +51,7 @@ Item{
             
             Text {
                 id: serverText
+                visible:bShowServer
                 anchors.right: idServer.left
                 anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
@@ -64,6 +66,7 @@ Item{
 
             Cura.ComboBox {
                 id: idServer
+                visible:bShowServer
                 anchors.right: parent.right
                 anchors.leftMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
@@ -88,6 +91,14 @@ Item{
                 Component.onCompleted: {
                     idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "International Server")})
                     idServerModel.append({"name": catalog.i18nc("@text:ComboBox", "China Server")})
+                    
+                    var env = CloudUtils.getEnv();
+                    console.log("release_local:",env)
+                    if (env === "release_local"){
+                        headLogo.currentIndex = 1
+                    }else{
+                        headLogo.currentIndex = 0
+                    }
                 }
             }
         }       
