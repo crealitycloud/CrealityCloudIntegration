@@ -651,7 +651,14 @@ BasicDialog {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?resetpassword = 0")
+                            onClicked: {
+                                    if(emailLoginLabel.btnSelected == true){
+                                        Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?resetpassword=0&channel=creality-slicer")
+                                    }
+                                    else{
+                                        Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?resetpassword=1&channel=creality-slicer")
+                                    }
+                                }
                             hoverEnabled: true
                             onEntered: {
                                 parent.font.underline = true
@@ -797,7 +804,14 @@ BasicDialog {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             hoverEnabled: true
-                            onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?signup=1")
+                            onClicked: {
+                                    if(emailLoginLabel.btnSelected == true){
+                                        Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?signup=0&channel=creality-slicer")
+                                    }
+                                    else{
+                                        Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?signup=1&channel=creality-slicer")
+                                    }
+                                }
                             onEntered: parent.font.underline = true
                             onExited: parent.font.underline = false
                         }
@@ -902,7 +916,7 @@ BasicDialog {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         hoverEnabled: true
-                        onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?signup=1")
+                        onClicked: Qt.openUrlExternally(CloudUtils.getWebUrl() + "/?signup=1&channel=creality-slicer")
                         onEntered: parent.font.underline = true
                         onExited: parent.font.underline = false
                     }
